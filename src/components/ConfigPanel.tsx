@@ -25,7 +25,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Switch } from '@/components/ui/switch';
 import { Plus, Edit, Trash2, Key, Shield, ShieldCheck, Eye, EyeOff, CircleOff, Power } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -81,7 +80,6 @@ type ConfigFormState = {
   api_key: string;
   auth_token: string;
   weight: number;
-  enabled: boolean;
 };
 
 export function ConfigPanel() {
@@ -105,7 +103,6 @@ export function ConfigPanel() {
     api_key: '',
     auth_token: '',
     weight: 1,
-    enabled: true,
   });
   const [showApiKey, setShowApiKey] = useState(false);
   const [showAuthToken, setShowAuthToken] = useState(false);
@@ -182,7 +179,7 @@ export function ConfigPanel() {
     setEditingConfig(null);
     setEditingService(service);
     setAuthType('auth_token');
-    setFormData({ name: '', base_url: '', api_key: '', auth_token: '', weight: 1, enabled: true });
+    setFormData({ name: '', base_url: '', api_key: '', auth_token: '', weight: 1 });
     setDialogOpen(true);
   };
 
@@ -196,7 +193,6 @@ export function ConfigPanel() {
       api_key: config.api_key || '',
       auth_token: config.auth_token || '',
       weight: config.weight,
-      enabled: config.enabled ?? true,
     });
     setDialogOpen(true);
   };
@@ -224,7 +220,6 @@ export function ConfigPanel() {
         name: formData.name,
         base_url: formData.base_url,
         weight: formData.weight,
-        enabled: formData.enabled,
         ...(authType === 'api_key'
           ? { api_key: formData.api_key, auth_token: undefined }
           : { auth_token: formData.auth_token, api_key: undefined }),
@@ -695,17 +690,6 @@ export function ConfigPanel() {
                     </p>
                   </div>
                 )}
-              </div>
-              <div className="flex items-center justify-between rounded-lg border bg-muted/40 p-3">
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium">{t('config.form.enabledLabel')}</span>
-                  <span className="text-xs text-muted-foreground">{t('config.form.enabledHint')}</span>
-                </div>
-                <Switch
-                  id="enabled"
-                  checked={formData.enabled}
-                  onCheckedChange={(checked) => setFormData({ ...formData, enabled: checked })}
-                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="weight">{t('config.form.weightLabel')}</Label>
