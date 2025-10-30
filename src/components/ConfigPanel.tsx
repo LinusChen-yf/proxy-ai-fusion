@@ -27,6 +27,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Edit, Trash2, Key, Shield, ShieldCheck, Eye, EyeOff, CircleOff, Power } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useFeedback } from '@/components/FeedbackProvider';
 
 const SERVICE_ORDER: ServiceId[] = ['claude', 'codex'];
 
@@ -84,6 +85,7 @@ type ConfigFormState = {
 
 export function ConfigPanel() {
   const { t } = useTranslation();
+  const feedback = useFeedback();
   const [activeService, setActiveService] = useState<ServiceId>('claude');
   const [configs, setConfigs] = useState<{ claude: ClaudeConfig[]; codex: CodexConfig[] }>({
     claude: [],
@@ -199,17 +201,17 @@ export function ConfigPanel() {
 
   const handleSave = async () => {
     if (!formData.name.trim()) {
-      alert(t('config.validation.name'));
+      feedback.showInfo(t('config.validation.name'));
       return;
     }
     if (!formData.base_url.trim()) {
-      alert(t('config.validation.baseUrl'));
+      feedback.showInfo(t('config.validation.baseUrl'));
       return;
     }
 
     const authValue = authType === 'api_key' ? formData.api_key : formData.auth_token;
     if (!authValue.trim()) {
-      alert(
+      feedback.showInfo(
         authType === 'api_key' ? t('config.validation.apiKey') : t('config.validation.authToken'),
       );
       return;
@@ -241,7 +243,7 @@ export function ConfigPanel() {
       setDialogOpen(false);
     } catch (error) {
       console.error('Failed to save config:', error);
-      alert(t('config.error.save', { message: String(error) }));
+      feedback.showError(t('config.error.save', { message: String(error) }));
     }
   };
 
@@ -264,7 +266,7 @@ export function ConfigPanel() {
       await loadConfigs();
     } catch (error) {
       console.error('Failed to delete config:', error);
-      alert(t('config.error.delete'));
+      feedback.showError(t('config.error.delete'));
     } finally {
       setDeleteDialogOpen(false);
       setConfigToDelete(null);
@@ -286,7 +288,7 @@ export function ConfigPanel() {
       await loadConfigs();
     } catch (error) {
       console.error('Failed to toggle config state:', error);
-      alert(t('config.error.toggle'));
+      feedback.showError(t('config.error.toggle'));
     }
   };
 

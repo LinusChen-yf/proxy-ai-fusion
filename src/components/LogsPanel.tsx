@@ -25,9 +25,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RefreshCw, Eye, Trash2 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useFeedback } from '@/components/FeedbackProvider';
 
 export function LogsPanel() {
   const { t } = useTranslation();
+  const feedback = useFeedback();
   const [logs, setLogs] = useState<RequestLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedLog, setSelectedLog] = useState<RequestLog | null>(null);
@@ -42,7 +44,7 @@ export function LogsPanel() {
       setLogs(data);
     } catch (error) {
       console.error('Failed to load logs:', error);
-      alert(t('logs.error.load'));
+      feedback.showError(t('logs.error.load'));
     } finally {
       setLoading(false);
     }
@@ -59,7 +61,7 @@ export function LogsPanel() {
       setDialogOpen(true);
     } catch (error) {
       console.error('Failed to load log details:', error);
-      alert(t('logs.error.details'));
+      feedback.showError(t('logs.error.details'));
     }
   };
 
@@ -69,10 +71,9 @@ export function LogsPanel() {
       const result = await api.clearLogs();
       setLogs([]);
       setClearDialogOpen(false);
-      alert(t('logs.clearSuccess', { count: result.deletedCount }));
     } catch (error) {
       console.error('Failed to clear logs:', error);
-      alert(t('logs.error.clear'));
+      feedback.showError(t('logs.error.clear'));
     } finally {
       setClearing(false);
     }
@@ -277,7 +278,11 @@ export function LogsPanel() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel disabled={clearing}>{t('common.cancel')}</AlertDialogCancel>
-              <AlertDialogAction onClick={handleClearLogs} disabled={clearing}>
+              <AlertDialogAction
+                onClick={handleClearLogs}
+                disabled={clearing}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+              >
                 {clearing ? t('common.loading') : t('common.delete')}
               </AlertDialogAction>
             </AlertDialogFooter>

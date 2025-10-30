@@ -8,9 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Save } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useFeedback } from '@/components/FeedbackProvider';
 
 export function LoadBalancerPanel() {
   const { t } = useTranslation();
+  const feedback = useFeedback();
   const [config, setConfig] = useState<LoadBalancerConfig>({
     mode: 'weight_selection',
     health_check_interval_secs: 30,
@@ -29,7 +31,7 @@ export function LoadBalancerPanel() {
       });
     } catch (error) {
       console.error('Failed to load load balancer config:', error);
-      alert(t('loadbalancer.error.load'));
+      feedback.showError(t('loadbalancer.error.load'));
     }
   };
 
@@ -42,7 +44,7 @@ export function LoadBalancerPanel() {
       await api.updateLoadBalancerConfig(config);
     } catch (error) {
       console.error('Failed to save load balancer config:', error);
-      alert(t('loadbalancer.error.save'));
+      feedback.showError(t('loadbalancer.error.save'));
     }
   };
 

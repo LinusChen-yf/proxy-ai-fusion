@@ -127,6 +127,8 @@
   "common.delete": "删除",
   "common.edit": "编辑",
   "common.close": "关闭",
+  "common.success": "成功",
+  "common.info": "提示",
   "common.loading": "加载中...",
   "common.apiKey": "API Key",
   "common.authToken": "Bearer Token",

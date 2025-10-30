@@ -24549,11 +24549,11 @@ var require_jsx_runtime = __commonJS((exports, module) => {
 });
 
 // src/main.tsx
-var import_react13 = __toESM(require_react(), 1);
+var import_react14 = __toESM(require_react(), 1);
 var import_client = __toESM(require_client(), 1);
 
 // src/App.tsx
-var import_react12 = __toESM(require_react(), 1);
+var import_react13 = __toESM(require_react(), 1);
 
 // src/services/i18n.ts
 class I18nService {
@@ -26273,6 +26273,25 @@ var AlertCircle = createLucideIcon("AlertCircle", [
   ["line", { x1: "12", x2: "12.01", y1: "16", y2: "16", key: "4dfq90" }]
 ]);
 
+// node_modules/lucide-react/dist/esm/icons/alert-triangle.js
+var AlertTriangle = createLucideIcon("AlertTriangle", [
+  [
+    "path",
+    {
+      d: "m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z",
+      key: "c3ski4"
+    }
+  ],
+  ["path", { d: "M12 9v4", key: "juzpu7" }],
+  ["path", { d: "M12 17h.01", key: "p32p05" }]
+]);
+
+// node_modules/lucide-react/dist/esm/icons/check-circle-2.js
+var CheckCircle2 = createLucideIcon("CheckCircle2", [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+  ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
+]);
+
 // node_modules/lucide-react/dist/esm/icons/check.js
 var Check = createLucideIcon("Check", [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]]);
 
@@ -26319,6 +26338,13 @@ var Globe = createLucideIcon("Globe", [
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
   ["path", { d: "M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20", key: "13o1zl" }],
   ["path", { d: "M2 12h20", key: "9i4pu4" }]
+]);
+
+// node_modules/lucide-react/dist/esm/icons/info.js
+var Info = createLucideIcon("Info", [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+  ["path", { d: "M12 16v-4", key: "1dtifu" }],
+  ["path", { d: "M12 8h.01", key: "e9boi3" }]
 ]);
 
 // node_modules/lucide-react/dist/esm/icons/key.js
@@ -26514,7 +26540,7 @@ class ErrorBoundary extends import_react3.Component {
 }
 
 // src/components/ConfigPanel.tsx
-var import_react7 = __toESM(require_react(), 1);
+var import_react8 = __toESM(require_react(), 1);
 
 // src/services/api.ts
 var API_BASE = "/api";
@@ -29701,8 +29727,129 @@ var TableCaption = React41.forwardRef(({ className, ...props }, ref) => /* @__PU
 }, undefined, false, undefined, this));
 TableCaption.displayName = "TableCaption";
 
-// src/components/ConfigPanel.tsx
+// src/components/FeedbackProvider.tsx
+var import_react7 = __toESM(require_react(), 1);
 var jsx_dev_runtime10 = __toESM(require_jsx_dev_runtime(), 1);
+var defaultState = {
+  open: false,
+  variant: "info",
+  description: ""
+};
+var FeedbackContext = import_react7.createContext(undefined);
+var iconByVariant = {
+  info: Info,
+  success: CheckCircle2,
+  error: AlertTriangle
+};
+var iconClassByVariant = {
+  info: "bg-muted text-muted-foreground border border-border/50",
+  success: "bg-primary/10 text-primary border border-primary/30",
+  error: "bg-destructive/10 text-destructive border border-destructive/30"
+};
+function FeedbackProvider({ children }) {
+  const { t } = useTranslation();
+  const [state, setState] = import_react7.useState(defaultState);
+  const close = import_react7.useCallback(() => {
+    setState(defaultState);
+  }, []);
+  const show = import_react7.useCallback((options2) => {
+    setState({
+      open: true,
+      variant: options2.variant ?? "info",
+      title: options2.title,
+      description: options2.description,
+      primaryActionLabel: options2.primaryActionLabel,
+      onPrimaryAction: options2.onPrimaryAction
+    });
+  }, []);
+  const withVariant = import_react7.useCallback((variant, description, options2) => {
+    show({
+      ...options2,
+      description,
+      variant
+    });
+  }, [show]);
+  const showError = import_react7.useCallback((description, options2) => {
+    withVariant("error", description, options2);
+  }, [withVariant]);
+  const showSuccess = import_react7.useCallback((description, options2) => {
+    withVariant("success", description, options2);
+  }, [withVariant]);
+  const showInfo = import_react7.useCallback((description, options2) => {
+    withVariant("info", description, options2);
+  }, [withVariant]);
+  const value = import_react7.useMemo(() => ({
+    show,
+    showError,
+    showSuccess,
+    showInfo,
+    close
+  }), [show, showError, showSuccess, showInfo, close]);
+  const Icon = iconByVariant[state.variant];
+  const iconClass = iconClassByVariant[state.variant];
+  const effectiveTitle = state.title ?? (state.variant === "error" ? t("common.error") : state.variant === "success" ? t("common.success") : t("common.info"));
+  const primaryLabel = state.primaryActionLabel ?? t("common.close");
+  const handlePrimaryAction = () => {
+    state.onPrimaryAction?.();
+    close();
+  };
+  const handleOpenChange = (open) => {
+    if (!open) {
+      close();
+    }
+  };
+  return /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(FeedbackContext.Provider, {
+    value,
+    children: [
+      children,
+      /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Dialog2, {
+        open: state.open,
+        onOpenChange: handleOpenChange,
+        children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(DialogContent2, {
+          className: "sm:max-w-sm",
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(DialogHeader, {
+              className: "space-y-4 text-left",
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+                  className: cn("flex h-12 w-12 items-center justify-center rounded-full", iconClass),
+                  children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Icon, {
+                    className: "h-6 w-6"
+                  }, undefined, false, undefined, this)
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(DialogTitle2, {
+                  children: effectiveTitle
+                }, undefined, false, undefined, this),
+                state.description ? /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(DialogDescription2, {
+                  className: "text-left leading-6",
+                  children: state.description
+                }, undefined, false, undefined, this) : null
+              ]
+            }, undefined, true, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(DialogFooter, {
+              children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Button, {
+                onClick: handlePrimaryAction,
+                variant: "default",
+                className: "bg-primary text-primary-foreground hover:bg-primary/90",
+                children: primaryLabel
+              }, undefined, false, undefined, this)
+            }, undefined, false, undefined, this)
+          ]
+        }, undefined, true, undefined, this)
+      }, undefined, false, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
+function useFeedback() {
+  const context = import_react7.useContext(FeedbackContext);
+  if (!context) {
+    throw new Error("useFeedback must be used within a FeedbackProvider");
+  }
+  return context;
+}
+
+// src/components/ConfigPanel.tsx
+var jsx_dev_runtime11 = __toESM(require_jsx_dev_runtime(), 1);
 var SERVICE_ORDER = ["claude", "codex"];
 var SERVICE_METADATA = {
   claude: {
@@ -29733,36 +29880,37 @@ function normalizeServiceConfigs(configs) {
 }
 function ConfigPanel() {
   const { t } = useTranslation();
-  const [activeService, setActiveService] = import_react7.useState("claude");
-  const [configs, setConfigs] = import_react7.useState({
+  const feedback = useFeedback();
+  const [activeService, setActiveService] = import_react8.useState("claude");
+  const [configs, setConfigs] = import_react8.useState({
     claude: [],
     codex: []
   });
-  const [activeConfigMap, setActiveConfigMap] = import_react7.useState({
+  const [activeConfigMap, setActiveConfigMap] = import_react8.useState({
     claude: "",
     codex: ""
   });
-  const [dialogOpen, setDialogOpen] = import_react7.useState(false);
-  const [editingConfig, setEditingConfig] = import_react7.useState(null);
-  const [editingService, setEditingService] = import_react7.useState("claude");
-  const [authType, setAuthType] = import_react7.useState("auth_token");
-  const [formData, setFormData] = import_react7.useState({
+  const [dialogOpen, setDialogOpen] = import_react8.useState(false);
+  const [editingConfig, setEditingConfig] = import_react8.useState(null);
+  const [editingService, setEditingService] = import_react8.useState("claude");
+  const [authType, setAuthType] = import_react8.useState("auth_token");
+  const [formData, setFormData] = import_react8.useState({
     name: "",
     base_url: "",
     api_key: "",
     auth_token: "",
     weight: 1
   });
-  const [showApiKey, setShowApiKey] = import_react7.useState(false);
-  const [showAuthToken, setShowAuthToken] = import_react7.useState(false);
-  const [testLoading, setTestLoading] = import_react7.useState({
+  const [showApiKey, setShowApiKey] = import_react8.useState(false);
+  const [showAuthToken, setShowAuthToken] = import_react8.useState(false);
+  const [testLoading, setTestLoading] = import_react8.useState({
     claude: false,
     codex: false
   });
-  const [deleteDialogOpen, setDeleteDialogOpen] = import_react7.useState(false);
-  const [configToDelete, setConfigToDelete] = import_react7.useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = import_react8.useState(false);
+  const [configToDelete, setConfigToDelete] = import_react8.useState(null);
   const STORAGE_KEY = "config_test_results";
-  const [testResults, setTestResults] = import_react7.useState(() => {
+  const [testResults, setTestResults] = import_react8.useState(() => {
     const empty = {
       claude: {},
       codex: {}
@@ -29805,10 +29953,10 @@ function ConfigPanel() {
       setActiveConfigMap({ claude: "", codex: "" });
     }
   };
-  import_react7.useEffect(() => {
+  import_react8.useEffect(() => {
     loadConfigs();
   }, []);
-  import_react7.useEffect(() => {
+  import_react8.useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(testResults));
     }
@@ -29835,16 +29983,16 @@ function ConfigPanel() {
   };
   const handleSave = async () => {
     if (!formData.name.trim()) {
-      alert(t("config.validation.name"));
+      feedback.showInfo(t("config.validation.name"));
       return;
     }
     if (!formData.base_url.trim()) {
-      alert(t("config.validation.baseUrl"));
+      feedback.showInfo(t("config.validation.baseUrl"));
       return;
     }
     const authValue = authType === "api_key" ? formData.api_key : formData.auth_token;
     if (!authValue.trim()) {
-      alert(authType === "api_key" ? t("config.validation.apiKey") : t("config.validation.authToken"));
+      feedback.showInfo(authType === "api_key" ? t("config.validation.apiKey") : t("config.validation.authToken"));
       return;
     }
     try {
@@ -29869,7 +30017,7 @@ function ConfigPanel() {
       setDialogOpen(false);
     } catch (error) {
       console.error("Failed to save config:", error);
-      alert(t("config.error.save", { message: String(error) }));
+      feedback.showError(t("config.error.save", { message: String(error) }));
     }
   };
   const handleDelete = (service, name) => {
@@ -29889,7 +30037,7 @@ function ConfigPanel() {
       await loadConfigs();
     } catch (error) {
       console.error("Failed to delete config:", error);
-      alert(t("config.error.delete"));
+      feedback.showError(t("config.error.delete"));
     } finally {
       setDeleteDialogOpen(false);
       setConfigToDelete(null);
@@ -29905,7 +30053,7 @@ function ConfigPanel() {
       await loadConfigs();
     } catch (error) {
       console.error("Failed to toggle config state:", error);
-      alert(t("config.error.toggle"));
+      feedback.showError(t("config.error.toggle"));
     }
   };
   const handleTest = async (service) => {
@@ -29960,80 +30108,80 @@ function ConfigPanel() {
     const exampleName = t(serviceMeta.exampleNameKey);
     const exampleUrl = t(serviceMeta.exampleUrlKey);
     if (currentConfigs.length === 0) {
-      return /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+      return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
         className: "flex flex-col items-center justify-center py-12 text-center",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
             className: "rounded-full bg-muted p-6 mb-4",
-            children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Plus, {
+            children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Plus, {
               className: "h-12 w-12 text-muted-foreground"
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("h3", {
+          /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("h3", {
             className: "text-lg font-semibold mb-2",
             children: t("config.empty.title", { service: serviceLabel })
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("p", {
+          /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("p", {
             className: "text-sm text-muted-foreground mb-6 max-w-md",
             children: t("config.empty.description", { service: serviceLabel })
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Button, {
+          /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
             onClick: () => handleCreate(service),
             size: "lg",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Plus, {
+              /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Plus, {
                 className: "mr-2 h-5 w-5"
               }, undefined, false, undefined, this),
               t("config.empty.button", { service: serviceLabel })
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
             className: "mt-8 text-left bg-muted/50 rounded-lg p-4 max-w-md",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("p", {
+              /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("p", {
                 className: "text-xs font-semibold mb-2",
                 children: [
                   "\uD83D\uDCA1 ",
                   t("config.empty.exampleTitle")
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("ul", {
+              /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("ul", {
                 className: "text-xs text-muted-foreground space-y-1",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("li", {
+                  /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("li", {
                     children: [
                       "• ",
                       t("config.empty.exampleNameLabel"),
                       " ",
-                      /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("code", {
+                      /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("code", {
                         className: "bg-background px-1 rounded",
                         children: exampleName
                       }, undefined, false, undefined, this)
                     ]
                   }, undefined, true, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("li", {
+                  /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("li", {
                     children: [
                       "• ",
                       t("config.empty.exampleUrlLabel"),
                       " ",
-                      /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("code", {
+                      /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("code", {
                         className: "bg-background px-1 rounded",
                         children: exampleUrl
                       }, undefined, false, undefined, this)
                     ]
                   }, undefined, true, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("li", {
+                  /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("li", {
                     children: [
                       "• ",
                       t("config.empty.exampleAuth")
                     ]
                   }, undefined, true, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("li", {
+                  /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("li", {
                     children: [
                       "• ",
                       t("config.empty.exampleWeightLabel"),
                       " ",
-                      /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("code", {
+                      /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("code", {
                         className: "bg-background px-1 rounded",
                         children: "1.0"
                       }, undefined, false, undefined, this),
@@ -30048,110 +30196,110 @@ function ConfigPanel() {
         ]
       }, undefined, true, undefined, this);
     }
-    return /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Table, {
+    return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Table, {
       children: [
-        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TableHeader, {
-          children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TableRow, {
+        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableHeader, {
+          children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableRow, {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TableHead, {
+              /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableHead, {
                 children: t("config.name")
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TableHead, {
+              /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableHead, {
                 children: t("config.baseUrl")
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TableHead, {
+              /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableHead, {
                 children: t("config.weight")
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TableHead, {
+              /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableHead, {
                 children: t("config.status")
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TableHead, {
+              /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableHead, {
                 children: t("config.test.result")
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TableHead, {
+              /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableHead, {
                 className: "text-right",
                 children: t("config.actions")
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this)
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TableBody, {
+        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableBody, {
           children: currentConfigs.map((config) => {
             const isEnabled = config.enabled !== false;
             const result = testResults[service]?.[config.name];
             const status = !isEnabled ? { label: t("config.status.disabled"), className: "text-muted-foreground" } : result?.success === false ? { label: t("config.status.error"), className: "text-destructive" } : result?.success ? { label: t("config.status.ok"), className: "text-emerald-600" } : { label: t("config.status.ok"), className: "text-muted-foreground" };
-            return /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TableRow, {
+            return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableRow, {
               children: [
-                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TableCell, {
-                  children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
+                  children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
                     className: "flex items-center gap-2",
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                      /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                         className: "font-medium",
                         children: config.name
                       }, undefined, false, undefined, this),
-                      config.api_key && /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                      config.api_key && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                         title: t("common.apiKey"),
-                        children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Key, {
+                        children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Key, {
                           className: "h-3 w-3 text-muted-foreground"
                         }, undefined, false, undefined, this)
                       }, undefined, false, undefined, this),
-                      config.auth_token && /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                      config.auth_token && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                         title: t("common.authToken"),
-                        children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Shield, {
+                        children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Shield, {
                           className: "h-3 w-3 text-muted-foreground"
                         }, undefined, false, undefined, this)
                       }, undefined, false, undefined, this)
                     ]
                   }, undefined, true, undefined, this)
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TableCell, {
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
                   className: "font-mono text-sm",
                   children: config.base_url
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TableCell, {
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
                   children: config.weight
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TableCell, {
-                  children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
+                  children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                     className: `text-xs font-medium ${status.className}`,
                     children: status.label
                   }, undefined, false, undefined, this)
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TableCell, {
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
                   className: "align-top",
                   children: (() => {
                     if (!result) {
-                      return /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                      return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                         className: "text-xs text-muted-foreground",
                         children: t("config.test.notRun")
                       }, undefined, false, undefined, this);
                     }
                     const testedTime = new Date(result.completedAt).toLocaleTimeString();
-                    return /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+                    return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
                       className: "flex flex-col gap-1 text-xs",
                       children: [
-                        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                           className: result.success ? "text-emerald-600" : "text-destructive",
                           children: result.success ? t("config.test.successShort") : t("config.test.failedShort")
                         }, undefined, false, undefined, this),
-                        result.status_code !== undefined && /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                        result.status_code !== undefined && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                           className: "text-muted-foreground",
                           children: t("config.test.statusCode", { code: result.status_code })
                         }, undefined, false, undefined, this),
-                        result.duration_ms !== undefined && /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                        result.duration_ms !== undefined && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                           className: "text-muted-foreground",
                           children: t("config.test.duration", { ms: result.duration_ms })
                         }, undefined, false, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                           className: "text-muted-foreground",
                           children: t("config.test.testedAt", { time: testedTime })
                         }, undefined, false, undefined, this),
-                        result.response_preview && /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                        result.response_preview && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                           className: "text-muted-foreground break-words",
                           children: result.response_preview
                         }, undefined, false, undefined, this),
-                        result.message && /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                        result.message && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                           className: "text-muted-foreground break-words",
                           children: result.message
                         }, undefined, false, undefined, this)
@@ -30159,37 +30307,37 @@ function ConfigPanel() {
                     }, undefined, true, undefined, this);
                   })()
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TableCell, {
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
                   className: "text-right",
-                  children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+                  children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
                     className: "flex justify-end gap-2",
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Button, {
+                      /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
                         variant: "outline",
                         size: "sm",
                         onClick: () => handleToggleConfigEnabled(service, config, !isEnabled),
                         title: isEnabled ? t("config.disableSingle") : t("config.enableSingle"),
-                        children: isEnabled ? /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(CircleOff, {
+                        children: isEnabled ? /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(CircleOff, {
                           className: "h-4 w-4"
-                        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Power, {
+                        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Power, {
                           className: "h-4 w-4"
                         }, undefined, false, undefined, this)
                       }, undefined, false, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Button, {
+                      /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
                         variant: "outline",
                         size: "sm",
                         onClick: () => handleEdit(service, config),
                         title: t("common.edit"),
-                        children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(PenSquare, {
+                        children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(PenSquare, {
                           className: "h-4 w-4"
                         }, undefined, false, undefined, this)
                       }, undefined, false, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Button, {
+                      /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
                         variant: "outline",
                         size: "sm",
                         onClick: () => handleDelete(service, config.name),
                         title: t("common.delete"),
-                        children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Trash2, {
+                        children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Trash2, {
                           className: "h-4 w-4 text-destructive"
                         }, undefined, false, undefined, this)
                       }, undefined, false, undefined, this)
@@ -30208,40 +30356,40 @@ function ConfigPanel() {
   const editingMeta = SERVICE_METADATA[editingService];
   const editingServiceLabel = t(editingMeta.labelKey);
   const editingExampleUrl = t(editingMeta.exampleUrlKey);
-  return /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Card, {
+  return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Card, {
     children: [
-      /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(CardHeader, {
-        children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(CardHeader, {
+        children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
           className: "flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between",
           children: [
-            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
               children: [
-                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(CardTitle, {
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(CardTitle, {
                   children: t("config.title")
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(CardDescription, {
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(CardDescription, {
                   children: t("config.description")
                 }, undefined, false, undefined, this)
               ]
             }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
               className: "flex flex-wrap items-center gap-2",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Button, {
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
                   variant: "outline",
                   onClick: () => handleTest(activeService),
                   disabled: !activeConfigMap[activeService] || isActiveConfigDisabled || testLoading[activeService],
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(ShieldCheck, {
+                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(ShieldCheck, {
                       className: "mr-2 h-4 w-4"
                     }, undefined, false, undefined, this),
                     testLoading[activeService] ? t("config.test.running") : t("config.test.api")
                   ]
                 }, undefined, true, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Button, {
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
                   onClick: () => handleCreate(activeService),
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Plus, {
+                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Plus, {
                       className: "mr-2 h-4 w-4"
                     }, undefined, false, undefined, this),
                     t("config.addFor", { service: t(SERVICE_METADATA[activeService].labelKey) })
@@ -30252,120 +30400,120 @@ function ConfigPanel() {
           ]
         }, undefined, true, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(CardContent, {
+      /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(CardContent, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Tabs2, {
+          /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Tabs2, {
             value: activeService,
             onValueChange: (value) => setActiveService(value),
             children: [
-              /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TabsList2, {
+              /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TabsList2, {
                 className: "grid grid-cols-2",
-                children: SERVICE_ORDER.map((service) => /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TabsTrigger2, {
+                children: SERVICE_ORDER.map((service) => /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TabsTrigger2, {
                   value: service,
                   className: "capitalize",
                   children: t(SERVICE_METADATA[service].labelKey)
                 }, service, false, undefined, this))
               }, undefined, false, undefined, this),
-              SERVICE_ORDER.map((service) => /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(TabsContent2, {
+              SERVICE_ORDER.map((service) => /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TabsContent2, {
                 value: service,
                 className: "mt-6",
                 children: renderServiceConfigs(service)
               }, service, false, undefined, this))
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Dialog2, {
+          /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Dialog2, {
             open: dialogOpen,
             onOpenChange: setDialogOpen,
-            children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(DialogContent2, {
+            children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(DialogContent2, {
               className: "max-w-2xl",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(DialogHeader, {
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(DialogHeader, {
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(DialogTitle2, {
+                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(DialogTitle2, {
                       children: editingConfig ? t("config.dialog.edit", { service: editingServiceLabel }) : t("config.dialog.create", { service: editingServiceLabel })
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(DialogDescription2, {
+                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(DialogDescription2, {
                       children: t("config.dialog.description", { service: editingServiceLabel })
                     }, undefined, false, undefined, this)
                   ]
                 }, undefined, true, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
                   className: "grid gap-4 py-4",
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
                       className: "grid gap-2",
                       children: [
-                        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Label2, {
+                        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Label2, {
                           htmlFor: "name",
                           children: [
                             t("config.form.nameLabel"),
                             " ",
-                            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                               className: "text-destructive",
                               children: "*"
                             }, undefined, false, undefined, this)
                           ]
                         }, undefined, true, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Input, {
+                        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Input, {
                           id: "name",
                           value: formData.name,
                           onChange: (e) => setFormData({ ...formData, name: e.target.value }),
                           disabled: !!editingConfig,
                           required: true
                         }, undefined, false, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("p", {
+                        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("p", {
                           className: "text-xs text-muted-foreground",
                           children: t("config.form.nameHint", { service: editingServiceLabel })
                         }, undefined, false, undefined, this)
                       ]
                     }, undefined, true, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
                       className: "grid gap-2",
                       children: [
-                        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Label2, {
+                        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Label2, {
                           htmlFor: "base_url",
                           children: [
                             t("config.form.baseUrlLabel"),
                             " ",
-                            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                               className: "text-destructive",
                               children: "*"
                             }, undefined, false, undefined, this)
                           ]
                         }, undefined, true, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Input, {
+                        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Input, {
                           id: "base_url",
                           value: formData.base_url,
                           onChange: (e) => setFormData({ ...formData, base_url: e.target.value }),
                           placeholder: editingExampleUrl,
                           required: true
                         }, undefined, false, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("p", {
+                        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("p", {
                           className: "text-xs text-muted-foreground",
                           children: t("config.form.baseUrlHint", { url: editingExampleUrl })
                         }, undefined, false, undefined, this)
                       ]
                     }, undefined, true, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
                       className: "grid gap-3 p-4 border rounded-lg bg-muted/50",
                       children: [
-                        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Label2, {
+                        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Label2, {
                           children: [
                             t("config.form.authMethod"),
                             " ",
-                            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                               className: "text-destructive",
                               children: "*"
                             }, undefined, false, undefined, this)
                           ]
                         }, undefined, true, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+                        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
                           className: "flex gap-4",
                           children: [
-                            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("label", {
+                            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("label", {
                               className: "flex items-center space-x-2 cursor-pointer",
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("input", {
+                                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("input", {
                                   type: "radio",
                                   name: "authType",
                                   value: "auth_token",
@@ -30373,16 +30521,16 @@ function ConfigPanel() {
                                   onChange: (e) => setAuthType(e.target.value),
                                   className: "w-4 h-4"
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                                   className: "text-sm font-medium",
                                   children: t("config.form.authToken")
                                 }, undefined, false, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("label", {
+                            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("label", {
                               className: "flex items-center space-x-2 cursor-pointer",
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("input", {
+                                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("input", {
                                   type: "radio",
                                   name: "authType",
                                   value: "api_key",
@@ -30390,7 +30538,7 @@ function ConfigPanel() {
                                   onChange: (e) => setAuthType(e.target.value),
                                   className: "w-4 h-4"
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                                   className: "text-sm font-medium",
                                   children: t("config.form.apiKey")
                                 }, undefined, false, undefined, this)
@@ -30398,24 +30546,24 @@ function ConfigPanel() {
                             }, undefined, true, undefined, this)
                           ]
                         }, undefined, true, undefined, this),
-                        authType === "api_key" ? /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+                        authType === "api_key" ? /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
                           className: "grid gap-2 mt-2",
                           children: [
-                            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Label2, {
+                            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Label2, {
                               htmlFor: "api_key",
                               children: [
                                 t("config.form.apiKey"),
                                 " ",
-                                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                                   className: "text-destructive",
                                   children: "*"
                                 }, undefined, false, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+                            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
                               className: "relative",
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Input, {
+                                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Input, {
                                   id: "api_key",
                                   type: showApiKey ? "text" : "password",
                                   value: formData.api_key,
@@ -30423,43 +30571,43 @@ function ConfigPanel() {
                                   required: true,
                                   className: "pr-10"
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Button, {
+                                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
                                   type: "button",
                                   variant: "ghost",
                                   size: "sm",
                                   className: "absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent",
                                   onClick: () => setShowApiKey(!showApiKey),
-                                  children: showApiKey ? /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(EyeOff, {
+                                  children: showApiKey ? /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(EyeOff, {
                                     className: "h-4 w-4 text-muted-foreground"
-                                  }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Eye, {
+                                  }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Eye, {
                                     className: "h-4 w-4 text-muted-foreground"
                                   }, undefined, false, undefined, this)
                                 }, undefined, false, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("p", {
+                            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("p", {
                               className: "text-xs text-muted-foreground",
                               children: t("config.form.apiKeyHint")
                             }, undefined, false, undefined, this)
                           ]
-                        }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+                        }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
                           className: "grid gap-2 mt-2",
                           children: [
-                            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Label2, {
+                            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Label2, {
                               htmlFor: "auth_token",
                               children: [
                                 t("config.form.authToken"),
                                 " ",
-                                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
+                                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
                                   className: "text-destructive",
                                   children: "*"
                                 }, undefined, false, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+                            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
                               className: "relative",
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Input, {
+                                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Input, {
                                   id: "auth_token",
                                   type: showAuthToken ? "text" : "password",
                                   value: formData.auth_token,
@@ -30467,21 +30615,21 @@ function ConfigPanel() {
                                   required: true,
                                   className: "pr-10"
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Button, {
+                                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
                                   type: "button",
                                   variant: "ghost",
                                   size: "sm",
                                   className: "absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent",
                                   onClick: () => setShowAuthToken(!showAuthToken),
-                                  children: showAuthToken ? /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(EyeOff, {
+                                  children: showAuthToken ? /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(EyeOff, {
                                     className: "h-4 w-4 text-muted-foreground"
-                                  }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Eye, {
+                                  }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Eye, {
                                     className: "h-4 w-4 text-muted-foreground"
                                   }, undefined, false, undefined, this)
                                 }, undefined, false, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("p", {
+                            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("p", {
                               className: "text-xs text-muted-foreground",
                               children: t("config.form.authTokenHint")
                             }, undefined, false, undefined, this)
@@ -30489,14 +30637,14 @@ function ConfigPanel() {
                         }, undefined, true, undefined, this)
                       ]
                     }, undefined, true, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
                       className: "grid gap-2",
                       children: [
-                        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Label2, {
+                        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Label2, {
                           htmlFor: "weight",
                           children: t("config.form.weightLabel")
                         }, undefined, false, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Input, {
+                        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Input, {
                           id: "weight",
                           type: "number",
                           value: formData.weight,
@@ -30507,7 +30655,7 @@ function ConfigPanel() {
                           min: "0",
                           step: "0.1"
                         }, undefined, false, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("p", {
+                        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("p", {
                           className: "text-xs text-muted-foreground",
                           children: t("config.form.weightHint")
                         }, undefined, false, undefined, this)
@@ -30515,14 +30663,14 @@ function ConfigPanel() {
                     }, undefined, true, undefined, this)
                   ]
                 }, undefined, true, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(DialogFooter, {
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(DialogFooter, {
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Button, {
+                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
                       variant: "outline",
                       onClick: () => setDialogOpen(false),
                       children: t("common.cancel")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Button, {
+                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
                       onClick: handleSave,
                       children: t("common.save")
                     }, undefined, false, undefined, this)
@@ -30531,27 +30679,27 @@ function ConfigPanel() {
               ]
             }, undefined, true, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(AlertDialog2, {
+          /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(AlertDialog2, {
             open: deleteDialogOpen,
             onOpenChange: setDeleteDialogOpen,
-            children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(AlertDialogContent2, {
+            children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(AlertDialogContent2, {
               children: [
-                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(AlertDialogHeader, {
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(AlertDialogHeader, {
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(AlertDialogTitle2, {
+                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(AlertDialogTitle2, {
                       children: t("config.confirmDelete", { name: configToDelete?.name || "" })
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(AlertDialogDescription2, {
+                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(AlertDialogDescription2, {
                       children: t("config.confirmDeleteDescription", { name: configToDelete?.name || "" })
                     }, undefined, false, undefined, this)
                   ]
                 }, undefined, true, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(AlertDialogFooter, {
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(AlertDialogFooter, {
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(AlertDialogCancel2, {
+                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(AlertDialogCancel2, {
                       children: t("common.cancel")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(AlertDialogAction2, {
+                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(AlertDialogAction2, {
                       onClick: confirmDelete,
                       className: "bg-primary text-primary-foreground hover:bg-primary/90",
                       children: t("common.delete")
@@ -30568,7 +30716,7 @@ function ConfigPanel() {
 }
 
 // src/components/LoadBalancerPanel.tsx
-var import_react9 = __toESM(require_react(), 1);
+var import_react10 = __toESM(require_react(), 1);
 
 // src/components/ui/select.tsx
 var React49 = __toESM(require_react(), 1);
@@ -32183,11 +32331,11 @@ var computePosition2 = (reference, floating, options2) => {
 
 // node_modules/@floating-ui/react-dom/dist/floating-ui.react-dom.mjs
 var React42 = __toESM(require_react(), 1);
-var import_react8 = __toESM(require_react(), 1);
+var import_react9 = __toESM(require_react(), 1);
 var ReactDOM3 = __toESM(require_react_dom(), 1);
 var isClient = typeof document !== "undefined";
 var noop = function noop2() {};
-var index = isClient ? import_react8.useLayoutEffect : noop;
+var index = isClient ? import_react9.useLayoutEffect : noop;
 function deepEqual(a, b) {
   if (a === b) {
     return true;
@@ -33786,85 +33934,85 @@ var ScrollDownButton = SelectScrollDownButton;
 var Separator = SelectSeparator;
 
 // src/components/ui/select.tsx
-var jsx_dev_runtime11 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime12 = __toESM(require_jsx_dev_runtime(), 1);
 var Select2 = Root25;
 var SelectValue2 = Value;
-var SelectTrigger2 = React49.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Trigger3, {
+var SelectTrigger2 = React49.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Trigger3, {
   ref,
   className: cn("flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1", className),
   ...props,
   children: [
     children,
-    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Icon, {
+    /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Icon, {
       asChild: true,
-      children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(ChevronDown, {
+      children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ChevronDown, {
         className: "h-4 w-4 opacity-50"
       }, undefined, false, undefined, this)
     }, undefined, false, undefined, this)
   ]
 }, undefined, true, undefined, this));
 SelectTrigger2.displayName = Trigger3.displayName;
-var SelectScrollUpButton2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(ScrollUpButton, {
+var SelectScrollUpButton2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ScrollUpButton, {
   ref,
   className: cn("flex cursor-default items-center justify-center py-1", className),
   ...props,
-  children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(ChevronUp, {
+  children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ChevronUp, {
     className: "h-4 w-4"
   }, undefined, false, undefined, this)
 }, undefined, false, undefined, this));
 SelectScrollUpButton2.displayName = ScrollUpButton.displayName;
-var SelectScrollDownButton2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(ScrollDownButton, {
+var SelectScrollDownButton2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ScrollDownButton, {
   ref,
   className: cn("flex cursor-default items-center justify-center py-1", className),
   ...props,
-  children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(ChevronDown, {
+  children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ChevronDown, {
     className: "h-4 w-4"
   }, undefined, false, undefined, this)
 }, undefined, false, undefined, this));
 SelectScrollDownButton2.displayName = ScrollDownButton.displayName;
-var SelectContent2 = React49.forwardRef(({ className, children, position = "popper", ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Portal3, {
-  children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Content23, {
+var SelectContent2 = React49.forwardRef(({ className, children, position = "popper", ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Portal3, {
+  children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Content23, {
     ref,
     className: cn("relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2", position === "popper" && "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1", className),
     position,
     ...props,
     children: [
-      /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(SelectScrollUpButton2, {}, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Viewport, {
+      /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(SelectScrollUpButton2, {}, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Viewport, {
         className: cn("p-1", position === "popper" && "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"),
         children
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(SelectScrollDownButton2, {}, undefined, false, undefined, this)
+      /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(SelectScrollDownButton2, {}, undefined, false, undefined, this)
     ]
   }, undefined, true, undefined, this)
 }, undefined, false, undefined, this));
 SelectContent2.displayName = Content23.displayName;
-var SelectLabel2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Label3, {
+var SelectLabel2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Label3, {
   ref,
   className: cn("py-1.5 pl-8 pr-2 text-sm font-semibold", className),
   ...props
 }, undefined, false, undefined, this));
 SelectLabel2.displayName = Label3.displayName;
-var SelectItem2 = React49.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Item2, {
+var SelectItem2 = React49.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Item2, {
   ref,
   className: cn("relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50", className),
   ...props,
   children: [
-    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
+    /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("span", {
       className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center",
-      children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(ItemIndicator, {
-        children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Check, {
+      children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ItemIndicator, {
+        children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Check, {
           className: "h-4 w-4"
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this)
     }, undefined, false, undefined, this),
-    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(ItemText, {
+    /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ItemText, {
       children
     }, undefined, false, undefined, this)
   ]
 }, undefined, true, undefined, this));
 SelectItem2.displayName = Item2.displayName;
-var SelectSeparator2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Separator, {
+var SelectSeparator2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Separator, {
   ref,
   className: cn("-mx-1 my-1 h-px bg-muted", className),
   ...props
@@ -33872,10 +34020,11 @@ var SelectSeparator2 = React49.forwardRef(({ className, ...props }, ref) => /* @
 SelectSeparator2.displayName = Separator.displayName;
 
 // src/components/LoadBalancerPanel.tsx
-var jsx_dev_runtime12 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime13 = __toESM(require_jsx_dev_runtime(), 1);
 function LoadBalancerPanel() {
   const { t } = useTranslation();
-  const [config, setConfig] = import_react9.useState({
+  const feedback = useFeedback();
+  const [config, setConfig] = import_react10.useState({
     mode: "weight_selection",
     health_check_interval_secs: 30,
     failure_threshold: 3,
@@ -33892,10 +34041,10 @@ function LoadBalancerPanel() {
       });
     } catch (error) {
       console.error("Failed to load load balancer config:", error);
-      alert(t("loadbalancer.error.load"));
+      feedback.showError(t("loadbalancer.error.load"));
     }
   };
-  import_react9.useEffect(() => {
+  import_react10.useEffect(() => {
     loadConfig();
   }, []);
   const handleSave = async () => {
@@ -33903,29 +34052,29 @@ function LoadBalancerPanel() {
       await api.updateLoadBalancerConfig(config);
     } catch (error) {
       console.error("Failed to save load balancer config:", error);
-      alert(t("loadbalancer.error.save"));
+      feedback.showError(t("loadbalancer.error.save"));
     }
   };
-  return /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Card, {
+  return /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Card, {
     children: [
-      /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(CardHeader, {
-        children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(CardHeader, {
+        children: /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
           className: "flex items-center justify-between",
           children: [
-            /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
               children: [
-                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(CardTitle, {
+                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(CardTitle, {
                   children: t("lb.title")
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(CardDescription, {
+                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(CardDescription, {
                   children: t("lb.description")
                 }, undefined, false, undefined, this)
               ]
             }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Button, {
+            /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Button, {
               onClick: handleSave,
               children: [
-                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Save, {
+                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Save, {
                   className: "mr-2 h-4 w-4"
                 }, undefined, false, undefined, this),
                 t("common.save")
@@ -33934,30 +34083,30 @@ function LoadBalancerPanel() {
           ]
         }, undefined, true, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(CardContent, {
-        children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(CardContent, {
+        children: /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
           className: "space-y-6",
           children: [
-            /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
               className: "grid gap-2",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Label2, {
+                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Label2, {
                   children: t("lb.mode")
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Select2, {
+                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Select2, {
                   value: config.mode,
                   onValueChange: (value) => setConfig({ ...config, mode: value }),
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(SelectTrigger2, {
-                      children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(SelectValue2, {}, undefined, false, undefined, this)
+                    /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(SelectTrigger2, {
+                      children: /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(SelectValue2, {}, undefined, false, undefined, this)
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(SelectContent2, {
+                    /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(SelectContent2, {
                       children: [
-                        /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(SelectItem2, {
+                        /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(SelectItem2, {
                           value: "weight_selection",
                           children: t("lb.weightSelection")
                         }, undefined, false, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(SelectItem2, {
+                        /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(SelectItem2, {
                           value: "round_robin",
                           children: t("lb.roundRobin")
                         }, undefined, false, undefined, this)
@@ -33967,14 +34116,14 @@ function LoadBalancerPanel() {
                 }, undefined, true, undefined, this)
               ]
             }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
               className: "grid gap-2",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Label2, {
+                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Label2, {
                   htmlFor: "health_check_interval",
                   children: t("lb.healthInterval")
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Input, {
+                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Input, {
                   id: "health_check_interval",
                   type: "number",
                   value: config.health_check_interval_secs ?? "",
@@ -33983,41 +34132,41 @@ function LoadBalancerPanel() {
                 }, undefined, false, undefined, this)
               ]
             }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
               className: "grid gap-2",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Label2, {
+                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Label2, {
                   htmlFor: "failure_threshold",
                   children: t("lb.failureThreshold")
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Input, {
+                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Input, {
                   id: "failure_threshold",
                   type: "number",
                   value: config.failure_threshold ?? "",
                   onChange: (e) => setConfig({ ...config, failure_threshold: parseInt(e.target.value) || 0 }),
                   min: "1"
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("p", {
+                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("p", {
                   className: "text-xs text-muted-foreground",
                   children: t("lb.failureHint")
                 }, undefined, false, undefined, this)
               ]
             }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
               className: "grid gap-2",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Label2, {
+                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Label2, {
                   htmlFor: "success_threshold",
                   children: t("lb.successThreshold")
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Input, {
+                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Input, {
                   id: "success_threshold",
                   type: "number",
                   value: config.success_threshold ?? "",
                   onChange: (e) => setConfig({ ...config, success_threshold: parseInt(e.target.value) || 0 }),
                   min: "1"
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("p", {
+                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("p", {
                   className: "text-xs text-muted-foreground",
                   children: t("lb.successHint")
                 }, undefined, false, undefined, this)
@@ -34031,10 +34180,10 @@ function LoadBalancerPanel() {
 }
 
 // src/components/LogsPanel.tsx
-var import_react10 = __toESM(require_react(), 1);
+var import_react11 = __toESM(require_react(), 1);
 
 // src/components/ui/badge.tsx
-var jsx_dev_runtime13 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime14 = __toESM(require_jsx_dev_runtime(), 1);
 var badgeVariants = cva("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", {
   variants: {
     variant: {
@@ -34049,22 +34198,23 @@ var badgeVariants = cva("inline-flex items-center rounded-full border px-2.5 py-
   }
 });
 function Badge({ className, variant, ...props }) {
-  return /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
     className: cn(badgeVariants({ variant }), className),
     ...props
   }, undefined, false, undefined, this);
 }
 
 // src/components/LogsPanel.tsx
-var jsx_dev_runtime14 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime15 = __toESM(require_jsx_dev_runtime(), 1);
 function LogsPanel() {
   const { t } = useTranslation();
-  const [logs, setLogs] = import_react10.useState([]);
-  const [loading, setLoading] = import_react10.useState(false);
-  const [selectedLog, setSelectedLog] = import_react10.useState(null);
-  const [dialogOpen, setDialogOpen] = import_react10.useState(false);
-  const [clearDialogOpen, setClearDialogOpen] = import_react10.useState(false);
-  const [clearing, setClearing] = import_react10.useState(false);
+  const feedback = useFeedback();
+  const [logs, setLogs] = import_react11.useState([]);
+  const [loading, setLoading] = import_react11.useState(false);
+  const [selectedLog, setSelectedLog] = import_react11.useState(null);
+  const [dialogOpen, setDialogOpen] = import_react11.useState(false);
+  const [clearDialogOpen, setClearDialogOpen] = import_react11.useState(false);
+  const [clearing, setClearing] = import_react11.useState(false);
   const loadLogs = async () => {
     setLoading(true);
     try {
@@ -34072,12 +34222,12 @@ function LogsPanel() {
       setLogs(data);
     } catch (error) {
       console.error("Failed to load logs:", error);
-      alert(t("logs.error.load"));
+      feedback.showError(t("logs.error.load"));
     } finally {
       setLoading(false);
     }
   };
-  import_react10.useEffect(() => {
+  import_react11.useEffect(() => {
     loadLogs();
   }, []);
   const handleViewDetails = async (id) => {
@@ -34087,7 +34237,7 @@ function LogsPanel() {
       setDialogOpen(true);
     } catch (error) {
       console.error("Failed to load log details:", error);
-      alert(t("logs.error.details"));
+      feedback.showError(t("logs.error.details"));
     }
   };
   const handleClearLogs = async () => {
@@ -34096,68 +34246,67 @@ function LogsPanel() {
       const result = await api.clearLogs();
       setLogs([]);
       setClearDialogOpen(false);
-      alert(t("logs.clearSuccess", { count: result.deletedCount }));
     } catch (error) {
       console.error("Failed to clear logs:", error);
-      alert(t("logs.error.clear"));
+      feedback.showError(t("logs.error.clear"));
     } finally {
       setClearing(false);
     }
   };
   const getStatusBadge = (statusCode) => {
     if (statusCode >= 200 && statusCode < 300) {
-      return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Badge, {
+      return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Badge, {
         variant: "default",
         children: statusCode
       }, undefined, false, undefined, this);
     } else if (statusCode >= 400) {
-      return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Badge, {
+      return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Badge, {
         variant: "secondary",
         children: statusCode
       }, undefined, false, undefined, this);
     } else {
-      return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Badge, {
+      return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Badge, {
         variant: "secondary",
         children: statusCode
       }, undefined, false, undefined, this);
     }
   };
-  return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Card, {
+  return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Card, {
     children: [
-      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(CardHeader, {
-        children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardHeader, {
+        children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
           className: "flex items-center justify-between",
           children: [
-            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
               children: [
-                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(CardTitle, {
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardTitle, {
                   children: t("logs.title")
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(CardDescription, {
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardDescription, {
                   children: t("logs.description")
                 }, undefined, false, undefined, this)
               ]
             }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
               className: "flex gap-2",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Button, {
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Button, {
                   variant: "outline",
                   onClick: loadLogs,
                   disabled: loading,
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(RefreshCw, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(RefreshCw, {
                       className: `mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`
                     }, undefined, false, undefined, this),
                     t("logs.refresh")
                   ]
                 }, undefined, true, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Button, {
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Button, {
                   variant: "outline",
                   onClick: () => setClearDialogOpen(true),
                   disabled: logs.length === 0,
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Trash2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Trash2, {
                       className: "mr-2 h-4 w-4"
                     }, undefined, false, undefined, this),
                     t("logs.clear")
@@ -34168,71 +34317,71 @@ function LogsPanel() {
           ]
         }, undefined, true, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(CardContent, {
+      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardContent, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Table, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Table, {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHeader, {
-                children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableRow, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHeader, {
+                children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableRow, {
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
                       children: t("logs.table.timestamp")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
                       children: t("common.service")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
                       children: t("common.method")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
                       children: t("common.targetUrl")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
                       children: t("common.status")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
                       children: t("common.duration")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
                       className: "text-right",
                       children: t("common.actions")
                     }, undefined, false, undefined, this)
                   ]
                 }, undefined, true, undefined, this)
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableBody, {
-                children: logs.map((log) => /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableRow, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableBody, {
+                children: logs.map((log) => /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableRow, {
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
                       children: new Date(log.timestamp).toLocaleString()
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
                       children: log.service
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
                       className: "font-mono text-sm",
                       children: log.method
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
                       className: "font-mono text-sm",
                       children: log.target_url ?? log.path
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
                       children: getStatusBadge(log.status_code)
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
                       children: [
                         log.duration_ms,
                         "ms"
                       ]
                     }, undefined, true, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
                       className: "text-right",
-                      children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Button, {
+                      children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Button, {
                         variant: "ghost",
                         size: "sm",
                         onClick: () => handleViewDetails(log.id),
-                        children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Eye, {
+                        children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Eye, {
                           className: "h-4 w-4"
                         }, undefined, false, undefined, this)
                       }, undefined, false, undefined, this)
@@ -34242,121 +34391,121 @@ function LogsPanel() {
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Dialog2, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Dialog2, {
             open: dialogOpen,
             onOpenChange: setDialogOpen,
-            children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(DialogContent2, {
+            children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(DialogContent2, {
               className: "max-w-4xl max-h-[80vh] overflow-y-auto",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(DialogHeader, {
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(DialogHeader, {
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(DialogTitle2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(DialogTitle2, {
                       children: t("logs.detailsTitle")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(DialogDescription2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(DialogDescription2, {
                       className: "font-mono break-all",
                       children: selectedLog && (selectedLog.target_url ?? `${selectedLog.method} ${selectedLog.path}`)
                     }, undefined, false, undefined, this)
                   ]
                 }, undefined, true, undefined, this),
-                selectedLog && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Tabs2, {
+                selectedLog && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Tabs2, {
                   defaultValue: "basic",
                   className: "w-full",
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsList2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsList2, {
                       children: [
-                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsTrigger2, {
+                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
                           value: "basic",
                           children: t("logs.tabs.basic")
                         }, undefined, false, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsTrigger2, {
+                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
                           value: "request",
                           children: t("logs.tabs.request")
                         }, undefined, false, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsTrigger2, {
+                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
                           value: "response",
                           children: t("logs.tabs.response")
                         }, undefined, false, undefined, this),
-                        selectedLog.usage && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsTrigger2, {
+                        selectedLog.usage && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
                           value: "usage",
                           children: t("logs.tabs.usage")
                         }, undefined, false, undefined, this)
                       ]
                     }, undefined, true, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsContent2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
                       value: "basic",
                       className: "space-y-4",
                       children: [
-                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                           className: "grid grid-cols-2 gap-4",
                           children: [
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm font-medium",
                                   children: t("common.id")
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm text-muted-foreground font-mono",
                                   children: selectedLog.id
                                 }, undefined, false, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm font-medium",
                                   children: t("logs.table.timestamp")
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm text-muted-foreground",
                                   children: new Date(selectedLog.timestamp).toLocaleString()
                                 }, undefined, false, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm font-medium",
                                   children: t("common.service")
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm text-muted-foreground",
                                   children: selectedLog.service
                                 }, undefined, false, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
-                            selectedLog.channel && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            selectedLog.channel && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm font-medium",
                                   children: t("common.channel")
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm text-muted-foreground",
                                   children: selectedLog.channel
                                 }, undefined, false, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm font-medium",
                                   children: t("common.statusCode")
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm text-muted-foreground",
                                   children: selectedLog.status_code
                                 }, undefined, false, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm font-medium",
                                   children: t("common.duration")
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm text-muted-foreground",
                                   children: [
                                     selectedLog.duration_ms,
@@ -34365,14 +34514,14 @@ function LogsPanel() {
                                 }, undefined, true, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
-                            selectedLog.target_url && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            selectedLog.target_url && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                               className: "col-span-2",
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm font-medium",
                                   children: t("common.targetUrl")
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm text-muted-foreground break-all",
                                   children: selectedLog.target_url
                                 }, undefined, false, undefined, this)
@@ -34380,13 +34529,13 @@ function LogsPanel() {
                             }, undefined, true, undefined, this)
                           ]
                         }, undefined, true, undefined, this),
-                        selectedLog.error_message && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                        selectedLog.error_message && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                           children: [
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                               className: "text-sm font-medium text-destructive",
                               children: t("common.error")
                             }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("pre", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("pre", {
                               className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
                               children: selectedLog.error_message
                             }, undefined, false, undefined, this)
@@ -34394,29 +34543,29 @@ function LogsPanel() {
                         }, undefined, true, undefined, this)
                       ]
                     }, undefined, true, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsContent2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
                       value: "request",
                       className: "space-y-4",
                       children: [
-                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                           children: [
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                               className: "text-sm font-medium",
                               children: t("common.headers")
                             }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("pre", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("pre", {
                               className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
                               children: JSON.stringify(selectedLog.request_headers ?? {}, null, 2)
                             }, undefined, false, undefined, this)
                           ]
                         }, undefined, true, undefined, this),
-                        selectedLog.request_body && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                        selectedLog.request_body && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                           children: [
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                               className: "text-sm font-medium",
                               children: t("common.body")
                             }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("pre", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("pre", {
                               className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
                               children: selectedLog.request_body
                             }, undefined, false, undefined, this)
@@ -34424,29 +34573,29 @@ function LogsPanel() {
                         }, undefined, true, undefined, this)
                       ]
                     }, undefined, true, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsContent2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
                       value: "response",
                       className: "space-y-4",
                       children: [
-                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                           children: [
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                               className: "text-sm font-medium",
                               children: t("common.headers")
                             }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("pre", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("pre", {
                               className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
                               children: JSON.stringify(selectedLog.response_headers ?? {}, null, 2)
                             }, undefined, false, undefined, this)
                           ]
                         }, undefined, true, undefined, this),
-                        selectedLog.response_body && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                        selectedLog.response_body && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                           children: [
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                               className: "text-sm font-medium",
                               children: t("common.body")
                             }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("pre", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("pre", {
                               className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
                               children: selectedLog.response_body
                             }, undefined, false, undefined, this)
@@ -34454,55 +34603,55 @@ function LogsPanel() {
                         }, undefined, true, undefined, this)
                       ]
                     }, undefined, true, undefined, this),
-                    selectedLog.usage && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsContent2, {
+                    selectedLog.usage && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
                       value: "usage",
                       className: "space-y-4",
-                      children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                      children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                         className: "grid grid-cols-2 gap-4",
                         children: [
-                          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                             children: [
-                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                 className: "text-sm font-medium",
                                 children: t("common.model")
                               }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                 className: "text-sm text-muted-foreground",
                                 children: selectedLog.usage.model
                               }, undefined, false, undefined, this)
                             ]
                           }, undefined, true, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                             children: [
-                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                 className: "text-sm font-medium",
                                 children: t("common.totalTokens")
                               }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                 className: "text-sm text-muted-foreground",
                                 children: selectedLog.usage.total_tokens
                               }, undefined, false, undefined, this)
                             ]
                           }, undefined, true, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                             children: [
-                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                 className: "text-sm font-medium",
                                 children: t("common.promptTokens")
                               }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                 className: "text-sm text-muted-foreground",
                                 children: selectedLog.usage.prompt_tokens
                               }, undefined, false, undefined, this)
                             ]
                           }, undefined, true, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                             children: [
-                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                 className: "text-sm font-medium",
                                 children: t("common.completionTokens")
                               }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                 className: "text-sm text-muted-foreground",
                                 children: selectedLog.usage.completion_tokens
                               }, undefined, false, undefined, this)
@@ -34516,30 +34665,31 @@ function LogsPanel() {
               ]
             }, undefined, true, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialog2, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialog2, {
             open: clearDialogOpen,
             onOpenChange: setClearDialogOpen,
-            children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogContent2, {
+            children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogContent2, {
               children: [
-                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogHeader, {
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogHeader, {
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogTitle2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogTitle2, {
                       children: t("logs.confirmClear")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogDescription2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogDescription2, {
                       children: t("logs.confirmClearDescription")
                     }, undefined, false, undefined, this)
                   ]
                 }, undefined, true, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogFooter, {
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogFooter, {
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogCancel2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogCancel2, {
                       disabled: clearing,
                       children: t("common.cancel")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogAction2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogAction2, {
                       onClick: handleClearLogs,
                       disabled: clearing,
+                      className: "bg-primary text-primary-foreground hover:bg-primary/90",
                       children: clearing ? t("common.loading") : t("common.delete")
                     }, undefined, false, undefined, this)
                   ]
@@ -34554,8 +34704,8 @@ function LogsPanel() {
 }
 
 // src/components/DashboardPanel.tsx
-var import_react11 = __toESM(require_react(), 1);
-var jsx_dev_runtime15 = __toESM(require_jsx_dev_runtime(), 1);
+var import_react12 = __toESM(require_react(), 1);
+var jsx_dev_runtime16 = __toESM(require_jsx_dev_runtime(), 1);
 var SERVICES = [
   {
     id: "claude",
@@ -34620,23 +34770,24 @@ function resolveServiceStatus(serviceData, loading, hasError) {
 }
 function DashboardPanel() {
   const { t } = useTranslation();
-  const [data, setData] = import_react11.useState({
+  const feedback = useFeedback();
+  const [data, setData] = import_react12.useState({
     services: {
       claude: { configs: [], activeName: null, mode: "manual" },
       codex: { configs: [], activeName: null, mode: "manual" }
     }
   });
-  const [loading, setLoading] = import_react11.useState(false);
-  const [hasError, setHasError] = import_react11.useState(false);
-  const [modeUpdating, setModeUpdating] = import_react11.useState({
+  const [loading, setLoading] = import_react12.useState(false);
+  const [hasError, setHasError] = import_react12.useState(false);
+  const [modeUpdating, setModeUpdating] = import_react12.useState({
     claude: false,
     codex: false
   });
-  const [configUpdating, setConfigUpdating] = import_react11.useState({
+  const [configUpdating, setConfigUpdating] = import_react12.useState({
     claude: false,
     codex: false
   });
-  const loadDashboardData = import_react11.useCallback(async () => {
+  const loadDashboardData = import_react12.useCallback(async () => {
     try {
       setLoading(true);
       setHasError(false);
@@ -34662,7 +34813,7 @@ function DashboardPanel() {
       setLoading(false);
     }
   }, []);
-  import_react11.useEffect(() => {
+  import_react12.useEffect(() => {
     loadDashboardData();
   }, [loadDashboardData]);
   const handleModeChange = async (service, newMode) => {
@@ -34681,7 +34832,7 @@ function DashboardPanel() {
       }));
     } catch (error) {
       console.error("Failed to update mode:", error);
-      alert(t("config.error.mode"));
+      feedback.showError(t("config.error.mode"));
     } finally {
       setModeUpdating((prev) => ({ ...prev, [service]: false }));
     }
@@ -34706,33 +34857,33 @@ function DashboardPanel() {
       }));
     } catch (error) {
       console.error("Failed to activate config:", error);
-      alert(t("config.error.activate"));
+      feedback.showError(t("config.error.activate"));
     } finally {
       setConfigUpdating((prev) => ({ ...prev, [service]: false }));
     }
   };
-  return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Card, {
+  return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Card, {
     children: [
-      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardHeader, {
+      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(CardHeader, {
         className: "flex flex-col gap-4 md:flex-row md:items-center md:justify-between",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardTitle, {
+              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(CardTitle, {
                 children: t("dashboard.title")
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardDescription, {
+              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(CardDescription, {
                 children: t("dashboard.subtitle")
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Button, {
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Button, {
             variant: "outline",
             size: "sm",
             onClick: loadDashboardData,
             disabled: loading,
             children: [
-              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(RefreshCw, {
+              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(RefreshCw, {
                 className: `mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`
               }, undefined, false, undefined, this),
               t("dashboard.refresh")
@@ -34740,13 +34891,13 @@ function DashboardPanel() {
           }, undefined, true, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardContent, {
+      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(CardContent, {
         children: [
-          hasError && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+          hasError && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
             className: "mb-4 rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive",
             children: t("dashboard.error")
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
             className: "grid gap-6 md:grid-cols-2",
             children: SERVICES.map((service) => {
               const serviceData = data.services[service.id] ?? { configs: [], activeName: null, mode: "manual" };
@@ -34757,43 +34908,43 @@ function DashboardPanel() {
               const selectValue = serviceData.activeName || "";
               const hasConfigs = serviceData.configs.length > 0;
               const hasEnabledConfigs = enabledConfigs.length > 0;
-              return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+              return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                 className: "flex flex-col gap-4 rounded-lg border p-4",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                     className: "flex items-start justify-between gap-2",
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                         children: [
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
                             className: "text-sm font-semibold",
                             children: t(service.labelKey)
                           }, undefined, false, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
                             className: "text-xs text-muted-foreground",
                             children: t(service.descriptionKey)
                           }, undefined, false, undefined, this)
                         ]
                       }, undefined, true, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Badge, {
+                      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Badge, {
                         variant: statusInfo.variant,
                         children: t(statusInfo.labelKey)
                       }, undefined, false, undefined, this)
                     ]
                   }, undefined, true, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
                         className: "text-sm font-medium text-muted-foreground",
                         children: t("dashboard.proxyUrl")
                       }, undefined, false, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                         className: "mt-1 flex items-center gap-2 font-mono text-xs md:text-sm",
                         children: [
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Link, {
+                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Link, {
                             className: "h-4 w-4 text-muted-foreground"
                           }, undefined, false, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("a", {
+                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("a", {
                             href: buildProxyUrl(service.port),
                             className: "transition hover:text-primary",
                             target: "_blank",
@@ -34802,79 +34953,79 @@ function DashboardPanel() {
                           }, undefined, false, undefined, this)
                         ]
                       }, undefined, true, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Tabs2, {
+                      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Tabs2, {
                         value: currentMode,
                         onValueChange: (value) => handleModeChange(service.id, value),
                         className: "mt-3",
                         children: [
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsList2, {
+                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsList2, {
                             className: "grid w-full grid-cols-2",
                             children: [
-                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
+                              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsTrigger2, {
                                 value: "manual",
                                 disabled: modeUpdating[service.id],
                                 children: t("dashboard.mode.manual")
                               }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
+                              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsTrigger2, {
                                 value: "load_balance",
                                 disabled: modeUpdating[service.id],
                                 children: t("dashboard.mode.loadBalance")
                               }, undefined, false, undefined, this)
                             ]
                           }, undefined, true, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
+                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsContent2, {
                             value: "manual",
                             className: "mt-3",
-                            children: loading ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                            children: loading ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               className: "h-16 animate-pulse rounded-md bg-muted"
-                            }, undefined, false, undefined, this) : !hasConfigs ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                            }, undefined, false, undefined, this) : !hasConfigs ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               className: "rounded-lg border border-dashed p-4 text-sm text-muted-foreground",
                               children: t("dashboard.noConfigs", { service: t(service.labelKey) })
-                            }, undefined, false, undefined, this) : !hasEnabledConfigs ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                            }, undefined, false, undefined, this) : !hasEnabledConfigs ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               className: "rounded-lg border border-dashed p-4 text-sm text-muted-foreground",
                               children: t("dashboard.noEnabledConfigs", { service: t(service.labelKey) })
-                            }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                            }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               className: "space-y-3",
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("label", {
+                                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("label", {
                                   className: "text-xs font-medium text-muted-foreground",
                                   children: t("dashboard.forwardingConfig")
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Select2, {
+                                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Select2, {
                                   value: selectValue,
                                   onValueChange: (value) => handleConfigSelect(service.id, value),
                                   disabled: configUpdating[service.id],
                                   children: [
-                                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(SelectTrigger2, {
+                                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectTrigger2, {
                                       className: "mt-1.5",
-                                      children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(SelectValue2, {
+                                      children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectValue2, {
                                         placeholder: t("dashboard.noActive", { service: t(service.labelKey) })
                                       }, undefined, false, undefined, this)
                                     }, undefined, false, undefined, this),
-                                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(SelectContent2, {
-                                      children: enabledConfigs.map((config) => /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(SelectItem2, {
+                                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectContent2, {
+                                      children: enabledConfigs.map((config) => /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectItem2, {
                                         value: config.name,
                                         children: config.name
                                       }, config.name, false, undefined, this))
                                     }, undefined, false, undefined, this)
                                   ]
                                 }, undefined, true, undefined, this),
-                                activeConfig && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                                activeConfig && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                                   className: "rounded-lg border bg-muted/40 p-4",
                                   children: [
-                                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                                       className: "flex flex-wrap items-center gap-2",
                                       children: [
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Badge, {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Badge, {
                                           children: activeConfig.name
                                         }, undefined, false, undefined, this),
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("span", {
                                           className: "text-xs text-muted-foreground",
                                           children: t("dashboard.weightLabel", {
                                             value: activeConfig.weight !== undefined ? activeConfig.weight.toFixed(2) : "1.00"
                                           })
                                         }, undefined, false, undefined, this),
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("span", {
                                           className: "text-xs text-muted-foreground",
                                           children: t("dashboard.authLabel", {
                                             value: t(getAuthLabelKey(activeConfig))
@@ -34882,14 +35033,14 @@ function DashboardPanel() {
                                         }, undefined, false, undefined, this)
                                       ]
                                     }, undefined, true, undefined, this),
-                                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                                       className: "mt-3 text-sm",
                                       children: [
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
                                           className: "text-xs uppercase tracking-wide text-muted-foreground",
                                           children: t("dashboard.upstreamUrl")
                                         }, undefined, false, undefined, this),
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
                                           className: "mt-1 font-mono text-sm break-all",
                                           children: activeConfig.base_url
                                         }, undefined, false, undefined, this)
@@ -34900,39 +35051,39 @@ function DashboardPanel() {
                               ]
                             }, undefined, true, undefined, this)
                           }, undefined, false, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
+                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsContent2, {
                             value: "load_balance",
                             className: "mt-3",
-                            children: loading ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                            children: loading ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               className: "h-16 animate-pulse rounded-md bg-muted"
-                            }, undefined, false, undefined, this) : serviceData.configs.length === 0 ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                            }, undefined, false, undefined, this) : serviceData.configs.length === 0 ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               className: "rounded-lg border border-dashed p-4 text-sm text-muted-foreground",
                               children: t("dashboard.noConfigs", { service: t(service.labelKey) })
-                            }, undefined, false, undefined, this) : !hasEnabledConfigs ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                            }, undefined, false, undefined, this) : !hasEnabledConfigs ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               className: "rounded-lg border border-dashed p-4 text-sm text-muted-foreground",
                               children: t("dashboard.noEnabledConfigs", { service: t(service.labelKey) })
-                            }, undefined, false, undefined, this) : activeConfig ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                            }, undefined, false, undefined, this) : activeConfig ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("label", {
+                                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("label", {
                                   className: "text-xs font-medium text-muted-foreground",
                                   children: t("dashboard.forwardingConfig")
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                                   className: "mt-1.5 rounded-lg border bg-muted/40 p-4",
                                   children: [
-                                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                                       className: "flex flex-wrap items-center gap-2",
                                       children: [
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Badge, {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Badge, {
                                           children: activeConfig.name
                                         }, undefined, false, undefined, this),
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("span", {
                                           className: "text-xs text-muted-foreground",
                                           children: t("dashboard.weightLabel", {
                                             value: activeConfig.weight !== undefined ? activeConfig.weight.toFixed(2) : "1.00"
                                           })
                                         }, undefined, false, undefined, this),
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("span", {
                                           className: "text-xs text-muted-foreground",
                                           children: t("dashboard.authLabel", {
                                             value: t(getAuthLabelKey(activeConfig))
@@ -34940,14 +35091,14 @@ function DashboardPanel() {
                                         }, undefined, false, undefined, this)
                                       ]
                                     }, undefined, true, undefined, this),
-                                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                                       className: "mt-3 text-sm",
                                       children: [
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
                                           className: "text-xs uppercase tracking-wide text-muted-foreground",
                                           children: t("dashboard.upstreamUrl")
                                         }, undefined, false, undefined, this),
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
                                           className: "mt-1 font-mono text-sm break-all",
                                           children: activeConfig.base_url
                                         }, undefined, false, undefined, this)
@@ -34956,7 +35107,7 @@ function DashboardPanel() {
                                   ]
                                 }, undefined, true, undefined, this)
                               ]
-                            }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                            }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               className: "rounded-lg border border-dashed p-4 text-sm text-muted-foreground",
                               children: t("dashboard.noActive", { service: t(service.labelKey) })
                             }, undefined, false, undefined, this)
@@ -34976,12 +35127,12 @@ function DashboardPanel() {
 }
 
 // src/App.tsx
-var jsx_dev_runtime16 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime17 = __toESM(require_jsx_dev_runtime(), 1);
 function App() {
-  const [theme, setTheme] = import_react12.useState("light");
-  const [isReady, setIsReady] = import_react12.useState(false);
+  const [theme, setTheme] = import_react13.useState("light");
+  const [isReady, setIsReady] = import_react13.useState(false);
   const { language, t } = useTranslation();
-  import_react12.useEffect(() => {
+  import_react13.useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     const savedLang = localStorage.getItem("language");
     if (savedTheme) {
@@ -35014,51 +35165,51 @@ function App() {
   if (!isReady) {
     return null;
   }
-  return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
     className: "min-h-screen bg-background",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("header", {
+      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("header", {
         className: "border-b",
-        children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+        children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
           className: "container mx-auto px-4 py-4",
-          children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+          children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
             className: "flex items-center justify-between",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("h1", {
+                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("h1", {
                     className: "text-3xl font-bold text-primary",
                     children: t("app.title")
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
+                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("p", {
                     className: "text-sm text-muted-foreground",
                     children: t("app.subtitle")
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
                 className: "flex items-center gap-2",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Select2, {
+                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Select2, {
                     value: language,
                     onValueChange: handleLanguageChange,
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectTrigger2, {
+                      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(SelectTrigger2, {
                         className: "w-[100px]",
                         children: [
-                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Globe, {
+                          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Globe, {
                             className: "mr-2 h-4 w-4"
                           }, undefined, false, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectValue2, {}, undefined, false, undefined, this)
+                          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(SelectValue2, {}, undefined, false, undefined, this)
                         ]
                       }, undefined, true, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectContent2, {
+                      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(SelectContent2, {
                         children: [
-                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectItem2, {
+                          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(SelectItem2, {
                             value: "en",
                             children: t("language.en")
                           }, undefined, false, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectItem2, {
+                          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(SelectItem2, {
                             value: "zh",
                             children: t("language.zh")
                           }, undefined, false, undefined, this)
@@ -35066,13 +35217,13 @@ function App() {
                       }, undefined, true, undefined, this)
                     ]
                   }, undefined, true, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Button, {
+                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Button, {
                     variant: "outline",
                     size: "icon",
                     onClick: toggleTheme,
-                    children: theme === "light" ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Moon, {
+                    children: theme === "light" ? /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Moon, {
                       className: "h-4 w-4"
-                    }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Sun, {
+                    }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Sun, {
                       className: "h-4 w-4"
                     }, undefined, false, undefined, this)
                   }, undefined, false, undefined, this)
@@ -35082,72 +35233,72 @@ function App() {
           }, undefined, true, undefined, this)
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("main", {
+      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("main", {
         className: "container mx-auto px-4 py-8",
-        children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Tabs2, {
+        children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Tabs2, {
           defaultValue: "dashboard",
           className: "space-y-4",
           children: [
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsList2, {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsList2, {
               children: [
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsTrigger2, {
+                /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsTrigger2, {
                   value: "dashboard",
                   children: t("nav.dashboard")
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsTrigger2, {
+                /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsTrigger2, {
                   value: "configs",
                   children: t("nav.configs")
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsTrigger2, {
+                /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsTrigger2, {
                   value: "loadbalancer",
                   children: t("nav.loadbalancer")
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsTrigger2, {
+                /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsTrigger2, {
                   value: "logs",
                   children: t("nav.logs")
                 }, undefined, false, undefined, this)
               ]
             }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsContent2, {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsContent2, {
               value: "dashboard",
               className: "space-y-4",
-              children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ErrorBoundary, {
-                children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(DashboardPanel, {}, undefined, false, undefined, this)
+              children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ErrorBoundary, {
+                children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(DashboardPanel, {}, undefined, false, undefined, this)
               }, undefined, false, undefined, this)
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsContent2, {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsContent2, {
               value: "configs",
               className: "space-y-4",
-              children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ErrorBoundary, {
-                children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ConfigPanel, {}, undefined, false, undefined, this)
+              children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ErrorBoundary, {
+                children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ConfigPanel, {}, undefined, false, undefined, this)
               }, undefined, false, undefined, this)
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsContent2, {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsContent2, {
               value: "loadbalancer",
               className: "space-y-4",
-              children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ErrorBoundary, {
-                children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(LoadBalancerPanel, {}, undefined, false, undefined, this)
+              children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ErrorBoundary, {
+                children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(LoadBalancerPanel, {}, undefined, false, undefined, this)
               }, undefined, false, undefined, this)
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsContent2, {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsContent2, {
               value: "logs",
               className: "space-y-4",
-              children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ErrorBoundary, {
-                children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(LogsPanel, {}, undefined, false, undefined, this)
+              children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ErrorBoundary, {
+                children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(LogsPanel, {}, undefined, false, undefined, this)
               }, undefined, false, undefined, this)
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("footer", {
+      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("footer", {
         className: "border-t mt-12",
-        children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+        children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
           className: "container mx-auto px-4 py-4 text-center text-sm text-muted-foreground",
           children: [
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("p", {
               children: t("footer.builtWith")
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("p", {
               children: t("footer.version")
             }, undefined, false, undefined, this)
           ]
@@ -35159,9 +35310,11 @@ function App() {
 var App_default = App;
 
 // src/main.tsx
-var jsx_dev_runtime17 = __toESM(require_jsx_dev_runtime(), 1);
-import_client.default.createRoot(document.getElementById("root")).render(/* @__PURE__ */ jsx_dev_runtime17.jsxDEV(import_react13.default.StrictMode, {
-  children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(App_default, {}, undefined, false, undefined, this)
+var jsx_dev_runtime18 = __toESM(require_jsx_dev_runtime(), 1);
+import_client.default.createRoot(document.getElementById("root")).render(/* @__PURE__ */ jsx_dev_runtime18.jsxDEV(import_react14.default.StrictMode, {
+  children: /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(FeedbackProvider, {
+    children: /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(App_default, {}, undefined, false, undefined, this)
+  }, undefined, false, undefined, this)
 }, undefined, false, undefined, this));
 
-//# debugId=2FCEC7776939D62264756E2164756E21
+//# debugId=4D768B6363DCDEC864756E2164756E21

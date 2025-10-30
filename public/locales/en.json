@@ -127,6 +127,8 @@
   "common.delete": "Delete",
   "common.edit": "Edit",
   "common.close": "Close",
+  "common.success": "Success",
+  "common.info": "Heads up",
   "common.loading": "Loading...",
   "common.apiKey": "API Key",
   "common.authToken": "Bearer Token",

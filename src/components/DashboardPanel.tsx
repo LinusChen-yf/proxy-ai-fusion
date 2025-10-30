@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select';
 import { Link, RefreshCw } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useFeedback } from '@/components/FeedbackProvider';
 
 interface DashboardService {
   id: ServiceId;
@@ -117,6 +118,7 @@ function resolveServiceStatus(
 
 export function DashboardPanel() {
   const { t } = useTranslation();
+  const feedback = useFeedback();
   const [data, setData] = useState<DashboardData>({
     services: {
       claude: { configs: [], activeName: null, mode: 'manual' },
@@ -184,7 +186,7 @@ export function DashboardPanel() {
       }));
     } catch (error) {
       console.error('Failed to update mode:', error);
-      alert(t('config.error.mode'));
+      feedback.showError(t('config.error.mode'));
     } finally {
       setModeUpdating((prev) => ({ ...prev, [service]: false }));
     }
@@ -211,7 +213,7 @@ export function DashboardPanel() {
       }));
     } catch (error) {
       console.error('Failed to activate config:', error);
-      alert(t('config.error.activate'));
+      feedback.showError(t('config.error.activate'));
     } finally {
       setConfigUpdating((prev) => ({ ...prev, [service]: false }));
     }
