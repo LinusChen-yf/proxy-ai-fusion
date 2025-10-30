@@ -35289,20 +35289,6 @@ function App() {
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this)
-      }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("footer", {
-        className: "border-t mt-12",
-        children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
-          className: "container mx-auto px-4 py-4 text-center text-sm text-muted-foreground",
-          children: [
-            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("p", {
-              children: t("footer.builtWith")
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("p", {
-              children: t("footer.version")
-            }, undefined, false, undefined, this)
-          ]
-        }, undefined, true, undefined, this)
       }, undefined, false, undefined, this)
     ]
   }, undefined, true, undefined, this);
@@ -35317,4 +35303,4 @@ import_client.default.createRoot(document.getElementById("root")).render(/* @__P
   }, undefined, false, undefined, this)
 }, undefined, false, undefined, this));
 
-//# debugId=4D768B6363DCDEC864756E2164756E21
+//# debugId=C9D636651E34D7D364756E2164756E21

@@ -7,8 +7,6 @@
   "nav.configs": "配置管理",
   "nav.loadbalancer": "负载均衡",
   "nav.logs": "日志查询",
-  "footer.builtWith": "由 ❤️ 驱动，基于 Bun + React + TypeScript + shadcn/ui 构建",
-  "footer.version": "版本 1.0.0 - Bun 全栈架构",
   "service.claude.name": "Claude",
   "service.claude.description": "兼容 Anthropic 的代理端点",
   "service.claude.exampleName": "claude-production",

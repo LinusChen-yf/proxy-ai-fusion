@@ -7,8 +7,6 @@
   "nav.configs": "Configurations",
   "nav.loadbalancer": "Load Balancer",
   "nav.logs": "Logs",
-  "footer.builtWith": "Built with ❤️ using Bun + React + TypeScript + shadcn/ui",
-  "footer.version": "Version 1.0.0 - Bun Fullstack",
   "service.claude.name": "Claude",
   "service.claude.description": "Anthropic-compatible proxy endpoint",
   "service.claude.exampleName": "claude-production",

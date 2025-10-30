@@ -128,13 +128,6 @@ function App() {
           </TabsContent>
         </Tabs>
       </main>
-
-      <footer className="border-t mt-12">
-        <div className="container mx-auto px-4 py-4 text-center text-sm text-muted-foreground">
-          <p>{t('footer.builtWith')}</p>
-          <p>{t('footer.version')}</p>
-        </div>
-      </footer>
     </div>
   );
 }
