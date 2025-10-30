@@ -193,7 +193,6 @@ export function DashboardPanel() {
   const handleConfigSelect = async (service: ServiceId, configName: string) => {
     try {
       setConfigUpdating((prev) => ({ ...prev, [service]: true }));
-      
       if (service === 'claude') {
         await api.activateClaudeConfig(configName);
       } else {
@@ -239,12 +238,17 @@ export function DashboardPanel() {
 
         <div className="grid gap-6 md:grid-cols-2">
           {SERVICES.map((service) => {
-            const serviceData = data.services[service.id] ?? { configs: [], activeName: null, mode: 'manual' };
+            const serviceData =
+              data.services[service.id] ?? { configs: [], activeName: null, mode: 'manual' };
+            const enabledConfigs = serviceData.configs.filter(config => config.enabled !== false);
             const activeConfig = serviceData.activeName
               ? serviceData.configs.find((config) => config.name === serviceData.activeName)
               : undefined;
             const statusInfo = resolveServiceStatus(serviceData, loading, hasError);
             const currentMode = serviceData.mode;
+            const selectValue = serviceData.activeName || '';
+            const hasConfigs = serviceData.configs.length > 0;
+            const hasEnabledConfigs = enabledConfigs.length > 0;
 
             return (
               <div key={service.id} className="flex flex-col gap-4 rounded-lg border p-4">
@@ -284,33 +288,37 @@ export function DashboardPanel() {
                     <TabsContent value="manual" className="mt-3">
                       {loading ? (
                         <div className="h-16 animate-pulse rounded-md bg-muted" />
-                      ) : serviceData.configs.length === 0 ? (
+                      ) : !hasConfigs ? (
                         <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
                           {t('dashboard.noConfigs', { service: t(service.labelKey) })}
                         </div>
+                      ) : !hasEnabledConfigs ? (
+                        <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                          {t('dashboard.noEnabledConfigs', { service: t(service.labelKey) })}
+                        </div>
                       ) : (
                         <div className="space-y-3">
-                          <div>
-                            <label className="text-xs font-medium text-muted-foreground">
-                              {t('dashboard.forwardingConfig')}
-                            </label>
-                            <Select
-                              value={serviceData.activeName || ''}
-                              onValueChange={(value) => handleConfigSelect(service.id, value)}
-                              disabled={configUpdating[service.id]}
-                            >
-                              <SelectTrigger className="mt-1.5">
-                                <SelectValue placeholder={t('dashboard.noActive', { service: t(service.labelKey) })} />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {serviceData.configs.map((config) => (
-                                  <SelectItem key={config.name} value={config.name}>
-                                    {config.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
+                          <label className="text-xs font-medium text-muted-foreground">
+                            {t('dashboard.forwardingConfig')}
+                          </label>
+                          <Select
+                            value={selectValue}
+                            onValueChange={(value) => handleConfigSelect(service.id, value)}
+                            disabled={configUpdating[service.id]}
+                          >
+                            <SelectTrigger className="mt-1.5">
+                              <SelectValue
+                                placeholder={t('dashboard.noActive', { service: t(service.labelKey) })}
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {enabledConfigs.map(config => (
+                                <SelectItem key={config.name} value={config.name}>
+                                  {config.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           {activeConfig && (
                             <div className="rounded-lg border bg-muted/40 p-4">
                               <div className="flex flex-wrap items-center gap-2">
@@ -343,6 +351,10 @@ export function DashboardPanel() {
                       ) : serviceData.configs.length === 0 ? (
                         <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
                           {t('dashboard.noConfigs', { service: t(service.labelKey) })}
+                        </div>
+                      ) : !hasEnabledConfigs ? (
+                        <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                          {t('dashboard.noEnabledConfigs', { service: t(service.labelKey) })}
                         </div>
                       ) : activeConfig ? (
                         <div>

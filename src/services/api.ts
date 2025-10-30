@@ -46,7 +46,7 @@ export const api = {
     });
   },
 
-  async updateConfig(name: string, config: Omit<ServiceConfig, 'weight'> & { weight?: number }): Promise<void> {
+  async updateConfig(name: string, config: Partial<ServiceConfig>): Promise<void> {
     await fetchJSON(`${API_BASE}/configs/${encodeURIComponent(name)}`, {
       method: 'PUT',
       body: JSON.stringify(config),
@@ -77,7 +77,7 @@ export const api = {
     });
   },
 
-  async updateClaudeConfig(name: string, config: Omit<ClaudeConfig, 'weight'> & { weight?: number }): Promise<void> {
+  async updateClaudeConfig(name: string, config: Partial<ClaudeConfig>): Promise<void> {
     await fetchJSON(`${API_BASE}/configs/${encodeURIComponent(name)}?service=claude`, {
       method: 'PUT',
       body: JSON.stringify(config),
@@ -115,7 +115,7 @@ export const api = {
     });
   },
 
-  async updateCodexConfig(name: string, config: Omit<CodexConfig, 'weight'> & { weight?: number }): Promise<void> {
+  async updateCodexConfig(name: string, config: Partial<CodexConfig>): Promise<void> {
     await fetchJSON(`${API_BASE}/configs/${encodeURIComponent(name)}?service=codex`, {
       method: 'PUT',
       body: JSON.stringify(config),

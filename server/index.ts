@@ -380,6 +380,11 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
         return Response.json({ error: 'Service not found' }, { status: 404, headers: corsHeaders });
       }
 
+      const exists = serviceConfig.configs.some(c => c.name === configName);
+      if (!exists) {
+        return Response.json({ error: 'Config not found' }, { status: 404, headers: corsHeaders });
+      }
+
       // Set active config
       serviceConfig.active = configName;
       await configManager.saveServiceConfig(serviceName, serviceConfig);
@@ -472,6 +477,13 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
       const config = serviceConfig.configs.find(c => c.name === configName);
       if (!config) {
         return Response.json({ error: 'Config not found' }, { status: 404, headers: corsHeaders });
+      }
+
+      if (!config.enabled) {
+        return Response.json({
+          success: false,
+          message: 'Configuration disabled. Enable it before running tests.',
+        }, { status: 400, headers: corsHeaders });
       }
 
       // Test the API connection

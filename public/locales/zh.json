@@ -155,5 +155,14 @@
   "common.tryAgain": "重试",
   "common.showStack": "展开堆栈信息",
   "common.somethingWrong": "出现了问题",
-  "common.errorOccurred": "渲染组件时发生错误"
+  "common.errorOccurred": "渲染组件时发生错误",
+  "dashboard.noEnabledConfigs": "所有 {{service}} 配置已禁用，请先启用一个。",
+  "config.status.ok": "正常",
+  "config.status.error": "异常",
+  "config.status.disabled": "已禁用",
+  "config.disableSingle": "禁用配置",
+  "config.enableSingle": "启用配置",
+  "config.error.toggle": "更新配置状态失败",
+  "config.form.enabledLabel": "启用状态",
+  "config.form.enabledHint": "禁用后不会出现在手动选择或负载均衡中。"
 }

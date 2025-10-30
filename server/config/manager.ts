@@ -114,10 +114,34 @@ codex = ${defaultConfig.proxyPorts.codex}
   async saveServiceConfig(serviceName: string, config: ServiceConfig): Promise<void> {
     const configPath = join(this.configDir, `${serviceName}.toml`);
 
+    const normalizedConfigs = config.configs.map(c => ({
+      ...c,
+      enabled: c.enabled !== false,
+      weight: c.weight ?? 1,
+    }));
+
+    let nextActive = config.active;
+    const hasActiveConfig = normalizedConfigs.some(c => c.name === nextActive);
+    if (!hasActiveConfig) {
+      nextActive = normalizedConfigs[0]?.name || '';
+    }
+
+    const activeConfig = normalizedConfigs.find(c => c.name === nextActive);
+    if (!activeConfig || !activeConfig.enabled) {
+      const fallback = normalizedConfigs.find(c => c.enabled);
+      nextActive = fallback ? fallback.name : '';
+    }
+
+    const sanitizedConfig: ServiceConfig = {
+      ...config,
+      configs: normalizedConfigs,
+      active: nextActive,
+    };
+
     // Convert to TOML format using standard library
     const tomlData: any = {
-      mode: config.mode,
-      configs: config.configs.map(c => ({
+      mode: sanitizedConfig.mode,
+      configs: sanitizedConfig.configs.map(c => ({
         name: c.name,
         base_url: c.baseUrl,
         auth_token: c.authToken || undefined,
@@ -126,16 +150,16 @@ codex = ${defaultConfig.proxyPorts.codex}
         enabled: c.enabled,
       })),
       active: {
-        name: config.active,
+        name: sanitizedConfig.active,
       },
       loadbalancer: {
-        strategy: config.loadBalancer.strategy,
+        strategy: sanitizedConfig.loadBalancer.strategy,
         health_check: {
-          enabled: config.loadBalancer.healthCheck.enabled,
-          interval: config.loadBalancer.healthCheck.interval,
-          timeout: config.loadBalancer.healthCheck.timeout,
-          failure_threshold: config.loadBalancer.healthCheck.failureThreshold,
-          success_threshold: config.loadBalancer.healthCheck.successThreshold,
+          enabled: sanitizedConfig.loadBalancer.healthCheck.enabled,
+          interval: sanitizedConfig.loadBalancer.healthCheck.interval,
+          timeout: sanitizedConfig.loadBalancer.healthCheck.timeout,
+          failure_threshold: sanitizedConfig.loadBalancer.healthCheck.failureThreshold,
+          success_threshold: sanitizedConfig.loadBalancer.healthCheck.successThreshold,
         },
       },
     };
@@ -144,7 +168,7 @@ codex = ${defaultConfig.proxyPorts.codex}
     await Bun.write(configPath, tomlContent);
 
     // Update in-memory cache
-    this.services.set(serviceName, config);
+    this.services.set(serviceName, sanitizedConfig);
   }
 
   getSystemConfig(): SystemConfig {
@@ -159,11 +183,23 @@ codex = ${defaultConfig.proxyPorts.codex}
     const service = this.services.get(serviceName);
     if (!service) return undefined;
 
-    return service.configs.find(c => c.name === service.active && c.enabled);
+    const active = service.configs.find(c => c.name === service.active);
+    if (!active || !active.enabled) {
+      return undefined;
+    }
+
+    return active;
   }
 
   getAllConfigs(serviceName: string): ProxyConfig[] {
     const service = this.services.get(serviceName);
-    return service?.configs.filter(c => c.enabled) || [];
+    if (!service) return [];
+
+    if (service.mode === 'manual') {
+      const activeConfig = this.getActiveConfig(serviceName);
+      return activeConfig ? [activeConfig] : [];
+    }
+
+    return service.configs.filter(c => c.enabled);
   }
 }

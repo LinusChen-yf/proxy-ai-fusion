@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
@@ -26,7 +25,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit, Trash2, CheckCircle, Key, Shield, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Plus, Edit, Trash2, Key, Shield, ShieldCheck, Eye, EyeOff, CircleOff, Power } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 
 const SERVICE_ORDER: ServiceId[] = ['claude', 'codex'];
@@ -71,8 +71,18 @@ function normalizeServiceConfigs<T extends ServiceConfig>(
     base_url: (config as any).baseUrl || (config as any).base_url,
     auth_token: (config as any).authToken || (config as any).auth_token,
     api_key: (config as any).apiKey || (config as any).api_key,
+    enabled: (config as any).enabled ?? true,
   } as T));
 }
+
+type ConfigFormState = {
+  name: string;
+  base_url: string;
+  api_key: string;
+  auth_token: string;
+  weight: number;
+  enabled: boolean;
+};
 
 export function ConfigPanel() {
   const { t } = useTranslation();
@@ -89,12 +99,13 @@ export function ConfigPanel() {
   const [editingConfig, setEditingConfig] = useState<ServiceConfig | null>(null);
   const [editingService, setEditingService] = useState<ServiceId>('claude');
   const [authType, setAuthType] = useState<'api_key' | 'auth_token'>('auth_token');
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ConfigFormState>({
     name: '',
     base_url: '',
     api_key: '',
     auth_token: '',
     weight: 1,
+    enabled: true,
   });
   const [showApiKey, setShowApiKey] = useState(false);
   const [showAuthToken, setShowAuthToken] = useState(false);
@@ -171,7 +182,7 @@ export function ConfigPanel() {
     setEditingConfig(null);
     setEditingService(service);
     setAuthType('auth_token');
-    setFormData({ name: '', base_url: '', api_key: '', auth_token: '', weight: 1 });
+    setFormData({ name: '', base_url: '', api_key: '', auth_token: '', weight: 1, enabled: true });
     setDialogOpen(true);
   };
 
@@ -185,6 +196,7 @@ export function ConfigPanel() {
       api_key: config.api_key || '',
       auth_token: config.auth_token || '',
       weight: config.weight,
+      enabled: config.enabled ?? true,
     });
     setDialogOpen(true);
   };
@@ -212,6 +224,7 @@ export function ConfigPanel() {
         name: formData.name,
         base_url: formData.base_url,
         weight: formData.weight,
+        enabled: formData.enabled,
         ...(authType === 'api_key'
           ? { api_key: formData.api_key, auth_token: undefined }
           : { auth_token: formData.auth_token, api_key: undefined }),
@@ -263,23 +276,33 @@ export function ConfigPanel() {
     }
   };
 
-  const handleActivate = async (service: ServiceId, name: string) => {
+  const handleToggleConfigEnabled = async (
+    service: ServiceId,
+    config: ServiceConfig,
+    enabled: boolean,
+  ) => {
     try {
       if (service === 'claude') {
-        await api.activateClaudeConfig(name);
+        await api.updateClaudeConfig(config.name, { enabled });
       } else {
-        await api.activateCodexConfig(name);
+        await api.updateCodexConfig(config.name, { enabled });
       }
+
       await loadConfigs();
     } catch (error) {
-      console.error('Failed to activate config:', error);
-      alert(t('config.error.activate'));
+      console.error('Failed to toggle config state:', error);
+      alert(t('config.error.toggle'));
     }
   };
 
   const handleTest = async (service: ServiceId) => {
     const configName = activeConfigMap[service];
     if (!configName) {
+      return;
+    }
+
+    const activeConfig = configs[service].find(c => c.name === configName);
+    if (!activeConfig || activeConfig.enabled === false) {
       return;
     }
 
@@ -323,12 +346,10 @@ export function ConfigPanel() {
 
   const renderServiceConfigs = (service: ServiceId) => {
     const currentConfigs = configs[service];
-    const activeName = activeConfigMap[service];
     const serviceMeta = SERVICE_METADATA[service];
     const serviceLabel = t(serviceMeta.labelKey);
     const exampleName = t(serviceMeta.exampleNameKey);
     const exampleUrl = t(serviceMeta.exampleUrlKey);
-
     if (currentConfigs.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -381,100 +402,114 @@ export function ConfigPanel() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {currentConfigs.map((config) => (
-            <TableRow key={config.name}>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{config.name}</span>
-                  {config.api_key && (
-                    <span title={t('common.apiKey')}>
-                      <Key className="h-3 w-3 text-muted-foreground" />
-                    </span>
-                  )}
-                  {config.auth_token && (
-                    <span title={t('common.authToken')}>
-                      <Shield className="h-3 w-3 text-muted-foreground" />
-                    </span>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell className="font-mono text-sm">{config.base_url}</TableCell>
-              <TableCell>{config.weight}</TableCell>
-              <TableCell>{config.name === activeName && <Badge>{t('config.active')}</Badge>}</TableCell>
-              <TableCell className="align-top">
-                {(() => {
-                  const result = testResults[service]?.[config.name];
-                  if (!result) {
-                    return <span className="text-xs text-muted-foreground">{t('config.test.notRun')}</span>;
-                  }
+          {currentConfigs.map((config) => {
+            const isEnabled = config.enabled !== false;
+            const result = testResults[service]?.[config.name];
+            const status = !isEnabled
+              ? { label: t('config.status.disabled'), className: 'text-muted-foreground' }
+              : result?.success === false
+                ? { label: t('config.status.error'), className: 'text-destructive' }
+                : result?.success
+                  ? { label: t('config.status.ok'), className: 'text-emerald-600' }
+                  : { label: t('config.status.ok'), className: 'text-muted-foreground' };
 
-                  const testedTime = new Date(result.completedAt).toLocaleTimeString();
-                  return (
-                    <div className="flex flex-col gap-1 text-xs">
-                      <span className={result.success ? 'text-emerald-600' : 'text-destructive'}>
-                        {result.success ? t('config.test.successShort') : t('config.test.failedShort')}
+            return (
+              <TableRow key={config.name}>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{config.name}</span>
+                    {config.api_key && (
+                      <span title={t('common.apiKey')}>
+                        <Key className="h-3 w-3 text-muted-foreground" />
                       </span>
-                      {result.status_code !== undefined && (
+                    )}
+                    {config.auth_token && (
+                      <span title={t('common.authToken')}>
+                        <Shield className="h-3 w-3 text-muted-foreground" />
+                      </span>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className="font-mono text-sm">{config.base_url}</TableCell>
+                <TableCell>{config.weight}</TableCell>
+                <TableCell>
+                  <span className={`text-xs font-medium ${status.className}`}>{status.label}</span>
+                </TableCell>
+                <TableCell className="align-top">
+                  {(() => {
+                    if (!result) {
+                      return <span className="text-xs text-muted-foreground">{t('config.test.notRun')}</span>;
+                    }
+
+                    const testedTime = new Date(result.completedAt).toLocaleTimeString();
+                    return (
+                      <div className="flex flex-col gap-1 text-xs">
+                        <span className={result.success ? 'text-emerald-600' : 'text-destructive'}>
+                          {result.success ? t('config.test.successShort') : t('config.test.failedShort')}
+                        </span>
+                        {result.status_code !== undefined && (
+                          <span className="text-muted-foreground">
+                            {t('config.test.statusCode', { code: result.status_code })}
+                          </span>
+                        )}
+                        {result.duration_ms !== undefined && (
+                          <span className="text-muted-foreground">
+                            {t('config.test.duration', { ms: result.duration_ms })}
+                          </span>
+                        )}
                         <span className="text-muted-foreground">
-                          {t('config.test.statusCode', { code: result.status_code })}
+                          {t('config.test.testedAt', { time: testedTime })}
                         </span>
-                      )}
-                     {result.duration_ms !== undefined && (
-                       <span className="text-muted-foreground">
-                         {t('config.test.duration', { ms: result.duration_ms })}
-                       </span>
-                     )}
-                     <span className="text-muted-foreground">
-                       {t('config.test.testedAt', { time: testedTime })}
-                     </span>
-                      {result.response_preview && (
-                        <span className="text-muted-foreground break-words">
-                          {result.response_preview}
-                        </span>
-                      )}
-                      {result.message && (
-                        <span className="text-muted-foreground break-words">{result.message}</span>
-                      )}
-                    </div>
-                  );
-                })()}
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  {config.name !== activeName && (
+                        {result.response_preview && (
+                          <span className="text-muted-foreground break-words">
+                            {result.response_preview}
+                          </span>
+                        )}
+                        {result.message && (
+                          <span className="text-muted-foreground break-words">{result.message}</span>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleActivate(service, config.name)}
-                      title={t('common.activate')}
+                      onClick={() => handleToggleConfigEnabled(service, config, !isEnabled)}
+                      title={isEnabled ? t('config.disableSingle') : t('config.enableSingle')}
                     >
-                      <CheckCircle className="h-4 w-4" />
+                      {isEnabled ? <CircleOff className="h-4 w-4" /> : <Power className="h-4 w-4" />}
                     </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(service, config)}
-                    title={t('common.edit')}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDelete(service, config.name)}
-                    title={t('common.delete')}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(service, config)}
+                      title={t('common.edit')}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(service, config.name)}
+                      title={t('common.delete')}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     );
   };
+
+  const activeConfig = configs[activeService].find(config => config.name === activeConfigMap[activeService]);
+  const isActiveConfigDisabled = activeConfig ? activeConfig.enabled === false : false;
 
   const editingMeta = SERVICE_METADATA[editingService];
   const editingServiceLabel = t(editingMeta.labelKey);
@@ -492,7 +527,11 @@ export function ConfigPanel() {
             <Button
               variant="outline"
               onClick={() => handleTest(activeService)}
-              disabled={!activeConfigMap[activeService] || testLoading[activeService]}
+              disabled={
+                !activeConfigMap[activeService] ||
+                isActiveConfigDisabled ||
+                testLoading[activeService]
+              }
             >
               <ShieldCheck className="mr-2 h-4 w-4" />
               {testLoading[activeService] ? t('config.test.running') : t('config.test.api')}
@@ -656,6 +695,17 @@ export function ConfigPanel() {
                     </p>
                   </div>
                 )}
+              </div>
+              <div className="flex items-center justify-between rounded-lg border bg-muted/40 p-3">
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">{t('config.form.enabledLabel')}</span>
+                  <span className="text-xs text-muted-foreground">{t('config.form.enabledHint')}</span>
+                </div>
+                <Switch
+                  id="enabled"
+                  checked={formData.enabled}
+                  onCheckedChange={(checked) => setFormData({ ...formData, enabled: checked })}
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="weight">{t('config.form.weightLabel')}</Label>

@@ -155,5 +155,14 @@
   "common.tryAgain": "Try Again",
   "common.showStack": "Show stack trace",
   "common.somethingWrong": "Something went wrong",
-  "common.errorOccurred": "An error occurred while rendering this component"
+  "common.errorOccurred": "An error occurred while rendering this component",
+  "dashboard.noEnabledConfigs": "All {{service}} configurations are disabled. Enable one to continue.",
+  "config.status.ok": "OK",
+  "config.status.error": "Error",
+  "config.status.disabled": "Disabled",
+  "config.disableSingle": "Disable configuration",
+  "config.enableSingle": "Enable configuration",
+  "config.error.toggle": "Failed to update configuration state",
+  "config.form.enabledLabel": "Configuration enabled",
+  "config.form.enabledHint": "Disabled configurations are hidden from manual routing and load balancing."
 }

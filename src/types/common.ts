@@ -6,6 +6,7 @@ export interface ServiceConfig {
   api_key?: string;
   auth_token?: string;
   weight: number;
+  enabled?: boolean;
 }
 
 export interface TestConnectionResponse {
@@ -23,6 +24,7 @@ export interface ClaudeConfig {
   api_key?: string;        // Anthropic API key
   auth_token?: string;     // Bearer token credentials
   weight: number;          // Load-balancing weight
+  enabled?: boolean;
 }
 
 // Codex-specific configuration
@@ -32,6 +34,7 @@ export interface CodexConfig {
   api_key?: string;        // OpenAI API key
   auth_token?: string;     // Bearer token credentials
   weight: number;          // Load-balancing weight
+  enabled?: boolean;
 }
 
 // Response structure for separated configs

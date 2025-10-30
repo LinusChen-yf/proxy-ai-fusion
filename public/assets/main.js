@@ -26273,12 +26273,6 @@ var AlertCircle = createLucideIcon("AlertCircle", [
   ["line", { x1: "12", x2: "12.01", y1: "16", y2: "16", key: "4dfq90" }]
 ]);
 
-// node_modules/lucide-react/dist/esm/icons/check-circle.js
-var CheckCircle = createLucideIcon("CheckCircle", [
-  ["path", { d: "M22 11.08V12a10 10 0 1 1-5.93-9.14", key: "g774vq" }],
-  ["path", { d: "m9 11 3 3L22 4", key: "1pflzl" }]
-]);
-
 // node_modules/lucide-react/dist/esm/icons/check.js
 var Check = createLucideIcon("Check", [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]]);
 
@@ -26289,6 +26283,13 @@ var ChevronDown = createLucideIcon("ChevronDown", [
 
 // node_modules/lucide-react/dist/esm/icons/chevron-up.js
 var ChevronUp = createLucideIcon("ChevronUp", [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]]);
+
+// node_modules/lucide-react/dist/esm/icons/circle-off.js
+var CircleOff = createLucideIcon("CircleOff", [
+  ["path", { d: "m2 2 20 20", key: "1ooewy" }],
+  ["path", { d: "M8.35 2.69A10 10 0 0 1 21.3 15.65", key: "1pfsoa" }],
+  ["path", { d: "M19.08 19.08A10 10 0 1 1 4.92 4.92", key: "1ablyi" }]
+]);
 
 // node_modules/lucide-react/dist/esm/icons/eye-off.js
 var EyeOff = createLucideIcon("EyeOff", [
@@ -26348,6 +26349,12 @@ var PenSquare = createLucideIcon("PenSquare", [
 var Plus = createLucideIcon("Plus", [
   ["path", { d: "M5 12h14", key: "1ays0h" }],
   ["path", { d: "M12 5v14", key: "s699le" }]
+]);
+
+// node_modules/lucide-react/dist/esm/icons/power.js
+var Power = createLucideIcon("Power", [
+  ["path", { d: "M12 2v10", key: "mnfbl" }],
+  ["path", { d: "M18.4 6.6a9 9 0 1 1-12.77.04", key: "obofu9" }]
 ]);
 
 // node_modules/lucide-react/dist/esm/icons/refresh-cw.js
@@ -26732,28 +26739,6 @@ var Label2 = React9.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */
   ...props
 }, undefined, false, undefined, this));
 Label2.displayName = Root.displayName;
-
-// src/components/ui/badge.tsx
-var jsx_dev_runtime6 = __toESM(require_jsx_dev_runtime(), 1);
-var badgeVariants = cva("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", {
-  variants: {
-    variant: {
-      default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-      secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-      destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-      outline: "text-foreground"
-    }
-  },
-  defaultVariants: {
-    variant: "default"
-  }
-});
-function Badge({ className, variant, ...props }) {
-  return /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("div", {
-    className: cn(badgeVariants({ variant }), className),
-    ...props
-  }, undefined, false, undefined, this);
-}
 
 // src/components/ui/tabs.tsx
 var React20 = __toESM(require_react(), 1);
@@ -27791,21 +27776,21 @@ var Trigger = TabsTrigger;
 var Content = TabsContent;
 
 // src/components/ui/tabs.tsx
-var jsx_dev_runtime7 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime6 = __toESM(require_jsx_dev_runtime(), 1);
 var Tabs2 = Root22;
-var TabsList2 = React20.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(List, {
+var TabsList2 = React20.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(List, {
   ref,
   className: cn("inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground", className),
   ...props
 }, undefined, false, undefined, this));
 TabsList2.displayName = List.displayName;
-var TabsTrigger2 = React20.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Trigger, {
+var TabsTrigger2 = React20.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(Trigger, {
   ref,
   className: cn("inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm", className),
   ...props
 }, undefined, false, undefined, this));
 TabsTrigger2.displayName = Trigger.displayName;
-var TabsContent2 = React20.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Content, {
+var TabsContent2 = React20.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(Content, {
   ref,
   className: cn("mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", className),
   ...props
@@ -29416,31 +29401,31 @@ var Description = DialogDescription;
 var Close = DialogClose;
 
 // src/components/ui/dialog.tsx
-var jsx_dev_runtime8 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime7 = __toESM(require_jsx_dev_runtime(), 1);
 var Dialog2 = Root3;
 var DialogPortal2 = Portal2;
-var DialogOverlay2 = React38.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Overlay, {
+var DialogOverlay2 = React38.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Overlay, {
   ref,
   className: cn("fixed inset-0 z-50 bg-background/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className),
   ...props
 }, undefined, false, undefined, this));
 DialogOverlay2.displayName = Overlay.displayName;
-var DialogContent2 = React38.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(DialogPortal2, {
+var DialogContent2 = React38.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(DialogPortal2, {
   children: [
-    /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(DialogOverlay2, {}, undefined, false, undefined, this),
-    /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Content2, {
+    /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(DialogOverlay2, {}, undefined, false, undefined, this),
+    /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Content2, {
       ref,
       className: cn("fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg", className),
       ...props,
       children: [
         children,
-        /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Close, {
+        /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Close, {
           className: "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground",
           children: [
-            /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(X, {
+            /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(X, {
               className: "h-4 w-4"
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("span", {
+            /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("span", {
               className: "sr-only",
               children: "Close"
             }, undefined, false, undefined, this)
@@ -29451,23 +29436,23 @@ var DialogContent2 = React38.forwardRef(({ className, children, ...props }, ref)
   ]
 }, undefined, true, undefined, this));
 DialogContent2.displayName = Content2.displayName;
-var DialogHeader = ({ className, ...props }) => /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
+var DialogHeader = ({ className, ...props }) => /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("div", {
   className: cn("flex flex-col space-y-1.5 text-center sm:text-left", className),
   ...props
 }, undefined, false, undefined, this);
 DialogHeader.displayName = "DialogHeader";
-var DialogFooter = ({ className, ...props }) => /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
+var DialogFooter = ({ className, ...props }) => /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("div", {
   className: cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className),
   ...props
 }, undefined, false, undefined, this);
 DialogFooter.displayName = "DialogFooter";
-var DialogTitle2 = React38.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Title, {
+var DialogTitle2 = React38.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Title, {
   ref,
   className: cn("text-lg font-semibold leading-none tracking-tight", className),
   ...props
 }, undefined, false, undefined, this));
 DialogTitle2.displayName = Title.displayName;
-var DialogDescription2 = React38.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Description, {
+var DialogDescription2 = React38.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Description, {
   ref,
   className: cn("text-sm text-muted-foreground", className),
   ...props
@@ -29600,19 +29585,19 @@ var Title2 = AlertDialogTitle;
 var Description2 = AlertDialogDescription;
 
 // src/components/ui/alert-dialog.tsx
-var jsx_dev_runtime9 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime8 = __toESM(require_jsx_dev_runtime(), 1);
 var AlertDialog2 = Root23;
 var AlertDialogPortal2 = Portal22;
-var AlertDialogOverlay2 = React40.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Overlay2, {
+var AlertDialogOverlay2 = React40.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Overlay2, {
   className: cn("fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className),
   ...props,
   ref
 }, undefined, false, undefined, this));
 AlertDialogOverlay2.displayName = Overlay2.displayName;
-var AlertDialogContent2 = React40.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(AlertDialogPortal2, {
+var AlertDialogContent2 = React40.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(AlertDialogPortal2, {
   children: [
-    /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(AlertDialogOverlay2, {}, undefined, false, undefined, this),
-    /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Content22, {
+    /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(AlertDialogOverlay2, {}, undefined, false, undefined, this),
+    /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Content22, {
       ref,
       className: cn("fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg", className),
       ...props
@@ -29623,7 +29608,7 @@ AlertDialogContent2.displayName = Content22.displayName;
 var AlertDialogHeader = ({
   className,
   ...props
-}) => /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
+}) => /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
   className: cn("flex flex-col space-y-2 text-center sm:text-left", className),
   ...props
 }, undefined, false, undefined, this);
@@ -29631,30 +29616,30 @@ AlertDialogHeader.displayName = "AlertDialogHeader";
 var AlertDialogFooter = ({
   className,
   ...props
-}) => /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
+}) => /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
   className: cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className),
   ...props
 }, undefined, false, undefined, this);
 AlertDialogFooter.displayName = "AlertDialogFooter";
-var AlertDialogTitle2 = React40.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Title2, {
+var AlertDialogTitle2 = React40.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Title2, {
   ref,
   className: cn("text-lg font-semibold", className),
   ...props
 }, undefined, false, undefined, this));
 AlertDialogTitle2.displayName = Title2.displayName;
-var AlertDialogDescription2 = React40.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Description2, {
+var AlertDialogDescription2 = React40.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Description2, {
   ref,
   className: cn("text-sm text-muted-foreground", className),
   ...props
 }, undefined, false, undefined, this));
 AlertDialogDescription2.displayName = Description2.displayName;
-var AlertDialogAction2 = React40.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Action, {
+var AlertDialogAction2 = React40.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Action, {
   ref,
   className: cn(buttonVariants(), className),
   ...props
 }, undefined, false, undefined, this));
 AlertDialogAction2.displayName = Action.displayName;
-var AlertDialogCancel2 = React40.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Cancel, {
+var AlertDialogCancel2 = React40.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Cancel, {
   ref,
   className: cn(buttonVariants({ variant: "outline" }), "mt-2 sm:mt-0", className),
   ...props
@@ -29663,58 +29648,251 @@ AlertDialogCancel2.displayName = Cancel.displayName;
 
 // src/components/ui/table.tsx
 var React41 = __toESM(require_react(), 1);
-var jsx_dev_runtime10 = __toESM(require_jsx_dev_runtime(), 1);
-var Table = React41.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+var jsx_dev_runtime9 = __toESM(require_jsx_dev_runtime(), 1);
+var Table = React41.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
   className: "relative w-full overflow-auto",
-  children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("table", {
+  children: /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("table", {
     ref,
     className: cn("w-full caption-bottom text-sm", className),
     ...props
   }, undefined, false, undefined, this)
 }, undefined, false, undefined, this));
 Table.displayName = "Table";
-var TableHeader = React41.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("thead", {
+var TableHeader = React41.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("thead", {
   ref,
   className: cn("[&_tr]:border-b", className),
   ...props
 }, undefined, false, undefined, this));
 TableHeader.displayName = "TableHeader";
-var TableBody = React41.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("tbody", {
+var TableBody = React41.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("tbody", {
   ref,
   className: cn("[&_tr:last-child]:border-0", className),
   ...props
 }, undefined, false, undefined, this));
 TableBody.displayName = "TableBody";
-var TableFooter = React41.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("tfoot", {
+var TableFooter = React41.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("tfoot", {
   ref,
   className: cn("border-t bg-muted/50 font-medium [&>tr]:last:border-b-0", className),
   ...props
 }, undefined, false, undefined, this));
 TableFooter.displayName = "TableFooter";
-var TableRow = React41.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("tr", {
+var TableRow = React41.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("tr", {
   ref,
   className: cn("border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted", className),
   ...props
 }, undefined, false, undefined, this));
 TableRow.displayName = "TableRow";
-var TableHead = React41.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("th", {
+var TableHead = React41.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("th", {
   ref,
   className: cn("h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0", className),
   ...props
 }, undefined, false, undefined, this));
 TableHead.displayName = "TableHead";
-var TableCell = React41.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("td", {
+var TableCell = React41.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("td", {
   ref,
   className: cn("p-4 align-middle [&:has([role=checkbox])]:pr-0", className),
   ...props
 }, undefined, false, undefined, this));
 TableCell.displayName = "TableCell";
-var TableCaption = React41.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("caption", {
+var TableCaption = React41.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("caption", {
   ref,
   className: cn("mt-4 text-sm text-muted-foreground", className),
   ...props
 }, undefined, false, undefined, this));
 TableCaption.displayName = "TableCaption";
+
+// src/components/ui/switch.tsx
+var React45 = __toESM(require_react(), 1);
+
+// node_modules/@radix-ui/react-switch/dist/index.mjs
+var React44 = __toESM(require_react(), 1);
+
+// node_modules/@radix-ui/react-use-previous/dist/index.mjs
+var React42 = __toESM(require_react(), 1);
+function usePrevious(value) {
+  const ref = React42.useRef({ value, previous: value });
+  return React42.useMemo(() => {
+    if (ref.current.value !== value) {
+      ref.current.previous = ref.current.value;
+      ref.current.value = value;
+    }
+    return ref.current.previous;
+  }, [value]);
+}
+
+// node_modules/@radix-ui/react-use-size/dist/index.mjs
+var React43 = __toESM(require_react(), 1);
+function useSize(element) {
+  const [size, setSize] = React43.useState(undefined);
+  useLayoutEffect2(() => {
+    if (element) {
+      setSize({ width: element.offsetWidth, height: element.offsetHeight });
+      const resizeObserver = new ResizeObserver((entries) => {
+        if (!Array.isArray(entries)) {
+          return;
+        }
+        if (!entries.length) {
+          return;
+        }
+        const entry = entries[0];
+        let width;
+        let height;
+        if ("borderBoxSize" in entry) {
+          const borderSizeEntry = entry["borderBoxSize"];
+          const borderSize = Array.isArray(borderSizeEntry) ? borderSizeEntry[0] : borderSizeEntry;
+          width = borderSize["inlineSize"];
+          height = borderSize["blockSize"];
+        } else {
+          width = element.offsetWidth;
+          height = element.offsetHeight;
+        }
+        setSize({ width, height });
+      });
+      resizeObserver.observe(element, { box: "border-box" });
+      return () => resizeObserver.unobserve(element);
+    } else {
+      setSize(undefined);
+    }
+  }, [element]);
+  return size;
+}
+
+// node_modules/@radix-ui/react-switch/dist/index.mjs
+var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
+"use client";
+var SWITCH_NAME = "Switch";
+var [createSwitchContext, createSwitchScope] = createContextScope(SWITCH_NAME);
+var [SwitchProvider, useSwitchContext] = createSwitchContext(SWITCH_NAME);
+var Switch = React44.forwardRef((props, forwardedRef) => {
+  const {
+    __scopeSwitch,
+    name,
+    checked: checkedProp,
+    defaultChecked,
+    required,
+    disabled,
+    value = "on",
+    onCheckedChange,
+    form,
+    ...switchProps
+  } = props;
+  const [button, setButton] = React44.useState(null);
+  const composedRefs = useComposedRefs(forwardedRef, (node) => setButton(node));
+  const hasConsumerStoppedPropagationRef = React44.useRef(false);
+  const isFormControl = button ? form || !!button.closest("form") : true;
+  const [checked, setChecked] = useControllableState({
+    prop: checkedProp,
+    defaultProp: defaultChecked ?? false,
+    onChange: onCheckedChange,
+    caller: SWITCH_NAME
+  });
+  return /* @__PURE__ */ import_jsx_runtime15.jsxs(SwitchProvider, { scope: __scopeSwitch, checked, disabled, children: [
+    /* @__PURE__ */ import_jsx_runtime15.jsx(Primitive.button, {
+      type: "button",
+      role: "switch",
+      "aria-checked": checked,
+      "aria-required": required,
+      "data-state": getState2(checked),
+      "data-disabled": disabled ? "" : undefined,
+      disabled,
+      value,
+      ...switchProps,
+      ref: composedRefs,
+      onClick: composeEventHandlers(props.onClick, (event) => {
+        setChecked((prevChecked) => !prevChecked);
+        if (isFormControl) {
+          hasConsumerStoppedPropagationRef.current = event.isPropagationStopped();
+          if (!hasConsumerStoppedPropagationRef.current)
+            event.stopPropagation();
+        }
+      })
+    }),
+    isFormControl && /* @__PURE__ */ import_jsx_runtime15.jsx(SwitchBubbleInput, {
+      control: button,
+      bubbles: !hasConsumerStoppedPropagationRef.current,
+      name,
+      value,
+      checked,
+      required,
+      disabled,
+      form,
+      style: { transform: "translateX(-100%)" }
+    })
+  ] });
+});
+Switch.displayName = SWITCH_NAME;
+var THUMB_NAME = "SwitchThumb";
+var SwitchThumb = React44.forwardRef((props, forwardedRef) => {
+  const { __scopeSwitch, ...thumbProps } = props;
+  const context = useSwitchContext(THUMB_NAME, __scopeSwitch);
+  return /* @__PURE__ */ import_jsx_runtime15.jsx(Primitive.span, {
+    "data-state": getState2(context.checked),
+    "data-disabled": context.disabled ? "" : undefined,
+    ...thumbProps,
+    ref: forwardedRef
+  });
+});
+SwitchThumb.displayName = THUMB_NAME;
+var BUBBLE_INPUT_NAME = "SwitchBubbleInput";
+var SwitchBubbleInput = React44.forwardRef(({
+  __scopeSwitch,
+  control,
+  checked,
+  bubbles = true,
+  ...props
+}, forwardedRef) => {
+  const ref = React44.useRef(null);
+  const composedRefs = useComposedRefs(ref, forwardedRef);
+  const prevChecked = usePrevious(checked);
+  const controlSize = useSize(control);
+  React44.useEffect(() => {
+    const input = ref.current;
+    if (!input)
+      return;
+    const inputProto = window.HTMLInputElement.prototype;
+    const descriptor = Object.getOwnPropertyDescriptor(inputProto, "checked");
+    const setChecked = descriptor.set;
+    if (prevChecked !== checked && setChecked) {
+      const event = new Event("click", { bubbles });
+      setChecked.call(input, checked);
+      input.dispatchEvent(event);
+    }
+  }, [prevChecked, checked, bubbles]);
+  return /* @__PURE__ */ import_jsx_runtime15.jsx("input", {
+    type: "checkbox",
+    "aria-hidden": true,
+    defaultChecked: checked,
+    ...props,
+    tabIndex: -1,
+    ref: composedRefs,
+    style: {
+      ...props.style,
+      ...controlSize,
+      position: "absolute",
+      pointerEvents: "none",
+      opacity: 0,
+      margin: 0
+    }
+  });
+});
+SwitchBubbleInput.displayName = BUBBLE_INPUT_NAME;
+function getState2(checked) {
+  return checked ? "checked" : "unchecked";
+}
+var Root4 = Switch;
+var Thumb = SwitchThumb;
+
+// src/components/ui/switch.tsx
+var jsx_dev_runtime10 = __toESM(require_jsx_dev_runtime(), 1);
+var Switch2 = React45.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Root4, {
+  className: cn("peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input", className),
+  ...props,
+  ref,
+  children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Thumb, {
+    className: cn("pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0")
+  }, undefined, false, undefined, this)
+}, undefined, false, undefined, this));
+Switch2.displayName = Root4.displayName;
 
 // src/components/ConfigPanel.tsx
 var jsx_dev_runtime11 = __toESM(require_jsx_dev_runtime(), 1);
@@ -29742,7 +29920,8 @@ function normalizeServiceConfigs(configs) {
     ...config,
     base_url: config.baseUrl || config.base_url,
     auth_token: config.authToken || config.auth_token,
-    api_key: config.apiKey || config.api_key
+    api_key: config.apiKey || config.api_key,
+    enabled: config.enabled ?? true
   }));
 }
 function ConfigPanel() {
@@ -29765,7 +29944,8 @@ function ConfigPanel() {
     base_url: "",
     api_key: "",
     auth_token: "",
-    weight: 1
+    weight: 1,
+    enabled: true
   });
   const [showApiKey, setShowApiKey] = import_react7.useState(false);
   const [showAuthToken, setShowAuthToken] = import_react7.useState(false);
@@ -29831,7 +30011,7 @@ function ConfigPanel() {
     setEditingConfig(null);
     setEditingService(service);
     setAuthType("auth_token");
-    setFormData({ name: "", base_url: "", api_key: "", auth_token: "", weight: 1 });
+    setFormData({ name: "", base_url: "", api_key: "", auth_token: "", weight: 1, enabled: true });
     setDialogOpen(true);
   };
   const handleEdit = (service, config) => {
@@ -29843,7 +30023,8 @@ function ConfigPanel() {
       base_url: config.base_url,
       api_key: config.api_key || "",
       auth_token: config.auth_token || "",
-      weight: config.weight
+      weight: config.weight,
+      enabled: config.enabled ?? true
     });
     setDialogOpen(true);
   };
@@ -29866,6 +30047,7 @@ function ConfigPanel() {
         name: formData.name,
         base_url: formData.base_url,
         weight: formData.weight,
+        enabled: formData.enabled,
         ...authType === "api_key" ? { api_key: formData.api_key, auth_token: undefined } : { auth_token: formData.auth_token, api_key: undefined }
       };
       if (editingConfig) {
@@ -29909,22 +30091,26 @@ function ConfigPanel() {
       setConfigToDelete(null);
     }
   };
-  const handleActivate = async (service, name) => {
+  const handleToggleConfigEnabled = async (service, config, enabled) => {
     try {
       if (service === "claude") {
-        await api.activateClaudeConfig(name);
+        await api.updateClaudeConfig(config.name, { enabled });
       } else {
-        await api.activateCodexConfig(name);
+        await api.updateCodexConfig(config.name, { enabled });
       }
       await loadConfigs();
     } catch (error) {
-      console.error("Failed to activate config:", error);
-      alert(t("config.error.activate"));
+      console.error("Failed to toggle config state:", error);
+      alert(t("config.error.toggle"));
     }
   };
   const handleTest = async (service) => {
     const configName = activeConfigMap[service];
     if (!configName) {
+      return;
+    }
+    const activeConfig2 = configs[service].find((c) => c.name === configName);
+    if (!activeConfig2 || activeConfig2.enabled === false) {
       return;
     }
     setTestLoading((prev) => ({ ...prev, [service]: true }));
@@ -29965,7 +30151,6 @@ function ConfigPanel() {
   };
   const renderServiceConfigs = (service) => {
     const currentConfigs = configs[service];
-    const activeName = activeConfigMap[service];
     const serviceMeta = SERVICE_METADATA[service];
     const serviceLabel = t(serviceMeta.labelKey);
     const exampleName = t(serviceMeta.exampleNameKey);
@@ -30087,126 +30272,135 @@ function ConfigPanel() {
           }, undefined, true, undefined, this)
         }, undefined, false, undefined, this),
         /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableBody, {
-          children: currentConfigs.map((config) => /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableRow, {
-            children: [
-              /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
-                children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
-                  className: "flex items-center gap-2",
-                  children: [
-                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
-                      className: "font-medium",
-                      children: config.name
-                    }, undefined, false, undefined, this),
-                    config.api_key && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
-                      title: t("common.apiKey"),
-                      children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Key, {
-                        className: "h-3 w-3 text-muted-foreground"
-                      }, undefined, false, undefined, this)
-                    }, undefined, false, undefined, this),
-                    config.auth_token && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
-                      title: t("common.authToken"),
-                      children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Shield, {
-                        className: "h-3 w-3 text-muted-foreground"
-                      }, undefined, false, undefined, this)
-                    }, undefined, false, undefined, this)
-                  ]
-                }, undefined, true, undefined, this)
-              }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
-                className: "font-mono text-sm",
-                children: config.base_url
-              }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
-                children: config.weight
-              }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
-                children: config.name === activeName && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Badge, {
-                  children: t("config.active")
-                }, undefined, false, undefined, this)
-              }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
-                className: "align-top",
-                children: (() => {
-                  const result = testResults[service]?.[config.name];
-                  if (!result) {
-                    return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
-                      className: "text-xs text-muted-foreground",
-                      children: t("config.test.notRun")
-                    }, undefined, false, undefined, this);
-                  }
-                  const testedTime = new Date(result.completedAt).toLocaleTimeString();
-                  return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
-                    className: "flex flex-col gap-1 text-xs",
+          children: currentConfigs.map((config) => {
+            const isEnabled = config.enabled !== false;
+            const result = testResults[service]?.[config.name];
+            const status = !isEnabled ? { label: t("config.status.disabled"), className: "text-muted-foreground" } : result?.success === false ? { label: t("config.status.error"), className: "text-destructive" } : result?.success ? { label: t("config.status.ok"), className: "text-emerald-600" } : { label: t("config.status.ok"), className: "text-muted-foreground" };
+            return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableRow, {
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
+                  children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
+                    className: "flex items-center gap-2",
                     children: [
                       /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
-                        className: result.success ? "text-emerald-600" : "text-destructive",
-                        children: result.success ? t("config.test.successShort") : t("config.test.failedShort")
+                        className: "font-medium",
+                        children: config.name
                       }, undefined, false, undefined, this),
-                      result.status_code !== undefined && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
-                        className: "text-muted-foreground",
-                        children: t("config.test.statusCode", { code: result.status_code })
+                      config.api_key && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
+                        title: t("common.apiKey"),
+                        children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Key, {
+                          className: "h-3 w-3 text-muted-foreground"
+                        }, undefined, false, undefined, this)
                       }, undefined, false, undefined, this),
-                      result.duration_ms !== undefined && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
-                        className: "text-muted-foreground",
-                        children: t("config.test.duration", { ms: result.duration_ms })
-                      }, undefined, false, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
-                        className: "text-muted-foreground",
-                        children: t("config.test.testedAt", { time: testedTime })
-                      }, undefined, false, undefined, this),
-                      result.response_preview && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
-                        className: "text-muted-foreground break-words",
-                        children: result.response_preview
-                      }, undefined, false, undefined, this),
-                      result.message && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
-                        className: "text-muted-foreground break-words",
-                        children: result.message
+                      config.auth_token && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
+                        title: t("common.authToken"),
+                        children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Shield, {
+                          className: "h-3 w-3 text-muted-foreground"
+                        }, undefined, false, undefined, this)
                       }, undefined, false, undefined, this)
                     ]
-                  }, undefined, true, undefined, this);
-                })()
-              }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
-                className: "text-right",
-                children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
-                  className: "flex justify-end gap-2",
-                  children: [
-                    config.name !== activeName && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
-                      variant: "outline",
-                      size: "sm",
-                      onClick: () => handleActivate(service, config.name),
-                      title: t("common.activate"),
-                      children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(CheckCircle, {
-                        className: "h-4 w-4"
+                  }, undefined, true, undefined, this)
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
+                  className: "font-mono text-sm",
+                  children: config.base_url
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
+                  children: config.weight
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
+                  children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
+                    className: `text-xs font-medium ${status.className}`,
+                    children: status.label
+                  }, undefined, false, undefined, this)
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
+                  className: "align-top",
+                  children: (() => {
+                    if (!result) {
+                      return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
+                        className: "text-xs text-muted-foreground",
+                        children: t("config.test.notRun")
+                      }, undefined, false, undefined, this);
+                    }
+                    const testedTime = new Date(result.completedAt).toLocaleTimeString();
+                    return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
+                      className: "flex flex-col gap-1 text-xs",
+                      children: [
+                        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
+                          className: result.success ? "text-emerald-600" : "text-destructive",
+                          children: result.success ? t("config.test.successShort") : t("config.test.failedShort")
+                        }, undefined, false, undefined, this),
+                        result.status_code !== undefined && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
+                          className: "text-muted-foreground",
+                          children: t("config.test.statusCode", { code: result.status_code })
+                        }, undefined, false, undefined, this),
+                        result.duration_ms !== undefined && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
+                          className: "text-muted-foreground",
+                          children: t("config.test.duration", { ms: result.duration_ms })
+                        }, undefined, false, undefined, this),
+                        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
+                          className: "text-muted-foreground",
+                          children: t("config.test.testedAt", { time: testedTime })
+                        }, undefined, false, undefined, this),
+                        result.response_preview && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
+                          className: "text-muted-foreground break-words",
+                          children: result.response_preview
+                        }, undefined, false, undefined, this),
+                        result.message && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
+                          className: "text-muted-foreground break-words",
+                          children: result.message
+                        }, undefined, false, undefined, this)
+                      ]
+                    }, undefined, true, undefined, this);
+                  })()
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
+                  className: "text-right",
+                  children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
+                    className: "flex justify-end gap-2",
+                    children: [
+                      /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
+                        variant: "outline",
+                        size: "sm",
+                        onClick: () => handleToggleConfigEnabled(service, config, !isEnabled),
+                        title: isEnabled ? t("config.disableSingle") : t("config.enableSingle"),
+                        children: isEnabled ? /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(CircleOff, {
+                          className: "h-4 w-4"
+                        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Power, {
+                          className: "h-4 w-4"
+                        }, undefined, false, undefined, this)
+                      }, undefined, false, undefined, this),
+                      /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
+                        variant: "outline",
+                        size: "sm",
+                        onClick: () => handleEdit(service, config),
+                        title: t("common.edit"),
+                        children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(PenSquare, {
+                          className: "h-4 w-4"
+                        }, undefined, false, undefined, this)
+                      }, undefined, false, undefined, this),
+                      /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
+                        variant: "outline",
+                        size: "sm",
+                        onClick: () => handleDelete(service, config.name),
+                        title: t("common.delete"),
+                        children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Trash2, {
+                          className: "h-4 w-4 text-destructive"
+                        }, undefined, false, undefined, this)
                       }, undefined, false, undefined, this)
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
-                      variant: "outline",
-                      size: "sm",
-                      onClick: () => handleEdit(service, config),
-                      title: t("common.edit"),
-                      children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(PenSquare, {
-                        className: "h-4 w-4"
-                      }, undefined, false, undefined, this)
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
-                      variant: "outline",
-                      size: "sm",
-                      onClick: () => handleDelete(service, config.name),
-                      title: t("common.delete"),
-                      children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Trash2, {
-                        className: "h-4 w-4 text-destructive"
-                      }, undefined, false, undefined, this)
-                    }, undefined, false, undefined, this)
-                  ]
-                }, undefined, true, undefined, this)
-              }, undefined, false, undefined, this)
-            ]
-          }, config.name, true, undefined, this))
+                    ]
+                  }, undefined, true, undefined, this)
+                }, undefined, false, undefined, this)
+              ]
+            }, config.name, true, undefined, this);
+          })
         }, undefined, false, undefined, this)
       ]
     }, undefined, true, undefined, this);
   };
+  const activeConfig = configs[activeService].find((config) => config.name === activeConfigMap[activeService]);
+  const isActiveConfigDisabled = activeConfig ? activeConfig.enabled === false : false;
   const editingMeta = SERVICE_METADATA[editingService];
   const editingServiceLabel = t(editingMeta.labelKey);
   const editingExampleUrl = t(editingMeta.exampleUrlKey);
@@ -30232,7 +30426,7 @@ function ConfigPanel() {
                 /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
                   variant: "outline",
                   onClick: () => handleTest(activeService),
-                  disabled: !activeConfigMap[activeService] || testLoading[activeService],
+                  disabled: !activeConfigMap[activeService] || isActiveConfigDisabled || testLoading[activeService],
                   children: [
                     /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(ShieldCheck, {
                       className: "mr-2 h-4 w-4"
@@ -30492,6 +30686,29 @@ function ConfigPanel() {
                       ]
                     }, undefined, true, undefined, this),
                     /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
+                      className: "flex items-center justify-between rounded-lg border bg-muted/40 p-3",
+                      children: [
+                        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
+                          className: "flex flex-col",
+                          children: [
+                            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
+                              className: "text-sm font-medium",
+                              children: t("config.form.enabledLabel")
+                            }, undefined, false, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
+                              className: "text-xs text-muted-foreground",
+                              children: t("config.form.enabledHint")
+                            }, undefined, false, undefined, this)
+                          ]
+                        }, undefined, true, undefined, this),
+                        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Switch2, {
+                          id: "enabled",
+                          checked: formData.enabled,
+                          onCheckedChange: (checked) => setFormData({ ...formData, enabled: checked })
+                        }, undefined, false, undefined, this)
+                      ]
+                    }, undefined, true, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
                       className: "grid gap-2",
                       children: [
                         /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Label2, {
@@ -30573,10 +30790,10 @@ function ConfigPanel() {
 var import_react9 = __toESM(require_react(), 1);
 
 // src/components/ui/select.tsx
-var React49 = __toESM(require_react(), 1);
+var React51 = __toESM(require_react(), 1);
 
 // node_modules/@radix-ui/react-select/dist/index.mjs
-var React48 = __toESM(require_react(), 1);
+var React50 = __toESM(require_react(), 1);
 var ReactDOM4 = __toESM(require_react_dom(), 1);
 
 // node_modules/@radix-ui/number/dist/index.mjs
@@ -30585,7 +30802,7 @@ function clamp(value, [min, max]) {
 }
 
 // node_modules/@radix-ui/react-popper/dist/index.mjs
-var React45 = __toESM(require_react(), 1);
+var React48 = __toESM(require_react(), 1);
 
 // node_modules/@floating-ui/utils/dist/floating-ui.utils.mjs
 var sides = ["top", "right", "bottom", "left"];
@@ -32184,7 +32401,7 @@ var computePosition2 = (reference, floating, options2) => {
 };
 
 // node_modules/@floating-ui/react-dom/dist/floating-ui.react-dom.mjs
-var React42 = __toESM(require_react(), 1);
+var React46 = __toESM(require_react(), 1);
 var import_react8 = __toESM(require_react(), 1);
 var ReactDOM3 = __toESM(require_react_dom(), 1);
 var isClient = typeof document !== "undefined";
@@ -32250,7 +32467,7 @@ function roundByDPR(element, value) {
   return Math.round(value * dpr) / dpr;
 }
 function useLatestRef(value) {
-  const ref = React42.useRef(value);
+  const ref = React46.useRef(value);
   index(() => {
     ref.current = value;
   });
@@ -32273,7 +32490,7 @@ function useFloating(options2) {
     whileElementsMounted,
     open
   } = options2;
-  const [data, setData] = React42.useState({
+  const [data, setData] = React46.useState({
     x: 0,
     y: 0,
     strategy,
@@ -32281,19 +32498,19 @@ function useFloating(options2) {
     middlewareData: {},
     isPositioned: false
   });
-  const [latestMiddleware, setLatestMiddleware] = React42.useState(middleware);
+  const [latestMiddleware, setLatestMiddleware] = React46.useState(middleware);
   if (!deepEqual(latestMiddleware, middleware)) {
     setLatestMiddleware(middleware);
   }
-  const [_reference, _setReference] = React42.useState(null);
-  const [_floating, _setFloating] = React42.useState(null);
-  const setReference = React42.useCallback((node) => {
+  const [_reference, _setReference] = React46.useState(null);
+  const [_floating, _setFloating] = React46.useState(null);
+  const setReference = React46.useCallback((node) => {
     if (node !== referenceRef.current) {
       referenceRef.current = node;
       _setReference(node);
     }
   }, []);
-  const setFloating = React42.useCallback((node) => {
+  const setFloating = React46.useCallback((node) => {
     if (node !== floatingRef.current) {
       floatingRef.current = node;
       _setFloating(node);
@@ -32301,14 +32518,14 @@ function useFloating(options2) {
   }, []);
   const referenceEl = externalReference || _reference;
   const floatingEl = externalFloating || _floating;
-  const referenceRef = React42.useRef(null);
-  const floatingRef = React42.useRef(null);
-  const dataRef = React42.useRef(data);
+  const referenceRef = React46.useRef(null);
+  const floatingRef = React46.useRef(null);
+  const dataRef = React46.useRef(data);
   const hasWhileElementsMounted = whileElementsMounted != null;
   const whileElementsMountedRef = useLatestRef(whileElementsMounted);
   const platformRef = useLatestRef(platform2);
   const openRef = useLatestRef(open);
-  const update = React42.useCallback(() => {
+  const update = React46.useCallback(() => {
     if (!referenceRef.current || !floatingRef.current) {
       return;
     }
@@ -32342,7 +32559,7 @@ function useFloating(options2) {
       }));
     }
   }, [open]);
-  const isMountedRef = React42.useRef(false);
+  const isMountedRef = React46.useRef(false);
   index(() => {
     isMountedRef.current = true;
     return () => {
@@ -32361,17 +32578,17 @@ function useFloating(options2) {
       update();
     }
   }, [referenceEl, floatingEl, update, whileElementsMountedRef, hasWhileElementsMounted]);
-  const refs = React42.useMemo(() => ({
+  const refs = React46.useMemo(() => ({
     reference: referenceRef,
     floating: floatingRef,
     setReference,
     setFloating
   }), [setReference, setFloating]);
-  const elements = React42.useMemo(() => ({
+  const elements = React46.useMemo(() => ({
     reference: referenceEl,
     floating: floatingEl
   }), [referenceEl, floatingEl]);
-  const floatingStyles = React42.useMemo(() => {
+  const floatingStyles = React46.useMemo(() => {
     const initialStyles = {
       position: strategy,
       left: 0,
@@ -32397,7 +32614,7 @@ function useFloating(options2) {
       top: y
     };
   }, [strategy, transform, elements.floating, data.x, data.y]);
-  return React42.useMemo(() => ({
+  return React46.useMemo(() => ({
     ...data,
     update,
     refs,
@@ -32466,93 +32683,56 @@ var arrow3 = (options2, deps) => ({
 });
 
 // node_modules/@radix-ui/react-arrow/dist/index.mjs
-var React43 = __toESM(require_react(), 1);
-var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
+var React47 = __toESM(require_react(), 1);
+var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
 var NAME2 = "Arrow";
-var Arrow = React43.forwardRef((props, forwardedRef) => {
+var Arrow = React47.forwardRef((props, forwardedRef) => {
   const { children, width = 10, height = 5, ...arrowProps } = props;
-  return /* @__PURE__ */ import_jsx_runtime15.jsx(Primitive.svg, {
+  return /* @__PURE__ */ import_jsx_runtime16.jsx(Primitive.svg, {
     ...arrowProps,
     ref: forwardedRef,
     width,
     height,
     viewBox: "0 0 30 10",
     preserveAspectRatio: "none",
-    children: props.asChild ? children : /* @__PURE__ */ import_jsx_runtime15.jsx("polygon", { points: "0,0 30,0 15,10" })
+    children: props.asChild ? children : /* @__PURE__ */ import_jsx_runtime16.jsx("polygon", { points: "0,0 30,0 15,10" })
   });
 });
 Arrow.displayName = NAME2;
-var Root4 = Arrow;
-
-// node_modules/@radix-ui/react-use-size/dist/index.mjs
-var React44 = __toESM(require_react(), 1);
-function useSize(element) {
-  const [size4, setSize] = React44.useState(undefined);
-  useLayoutEffect2(() => {
-    if (element) {
-      setSize({ width: element.offsetWidth, height: element.offsetHeight });
-      const resizeObserver = new ResizeObserver((entries) => {
-        if (!Array.isArray(entries)) {
-          return;
-        }
-        if (!entries.length) {
-          return;
-        }
-        const entry = entries[0];
-        let width;
-        let height;
-        if ("borderBoxSize" in entry) {
-          const borderSizeEntry = entry["borderBoxSize"];
-          const borderSize = Array.isArray(borderSizeEntry) ? borderSizeEntry[0] : borderSizeEntry;
-          width = borderSize["inlineSize"];
-          height = borderSize["blockSize"];
-        } else {
-          width = element.offsetWidth;
-          height = element.offsetHeight;
-        }
-        setSize({ width, height });
-      });
-      resizeObserver.observe(element, { box: "border-box" });
-      return () => resizeObserver.unobserve(element);
-    } else {
-      setSize(undefined);
-    }
-  }, [element]);
-  return size4;
-}
+var Root5 = Arrow;
 
 // node_modules/@radix-ui/react-popper/dist/index.mjs
-var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
 "use client";
 var POPPER_NAME = "Popper";
 var [createPopperContext, createPopperScope] = createContextScope(POPPER_NAME);
 var [PopperProvider, usePopperContext] = createPopperContext(POPPER_NAME);
 var Popper = (props) => {
   const { __scopePopper, children } = props;
-  const [anchor, setAnchor] = React45.useState(null);
-  return /* @__PURE__ */ import_jsx_runtime16.jsx(PopperProvider, { scope: __scopePopper, anchor, onAnchorChange: setAnchor, children });
+  const [anchor, setAnchor] = React48.useState(null);
+  return /* @__PURE__ */ import_jsx_runtime17.jsx(PopperProvider, { scope: __scopePopper, anchor, onAnchorChange: setAnchor, children });
 };
 Popper.displayName = POPPER_NAME;
 var ANCHOR_NAME = "PopperAnchor";
-var PopperAnchor = React45.forwardRef((props, forwardedRef) => {
+var PopperAnchor = React48.forwardRef((props, forwardedRef) => {
   const { __scopePopper, virtualRef, ...anchorProps } = props;
   const context = usePopperContext(ANCHOR_NAME, __scopePopper);
-  const ref = React45.useRef(null);
+  const ref = React48.useRef(null);
   const composedRefs = useComposedRefs(forwardedRef, ref);
-  const anchorRef = React45.useRef(null);
-  React45.useEffect(() => {
+  const anchorRef = React48.useRef(null);
+  React48.useEffect(() => {
     const previousAnchor = anchorRef.current;
     anchorRef.current = virtualRef?.current || ref.current;
     if (previousAnchor !== anchorRef.current) {
       context.onAnchorChange(anchorRef.current);
     }
   });
-  return virtualRef ? null : /* @__PURE__ */ import_jsx_runtime16.jsx(Primitive.div, { ...anchorProps, ref: composedRefs });
+  return virtualRef ? null : /* @__PURE__ */ import_jsx_runtime17.jsx(Primitive.div, { ...anchorProps, ref: composedRefs });
 });
 PopperAnchor.displayName = ANCHOR_NAME;
 var CONTENT_NAME4 = "PopperContent";
 var [PopperContentProvider, useContentContext] = createPopperContext(CONTENT_NAME4);
-var PopperContent = React45.forwardRef((props, forwardedRef) => {
+var PopperContent = React48.forwardRef((props, forwardedRef) => {
   const {
     __scopePopper,
     side = "bottom",
@@ -32570,9 +32750,9 @@ var PopperContent = React45.forwardRef((props, forwardedRef) => {
     ...contentProps
   } = props;
   const context = usePopperContext(CONTENT_NAME4, __scopePopper);
-  const [content, setContent] = React45.useState(null);
+  const [content, setContent] = React48.useState(null);
   const composedRefs = useComposedRefs(forwardedRef, (node) => setContent(node));
-  const [arrow4, setArrow] = React45.useState(null);
+  const [arrow4, setArrow] = React48.useState(null);
   const arrowSize = useSize(arrow4);
   const arrowWidth = arrowSize?.width ?? 0;
   const arrowHeight = arrowSize?.height ?? 0;
@@ -32632,12 +32812,12 @@ var PopperContent = React45.forwardRef((props, forwardedRef) => {
   const arrowX = middlewareData.arrow?.x;
   const arrowY = middlewareData.arrow?.y;
   const cannotCenterArrow = middlewareData.arrow?.centerOffset !== 0;
-  const [contentZIndex, setContentZIndex] = React45.useState();
+  const [contentZIndex, setContentZIndex] = React48.useState();
   useLayoutEffect2(() => {
     if (content)
       setContentZIndex(window.getComputedStyle(content).zIndex);
   }, [content]);
-  return /* @__PURE__ */ import_jsx_runtime16.jsx("div", {
+  return /* @__PURE__ */ import_jsx_runtime17.jsx("div", {
     ref: refs.setFloating,
     "data-radix-popper-content-wrapper": "",
     style: {
@@ -32655,14 +32835,14 @@ var PopperContent = React45.forwardRef((props, forwardedRef) => {
       }
     },
     dir: props.dir,
-    children: /* @__PURE__ */ import_jsx_runtime16.jsx(PopperContentProvider, {
+    children: /* @__PURE__ */ import_jsx_runtime17.jsx(PopperContentProvider, {
       scope: __scopePopper,
       placedSide,
       onArrowChange: setArrow,
       arrowX,
       arrowY,
       shouldHideArrow: cannotCenterArrow,
-      children: /* @__PURE__ */ import_jsx_runtime16.jsx(Primitive.div, {
+      children: /* @__PURE__ */ import_jsx_runtime17.jsx(Primitive.div, {
         "data-side": placedSide,
         "data-align": placedAlign,
         ...contentProps,
@@ -32683,11 +32863,11 @@ var OPPOSITE_SIDE = {
   bottom: "top",
   left: "right"
 };
-var PopperArrow = React45.forwardRef(function PopperArrow2(props, forwardedRef) {
+var PopperArrow = React48.forwardRef(function PopperArrow2(props, forwardedRef) {
   const { __scopePopper, ...arrowProps } = props;
   const contentContext = useContentContext(ARROW_NAME, __scopePopper);
   const baseSide = OPPOSITE_SIDE[contentContext.placedSide];
-  return /* @__PURE__ */ import_jsx_runtime16.jsx("span", {
+  return /* @__PURE__ */ import_jsx_runtime17.jsx("span", {
     ref: contentContext.onArrowChange,
     style: {
       position: "absolute",
@@ -32708,7 +32888,7 @@ var PopperArrow = React45.forwardRef(function PopperArrow2(props, forwardedRef) 
       }[contentContext.placedSide],
       visibility: contentContext.shouldHideArrow ? "hidden" : undefined
     },
-    children: /* @__PURE__ */ import_jsx_runtime16.jsx(Root4, {
+    children: /* @__PURE__ */ import_jsx_runtime17.jsx(Root5, {
       ...arrowProps,
       ref: forwardedRef,
       style: {
@@ -32762,22 +32942,9 @@ var Anchor = PopperAnchor;
 var Content3 = PopperContent;
 var Arrow2 = PopperArrow;
 
-// node_modules/@radix-ui/react-use-previous/dist/index.mjs
-var React46 = __toESM(require_react(), 1);
-function usePrevious(value) {
-  const ref = React46.useRef({ value, previous: value });
-  return React46.useMemo(() => {
-    if (ref.current.value !== value) {
-      ref.current.previous = ref.current.value;
-      ref.current.value = value;
-    }
-    return ref.current.previous;
-  }, [value]);
-}
-
 // node_modules/@radix-ui/react-visually-hidden/dist/index.mjs
-var React47 = __toESM(require_react(), 1);
-var import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
+var React49 = __toESM(require_react(), 1);
+var import_jsx_runtime18 = __toESM(require_jsx_runtime(), 1);
 var VISUALLY_HIDDEN_STYLES = Object.freeze({
   position: "absolute",
   border: 0,
@@ -32791,8 +32958,8 @@ var VISUALLY_HIDDEN_STYLES = Object.freeze({
   wordWrap: "normal"
 });
 var NAME3 = "VisuallyHidden";
-var VisuallyHidden = React47.forwardRef((props, forwardedRef) => {
-  return /* @__PURE__ */ import_jsx_runtime17.jsx(Primitive.span, {
+var VisuallyHidden = React49.forwardRef((props, forwardedRef) => {
+  return /* @__PURE__ */ import_jsx_runtime18.jsx(Primitive.span, {
     ...props,
     ref: forwardedRef,
     style: { ...VISUALLY_HIDDEN_STYLES, ...props.style }
@@ -32801,7 +32968,7 @@ var VisuallyHidden = React47.forwardRef((props, forwardedRef) => {
 VisuallyHidden.displayName = NAME3;
 
 // node_modules/@radix-ui/react-select/dist/index.mjs
-var import_jsx_runtime18 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime19 = __toESM(require_jsx_runtime(), 1);
 "use client";
 var OPEN_KEYS = [" ", "Enter", "ArrowUp", "ArrowDown"];
 var SELECTION_KEYS = [" ", "Enter"];
@@ -32832,9 +32999,9 @@ var Select = (props) => {
     form
   } = props;
   const popperScope = usePopperScope(__scopeSelect);
-  const [trigger, setTrigger] = React48.useState(null);
-  const [valueNode, setValueNode] = React48.useState(null);
-  const [valueNodeHasChildren, setValueNodeHasChildren] = React48.useState(false);
+  const [trigger, setTrigger] = React50.useState(null);
+  const [valueNode, setValueNode] = React50.useState(null);
+  const [valueNodeHasChildren, setValueNodeHasChildren] = React50.useState(false);
   const direction = useDirection(dir);
   const [open, setOpen] = useControllableState({
     prop: openProp,
@@ -32848,11 +33015,11 @@ var Select = (props) => {
     onChange: onValueChange,
     caller: SELECT_NAME
   });
-  const triggerPointerDownPosRef = React48.useRef(null);
+  const triggerPointerDownPosRef = React50.useRef(null);
   const isFormControl = trigger ? form || !!trigger.closest("form") : true;
-  const [nativeOptionsSet, setNativeOptionsSet] = React48.useState(/* @__PURE__ */ new Set);
+  const [nativeOptionsSet, setNativeOptionsSet] = React50.useState(/* @__PURE__ */ new Set);
   const nativeSelectKey = Array.from(nativeOptionsSet).map((option) => option.props.value).join(";");
-  return /* @__PURE__ */ import_jsx_runtime18.jsx(Root24, { ...popperScope, children: /* @__PURE__ */ import_jsx_runtime18.jsxs(SelectProvider, {
+  return /* @__PURE__ */ import_jsx_runtime19.jsx(Root24, { ...popperScope, children: /* @__PURE__ */ import_jsx_runtime19.jsxs(SelectProvider, {
     required,
     scope: __scopeSelect,
     trigger,
@@ -32870,12 +33037,12 @@ var Select = (props) => {
     triggerPointerDownPosRef,
     disabled,
     children: [
-      /* @__PURE__ */ import_jsx_runtime18.jsx(Collection2.Provider, { scope: __scopeSelect, children: /* @__PURE__ */ import_jsx_runtime18.jsx(SelectNativeOptionsProvider, {
+      /* @__PURE__ */ import_jsx_runtime19.jsx(Collection2.Provider, { scope: __scopeSelect, children: /* @__PURE__ */ import_jsx_runtime19.jsx(SelectNativeOptionsProvider, {
         scope: props.__scopeSelect,
-        onNativeOptionAdd: React48.useCallback((option) => {
+        onNativeOptionAdd: React50.useCallback((option) => {
           setNativeOptionsSet((prev) => new Set(prev).add(option));
         }, []),
-        onNativeOptionRemove: React48.useCallback((option) => {
+        onNativeOptionRemove: React50.useCallback((option) => {
           setNativeOptionsSet((prev) => {
             const optionsSet = new Set(prev);
             optionsSet.delete(option);
@@ -32884,7 +33051,7 @@ var Select = (props) => {
         }, []),
         children
       }) }),
-      isFormControl ? /* @__PURE__ */ import_jsx_runtime18.jsxs(SelectBubbleInput, {
+      isFormControl ? /* @__PURE__ */ import_jsx_runtime19.jsxs(SelectBubbleInput, {
         "aria-hidden": true,
         required,
         tabIndex: -1,
@@ -32895,7 +33062,7 @@ var Select = (props) => {
         disabled,
         form,
         children: [
-          value === undefined ? /* @__PURE__ */ import_jsx_runtime18.jsx("option", { value: "" }) : null,
+          value === undefined ? /* @__PURE__ */ import_jsx_runtime19.jsx("option", { value: "" }) : null,
           Array.from(nativeOptionsSet)
         ]
       }, nativeSelectKey) : null
@@ -32904,14 +33071,14 @@ var Select = (props) => {
 };
 Select.displayName = SELECT_NAME;
 var TRIGGER_NAME4 = "SelectTrigger";
-var SelectTrigger = React48.forwardRef((props, forwardedRef) => {
+var SelectTrigger = React50.forwardRef((props, forwardedRef) => {
   const { __scopeSelect, disabled = false, ...triggerProps } = props;
   const popperScope = usePopperScope(__scopeSelect);
   const context = useSelectContext(TRIGGER_NAME4, __scopeSelect);
   const isDisabled = context.disabled || disabled;
   const composedRefs = useComposedRefs(forwardedRef, context.onTriggerChange);
   const getItems = useCollection2(__scopeSelect);
-  const pointerTypeRef = React48.useRef("touch");
+  const pointerTypeRef = React50.useRef("touch");
   const [searchRef, handleTypeaheadSearch, resetTypeahead] = useTypeaheadSearch((search) => {
     const enabledItems = getItems().filter((item) => !item.disabled);
     const currentItem = enabledItems.find((item) => item.value === context.value);
@@ -32932,7 +33099,7 @@ var SelectTrigger = React48.forwardRef((props, forwardedRef) => {
       };
     }
   };
-  return /* @__PURE__ */ import_jsx_runtime18.jsx(Anchor, { asChild: true, ...popperScope, children: /* @__PURE__ */ import_jsx_runtime18.jsx(Primitive.button, {
+  return /* @__PURE__ */ import_jsx_runtime19.jsx(Anchor, { asChild: true, ...popperScope, children: /* @__PURE__ */ import_jsx_runtime19.jsx(Primitive.button, {
     type: "button",
     role: "combobox",
     "aria-controls": context.contentId,
@@ -32979,7 +33146,7 @@ var SelectTrigger = React48.forwardRef((props, forwardedRef) => {
 });
 SelectTrigger.displayName = TRIGGER_NAME4;
 var VALUE_NAME = "SelectValue";
-var SelectValue = React48.forwardRef((props, forwardedRef) => {
+var SelectValue = React50.forwardRef((props, forwardedRef) => {
   const { __scopeSelect, className, style, children, placeholder = "", ...valueProps } = props;
   const context = useSelectContext(VALUE_NAME, __scopeSelect);
   const { onValueNodeHasChildrenChange } = context;
@@ -32988,44 +33155,44 @@ var SelectValue = React48.forwardRef((props, forwardedRef) => {
   useLayoutEffect2(() => {
     onValueNodeHasChildrenChange(hasChildren);
   }, [onValueNodeHasChildrenChange, hasChildren]);
-  return /* @__PURE__ */ import_jsx_runtime18.jsx(Primitive.span, {
+  return /* @__PURE__ */ import_jsx_runtime19.jsx(Primitive.span, {
     ...valueProps,
     ref: composedRefs,
     style: { pointerEvents: "none" },
-    children: shouldShowPlaceholder(context.value) ? /* @__PURE__ */ import_jsx_runtime18.jsx(import_jsx_runtime18.Fragment, { children: placeholder }) : children
+    children: shouldShowPlaceholder(context.value) ? /* @__PURE__ */ import_jsx_runtime19.jsx(import_jsx_runtime19.Fragment, { children: placeholder }) : children
   });
 });
 SelectValue.displayName = VALUE_NAME;
 var ICON_NAME = "SelectIcon";
-var SelectIcon = React48.forwardRef((props, forwardedRef) => {
+var SelectIcon = React50.forwardRef((props, forwardedRef) => {
   const { __scopeSelect, children, ...iconProps } = props;
-  return /* @__PURE__ */ import_jsx_runtime18.jsx(Primitive.span, { "aria-hidden": true, ...iconProps, ref: forwardedRef, children: children || "▼" });
+  return /* @__PURE__ */ import_jsx_runtime19.jsx(Primitive.span, { "aria-hidden": true, ...iconProps, ref: forwardedRef, children: children || "▼" });
 });
 SelectIcon.displayName = ICON_NAME;
 var PORTAL_NAME4 = "SelectPortal";
 var SelectPortal = (props) => {
-  return /* @__PURE__ */ import_jsx_runtime18.jsx(Portal, { asChild: true, ...props });
+  return /* @__PURE__ */ import_jsx_runtime19.jsx(Portal, { asChild: true, ...props });
 };
 SelectPortal.displayName = PORTAL_NAME4;
 var CONTENT_NAME5 = "SelectContent";
-var SelectContent = React48.forwardRef((props, forwardedRef) => {
+var SelectContent = React50.forwardRef((props, forwardedRef) => {
   const context = useSelectContext(CONTENT_NAME5, props.__scopeSelect);
-  const [fragment, setFragment] = React48.useState();
+  const [fragment, setFragment] = React50.useState();
   useLayoutEffect2(() => {
     setFragment(new DocumentFragment);
   }, []);
   if (!context.open) {
     const frag = fragment;
-    return frag ? ReactDOM4.createPortal(/* @__PURE__ */ import_jsx_runtime18.jsx(SelectContentProvider, { scope: props.__scopeSelect, children: /* @__PURE__ */ import_jsx_runtime18.jsx(Collection2.Slot, { scope: props.__scopeSelect, children: /* @__PURE__ */ import_jsx_runtime18.jsx("div", { children: props.children }) }) }), frag) : null;
+    return frag ? ReactDOM4.createPortal(/* @__PURE__ */ import_jsx_runtime19.jsx(SelectContentProvider, { scope: props.__scopeSelect, children: /* @__PURE__ */ import_jsx_runtime19.jsx(Collection2.Slot, { scope: props.__scopeSelect, children: /* @__PURE__ */ import_jsx_runtime19.jsx("div", { children: props.children }) }) }), frag) : null;
   }
-  return /* @__PURE__ */ import_jsx_runtime18.jsx(SelectContentImpl, { ...props, ref: forwardedRef });
+  return /* @__PURE__ */ import_jsx_runtime19.jsx(SelectContentImpl, { ...props, ref: forwardedRef });
 });
 SelectContent.displayName = CONTENT_NAME5;
 var CONTENT_MARGIN = 10;
 var [SelectContentProvider, useSelectContentContext] = createSelectContext(CONTENT_NAME5);
 var CONTENT_IMPL_NAME = "SelectContentImpl";
 var Slot3 = createSlot("SelectContent.RemoveScroll");
-var SelectContentImpl = React48.forwardRef((props, forwardedRef) => {
+var SelectContentImpl = React50.forwardRef((props, forwardedRef) => {
   const {
     __scopeSelect,
     position = "item-aligned",
@@ -33045,20 +33212,20 @@ var SelectContentImpl = React48.forwardRef((props, forwardedRef) => {
     ...contentProps
   } = props;
   const context = useSelectContext(CONTENT_NAME5, __scopeSelect);
-  const [content, setContent] = React48.useState(null);
-  const [viewport, setViewport] = React48.useState(null);
+  const [content, setContent] = React50.useState(null);
+  const [viewport, setViewport] = React50.useState(null);
   const composedRefs = useComposedRefs(forwardedRef, (node) => setContent(node));
-  const [selectedItem, setSelectedItem] = React48.useState(null);
-  const [selectedItemText, setSelectedItemText] = React48.useState(null);
+  const [selectedItem, setSelectedItem] = React50.useState(null);
+  const [selectedItemText, setSelectedItemText] = React50.useState(null);
   const getItems = useCollection2(__scopeSelect);
-  const [isPositioned, setIsPositioned] = React48.useState(false);
-  const firstValidItemFoundRef = React48.useRef(false);
-  React48.useEffect(() => {
+  const [isPositioned, setIsPositioned] = React50.useState(false);
+  const firstValidItemFoundRef = React50.useRef(false);
+  React50.useEffect(() => {
     if (content)
       return hideOthers(content);
   }, [content]);
   useFocusGuards();
-  const focusFirst3 = React48.useCallback((candidates) => {
+  const focusFirst3 = React50.useCallback((candidates) => {
     const [firstItem, ...restItems] = getItems().map((item) => item.ref.current);
     const [lastItem] = restItems.slice(-1);
     const PREVIOUSLY_FOCUSED_ELEMENT = document.activeElement;
@@ -33075,14 +33242,14 @@ var SelectContentImpl = React48.forwardRef((props, forwardedRef) => {
         return;
     }
   }, [getItems, viewport]);
-  const focusSelectedItem = React48.useCallback(() => focusFirst3([selectedItem, content]), [focusFirst3, selectedItem, content]);
-  React48.useEffect(() => {
+  const focusSelectedItem = React50.useCallback(() => focusFirst3([selectedItem, content]), [focusFirst3, selectedItem, content]);
+  React50.useEffect(() => {
     if (isPositioned) {
       focusSelectedItem();
     }
   }, [isPositioned, focusSelectedItem]);
   const { onOpenChange, triggerPointerDownPosRef } = context;
-  React48.useEffect(() => {
+  React50.useEffect(() => {
     if (content) {
       let pointerMoveDelta = { x: 0, y: 0 };
       const handlePointerMove = (event) => {
@@ -33112,7 +33279,7 @@ var SelectContentImpl = React48.forwardRef((props, forwardedRef) => {
       };
     }
   }, [content, onOpenChange, triggerPointerDownPosRef]);
-  React48.useEffect(() => {
+  React50.useEffect(() => {
     const close = () => onOpenChange(false);
     window.addEventListener("blur", close);
     window.addEventListener("resize", close);
@@ -33129,7 +33296,7 @@ var SelectContentImpl = React48.forwardRef((props, forwardedRef) => {
       setTimeout(() => nextItem.ref.current.focus());
     }
   });
-  const itemRefCallback = React48.useCallback((node, value, disabled) => {
+  const itemRefCallback = React50.useCallback((node, value, disabled) => {
     const isFirstValidItem = !firstValidItemFoundRef.current && !disabled;
     const isSelectedItem = context.value !== undefined && context.value === value;
     if (isSelectedItem || isFirstValidItem) {
@@ -33138,8 +33305,8 @@ var SelectContentImpl = React48.forwardRef((props, forwardedRef) => {
         firstValidItemFoundRef.current = true;
     }
   }, [context.value]);
-  const handleItemLeave = React48.useCallback(() => content?.focus(), [content]);
-  const itemTextRefCallback = React48.useCallback((node, value, disabled) => {
+  const handleItemLeave = React50.useCallback(() => content?.focus(), [content]);
+  const itemTextRefCallback = React50.useCallback((node, value, disabled) => {
     const isFirstValidItem = !firstValidItemFoundRef.current && !disabled;
     const isSelectedItem = context.value !== undefined && context.value === value;
     if (isSelectedItem || isFirstValidItem) {
@@ -33159,7 +33326,7 @@ var SelectContentImpl = React48.forwardRef((props, forwardedRef) => {
     hideWhenDetached,
     avoidCollisions
   } : {};
-  return /* @__PURE__ */ import_jsx_runtime18.jsx(SelectContentProvider, {
+  return /* @__PURE__ */ import_jsx_runtime19.jsx(SelectContentProvider, {
     scope: __scopeSelect,
     content,
     viewport,
@@ -33173,7 +33340,7 @@ var SelectContentImpl = React48.forwardRef((props, forwardedRef) => {
     position,
     isPositioned,
     searchRef,
-    children: /* @__PURE__ */ import_jsx_runtime18.jsx(Combination_default, { as: Slot3, allowPinchZoom: true, children: /* @__PURE__ */ import_jsx_runtime18.jsx(FocusScope, {
+    children: /* @__PURE__ */ import_jsx_runtime19.jsx(Combination_default, { as: Slot3, allowPinchZoom: true, children: /* @__PURE__ */ import_jsx_runtime19.jsx(FocusScope, {
       asChild: true,
       trapped: context.open,
       onMountAutoFocus: (event) => {
@@ -33183,14 +33350,14 @@ var SelectContentImpl = React48.forwardRef((props, forwardedRef) => {
         context.trigger?.focus({ preventScroll: true });
         event.preventDefault();
       }),
-      children: /* @__PURE__ */ import_jsx_runtime18.jsx(DismissableLayer, {
+      children: /* @__PURE__ */ import_jsx_runtime19.jsx(DismissableLayer, {
         asChild: true,
         disableOutsidePointerEvents: true,
         onEscapeKeyDown,
         onPointerDownOutside,
         onFocusOutside: (event) => event.preventDefault(),
         onDismiss: () => context.onOpenChange(false),
-        children: /* @__PURE__ */ import_jsx_runtime18.jsx(SelectPosition, {
+        children: /* @__PURE__ */ import_jsx_runtime19.jsx(SelectPosition, {
           role: "listbox",
           id: context.contentId,
           "data-state": context.open ? "open" : "closed",
@@ -33234,18 +33401,18 @@ var SelectContentImpl = React48.forwardRef((props, forwardedRef) => {
 });
 SelectContentImpl.displayName = CONTENT_IMPL_NAME;
 var ITEM_ALIGNED_POSITION_NAME = "SelectItemAlignedPosition";
-var SelectItemAlignedPosition = React48.forwardRef((props, forwardedRef) => {
+var SelectItemAlignedPosition = React50.forwardRef((props, forwardedRef) => {
   const { __scopeSelect, onPlaced, ...popperProps } = props;
   const context = useSelectContext(CONTENT_NAME5, __scopeSelect);
   const contentContext = useSelectContentContext(CONTENT_NAME5, __scopeSelect);
-  const [contentWrapper, setContentWrapper] = React48.useState(null);
-  const [content, setContent] = React48.useState(null);
+  const [contentWrapper, setContentWrapper] = React50.useState(null);
+  const [content, setContent] = React50.useState(null);
   const composedRefs = useComposedRefs(forwardedRef, (node) => setContent(node));
   const getItems = useCollection2(__scopeSelect);
-  const shouldExpandOnScrollRef = React48.useRef(false);
-  const shouldRepositionRef = React48.useRef(true);
+  const shouldExpandOnScrollRef = React50.useRef(false);
+  const shouldRepositionRef = React50.useRef(true);
   const { viewport, selectedItem, selectedItemText, focusSelectedItem } = contentContext;
-  const position = React48.useCallback(() => {
+  const position = React50.useCallback(() => {
     if (context.trigger && context.valueNode && contentWrapper && content && viewport && selectedItem && selectedItemText) {
       const triggerRect = context.trigger.getBoundingClientRect();
       const contentRect = content.getBoundingClientRect();
@@ -33332,24 +33499,24 @@ var SelectItemAlignedPosition = React48.forwardRef((props, forwardedRef) => {
     onPlaced
   ]);
   useLayoutEffect2(() => position(), [position]);
-  const [contentZIndex, setContentZIndex] = React48.useState();
+  const [contentZIndex, setContentZIndex] = React50.useState();
   useLayoutEffect2(() => {
     if (content)
       setContentZIndex(window.getComputedStyle(content).zIndex);
   }, [content]);
-  const handleScrollButtonChange = React48.useCallback((node) => {
+  const handleScrollButtonChange = React50.useCallback((node) => {
     if (node && shouldRepositionRef.current === true) {
       position();
       focusSelectedItem?.();
       shouldRepositionRef.current = false;
     }
   }, [position, focusSelectedItem]);
-  return /* @__PURE__ */ import_jsx_runtime18.jsx(SelectViewportProvider, {
+  return /* @__PURE__ */ import_jsx_runtime19.jsx(SelectViewportProvider, {
     scope: __scopeSelect,
     contentWrapper,
     shouldExpandOnScrollRef,
     onScrollButtonChange: handleScrollButtonChange,
-    children: /* @__PURE__ */ import_jsx_runtime18.jsx("div", {
+    children: /* @__PURE__ */ import_jsx_runtime19.jsx("div", {
       ref: setContentWrapper,
       style: {
         display: "flex",
@@ -33357,7 +33524,7 @@ var SelectItemAlignedPosition = React48.forwardRef((props, forwardedRef) => {
         position: "fixed",
         zIndex: contentZIndex
       },
-      children: /* @__PURE__ */ import_jsx_runtime18.jsx(Primitive.div, {
+      children: /* @__PURE__ */ import_jsx_runtime19.jsx(Primitive.div, {
         ...popperProps,
         ref: composedRefs,
         style: {
@@ -33371,7 +33538,7 @@ var SelectItemAlignedPosition = React48.forwardRef((props, forwardedRef) => {
 });
 SelectItemAlignedPosition.displayName = ITEM_ALIGNED_POSITION_NAME;
 var POPPER_POSITION_NAME = "SelectPopperPosition";
-var SelectPopperPosition = React48.forwardRef((props, forwardedRef) => {
+var SelectPopperPosition = React50.forwardRef((props, forwardedRef) => {
   const {
     __scopeSelect,
     align = "start",
@@ -33379,7 +33546,7 @@ var SelectPopperPosition = React48.forwardRef((props, forwardedRef) => {
     ...popperProps
   } = props;
   const popperScope = usePopperScope(__scopeSelect);
-  return /* @__PURE__ */ import_jsx_runtime18.jsx(Content3, {
+  return /* @__PURE__ */ import_jsx_runtime19.jsx(Content3, {
     ...popperScope,
     ...popperProps,
     ref: forwardedRef,
@@ -33401,20 +33568,20 @@ var SelectPopperPosition = React48.forwardRef((props, forwardedRef) => {
 SelectPopperPosition.displayName = POPPER_POSITION_NAME;
 var [SelectViewportProvider, useSelectViewportContext] = createSelectContext(CONTENT_NAME5, {});
 var VIEWPORT_NAME = "SelectViewport";
-var SelectViewport = React48.forwardRef((props, forwardedRef) => {
+var SelectViewport = React50.forwardRef((props, forwardedRef) => {
   const { __scopeSelect, nonce, ...viewportProps } = props;
   const contentContext = useSelectContentContext(VIEWPORT_NAME, __scopeSelect);
   const viewportContext = useSelectViewportContext(VIEWPORT_NAME, __scopeSelect);
   const composedRefs = useComposedRefs(forwardedRef, contentContext.onViewportChange);
-  const prevScrollTopRef = React48.useRef(0);
-  return /* @__PURE__ */ import_jsx_runtime18.jsxs(import_jsx_runtime18.Fragment, { children: [
-    /* @__PURE__ */ import_jsx_runtime18.jsx("style", {
+  const prevScrollTopRef = React50.useRef(0);
+  return /* @__PURE__ */ import_jsx_runtime19.jsxs(import_jsx_runtime19.Fragment, { children: [
+    /* @__PURE__ */ import_jsx_runtime19.jsx("style", {
       dangerouslySetInnerHTML: {
         __html: `[data-radix-select-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-select-viewport]::-webkit-scrollbar{display:none}`
       },
       nonce
     }),
-    /* @__PURE__ */ import_jsx_runtime18.jsx(Collection2.Slot, { scope: __scopeSelect, children: /* @__PURE__ */ import_jsx_runtime18.jsx(Primitive.div, {
+    /* @__PURE__ */ import_jsx_runtime19.jsx(Collection2.Slot, { scope: __scopeSelect, children: /* @__PURE__ */ import_jsx_runtime19.jsx(Primitive.div, {
       "data-radix-select-viewport": "",
       role: "presentation",
       ...viewportProps,
@@ -33455,22 +33622,22 @@ var SelectViewport = React48.forwardRef((props, forwardedRef) => {
 SelectViewport.displayName = VIEWPORT_NAME;
 var GROUP_NAME2 = "SelectGroup";
 var [SelectGroupContextProvider, useSelectGroupContext] = createSelectContext(GROUP_NAME2);
-var SelectGroup = React48.forwardRef((props, forwardedRef) => {
+var SelectGroup = React50.forwardRef((props, forwardedRef) => {
   const { __scopeSelect, ...groupProps } = props;
   const groupId = useId();
-  return /* @__PURE__ */ import_jsx_runtime18.jsx(SelectGroupContextProvider, { scope: __scopeSelect, id: groupId, children: /* @__PURE__ */ import_jsx_runtime18.jsx(Primitive.div, { role: "group", "aria-labelledby": groupId, ...groupProps, ref: forwardedRef }) });
+  return /* @__PURE__ */ import_jsx_runtime19.jsx(SelectGroupContextProvider, { scope: __scopeSelect, id: groupId, children: /* @__PURE__ */ import_jsx_runtime19.jsx(Primitive.div, { role: "group", "aria-labelledby": groupId, ...groupProps, ref: forwardedRef }) });
 });
 SelectGroup.displayName = GROUP_NAME2;
 var LABEL_NAME = "SelectLabel";
-var SelectLabel = React48.forwardRef((props, forwardedRef) => {
+var SelectLabel = React50.forwardRef((props, forwardedRef) => {
   const { __scopeSelect, ...labelProps } = props;
   const groupContext = useSelectGroupContext(LABEL_NAME, __scopeSelect);
-  return /* @__PURE__ */ import_jsx_runtime18.jsx(Primitive.div, { id: groupContext.id, ...labelProps, ref: forwardedRef });
+  return /* @__PURE__ */ import_jsx_runtime19.jsx(Primitive.div, { id: groupContext.id, ...labelProps, ref: forwardedRef });
 });
 SelectLabel.displayName = LABEL_NAME;
 var ITEM_NAME2 = "SelectItem";
 var [SelectItemContextProvider, useSelectItemContext] = createSelectContext(ITEM_NAME2);
-var SelectItem = React48.forwardRef((props, forwardedRef) => {
+var SelectItem = React50.forwardRef((props, forwardedRef) => {
   const {
     __scopeSelect,
     value,
@@ -33481,11 +33648,11 @@ var SelectItem = React48.forwardRef((props, forwardedRef) => {
   const context = useSelectContext(ITEM_NAME2, __scopeSelect);
   const contentContext = useSelectContentContext(ITEM_NAME2, __scopeSelect);
   const isSelected = context.value === value;
-  const [textValue, setTextValue] = React48.useState(textValueProp ?? "");
-  const [isFocused, setIsFocused] = React48.useState(false);
+  const [textValue, setTextValue] = React50.useState(textValueProp ?? "");
+  const [isFocused, setIsFocused] = React50.useState(false);
   const composedRefs = useComposedRefs(forwardedRef, (node) => contentContext.itemRefCallback?.(node, value, disabled));
   const textId = useId();
-  const pointerTypeRef = React48.useRef("touch");
+  const pointerTypeRef = React50.useRef("touch");
   const handleSelect = () => {
     if (!disabled) {
       context.onValueChange(value);
@@ -33495,21 +33662,21 @@ var SelectItem = React48.forwardRef((props, forwardedRef) => {
   if (value === "") {
     throw new Error("A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.");
   }
-  return /* @__PURE__ */ import_jsx_runtime18.jsx(SelectItemContextProvider, {
+  return /* @__PURE__ */ import_jsx_runtime19.jsx(SelectItemContextProvider, {
     scope: __scopeSelect,
     value,
     disabled,
     textId,
     isSelected,
-    onItemTextChange: React48.useCallback((node) => {
+    onItemTextChange: React50.useCallback((node) => {
       setTextValue((prevTextValue) => prevTextValue || (node?.textContent ?? "").trim());
     }, []),
-    children: /* @__PURE__ */ import_jsx_runtime18.jsx(Collection2.ItemSlot, {
+    children: /* @__PURE__ */ import_jsx_runtime19.jsx(Collection2.ItemSlot, {
       scope: __scopeSelect,
       value,
       disabled,
       textValue,
-      children: /* @__PURE__ */ import_jsx_runtime18.jsx(Primitive.div, {
+      children: /* @__PURE__ */ import_jsx_runtime19.jsx(Primitive.div, {
         role: "option",
         "aria-labelledby": textId,
         "data-highlighted": isFocused ? "" : undefined,
@@ -33561,39 +33728,39 @@ var SelectItem = React48.forwardRef((props, forwardedRef) => {
 });
 SelectItem.displayName = ITEM_NAME2;
 var ITEM_TEXT_NAME = "SelectItemText";
-var SelectItemText = React48.forwardRef((props, forwardedRef) => {
+var SelectItemText = React50.forwardRef((props, forwardedRef) => {
   const { __scopeSelect, className, style, ...itemTextProps } = props;
   const context = useSelectContext(ITEM_TEXT_NAME, __scopeSelect);
   const contentContext = useSelectContentContext(ITEM_TEXT_NAME, __scopeSelect);
   const itemContext = useSelectItemContext(ITEM_TEXT_NAME, __scopeSelect);
   const nativeOptionsContext = useSelectNativeOptionsContext(ITEM_TEXT_NAME, __scopeSelect);
-  const [itemTextNode, setItemTextNode] = React48.useState(null);
+  const [itemTextNode, setItemTextNode] = React50.useState(null);
   const composedRefs = useComposedRefs(forwardedRef, (node) => setItemTextNode(node), itemContext.onItemTextChange, (node) => contentContext.itemTextRefCallback?.(node, itemContext.value, itemContext.disabled));
   const textContent = itemTextNode?.textContent;
-  const nativeOption = React48.useMemo(() => /* @__PURE__ */ import_jsx_runtime18.jsx("option", { value: itemContext.value, disabled: itemContext.disabled, children: textContent }, itemContext.value), [itemContext.disabled, itemContext.value, textContent]);
+  const nativeOption = React50.useMemo(() => /* @__PURE__ */ import_jsx_runtime19.jsx("option", { value: itemContext.value, disabled: itemContext.disabled, children: textContent }, itemContext.value), [itemContext.disabled, itemContext.value, textContent]);
   const { onNativeOptionAdd, onNativeOptionRemove } = nativeOptionsContext;
   useLayoutEffect2(() => {
     onNativeOptionAdd(nativeOption);
     return () => onNativeOptionRemove(nativeOption);
   }, [onNativeOptionAdd, onNativeOptionRemove, nativeOption]);
-  return /* @__PURE__ */ import_jsx_runtime18.jsxs(import_jsx_runtime18.Fragment, { children: [
-    /* @__PURE__ */ import_jsx_runtime18.jsx(Primitive.span, { id: itemContext.textId, ...itemTextProps, ref: composedRefs }),
+  return /* @__PURE__ */ import_jsx_runtime19.jsxs(import_jsx_runtime19.Fragment, { children: [
+    /* @__PURE__ */ import_jsx_runtime19.jsx(Primitive.span, { id: itemContext.textId, ...itemTextProps, ref: composedRefs }),
     itemContext.isSelected && context.valueNode && !context.valueNodeHasChildren ? ReactDOM4.createPortal(itemTextProps.children, context.valueNode) : null
   ] });
 });
 SelectItemText.displayName = ITEM_TEXT_NAME;
 var ITEM_INDICATOR_NAME = "SelectItemIndicator";
-var SelectItemIndicator = React48.forwardRef((props, forwardedRef) => {
+var SelectItemIndicator = React50.forwardRef((props, forwardedRef) => {
   const { __scopeSelect, ...itemIndicatorProps } = props;
   const itemContext = useSelectItemContext(ITEM_INDICATOR_NAME, __scopeSelect);
-  return itemContext.isSelected ? /* @__PURE__ */ import_jsx_runtime18.jsx(Primitive.span, { "aria-hidden": true, ...itemIndicatorProps, ref: forwardedRef }) : null;
+  return itemContext.isSelected ? /* @__PURE__ */ import_jsx_runtime19.jsx(Primitive.span, { "aria-hidden": true, ...itemIndicatorProps, ref: forwardedRef }) : null;
 });
 SelectItemIndicator.displayName = ITEM_INDICATOR_NAME;
 var SCROLL_UP_BUTTON_NAME = "SelectScrollUpButton";
-var SelectScrollUpButton = React48.forwardRef((props, forwardedRef) => {
+var SelectScrollUpButton = React50.forwardRef((props, forwardedRef) => {
   const contentContext = useSelectContentContext(SCROLL_UP_BUTTON_NAME, props.__scopeSelect);
   const viewportContext = useSelectViewportContext(SCROLL_UP_BUTTON_NAME, props.__scopeSelect);
-  const [canScrollUp, setCanScrollUp] = React48.useState(false);
+  const [canScrollUp, setCanScrollUp] = React50.useState(false);
   const composedRefs = useComposedRefs(forwardedRef, viewportContext.onScrollButtonChange);
   useLayoutEffect2(() => {
     if (contentContext.viewport && contentContext.isPositioned) {
@@ -33608,7 +33775,7 @@ var SelectScrollUpButton = React48.forwardRef((props, forwardedRef) => {
       return () => viewport.removeEventListener("scroll", handleScroll22);
     }
   }, [contentContext.viewport, contentContext.isPositioned]);
-  return canScrollUp ? /* @__PURE__ */ import_jsx_runtime18.jsx(SelectScrollButtonImpl, {
+  return canScrollUp ? /* @__PURE__ */ import_jsx_runtime19.jsx(SelectScrollButtonImpl, {
     ...props,
     ref: composedRefs,
     onAutoScroll: () => {
@@ -33621,10 +33788,10 @@ var SelectScrollUpButton = React48.forwardRef((props, forwardedRef) => {
 });
 SelectScrollUpButton.displayName = SCROLL_UP_BUTTON_NAME;
 var SCROLL_DOWN_BUTTON_NAME = "SelectScrollDownButton";
-var SelectScrollDownButton = React48.forwardRef((props, forwardedRef) => {
+var SelectScrollDownButton = React50.forwardRef((props, forwardedRef) => {
   const contentContext = useSelectContentContext(SCROLL_DOWN_BUTTON_NAME, props.__scopeSelect);
   const viewportContext = useSelectViewportContext(SCROLL_DOWN_BUTTON_NAME, props.__scopeSelect);
-  const [canScrollDown, setCanScrollDown] = React48.useState(false);
+  const [canScrollDown, setCanScrollDown] = React50.useState(false);
   const composedRefs = useComposedRefs(forwardedRef, viewportContext.onScrollButtonChange);
   useLayoutEffect2(() => {
     if (contentContext.viewport && contentContext.isPositioned) {
@@ -33640,7 +33807,7 @@ var SelectScrollDownButton = React48.forwardRef((props, forwardedRef) => {
       return () => viewport.removeEventListener("scroll", handleScroll22);
     }
   }, [contentContext.viewport, contentContext.isPositioned]);
-  return canScrollDown ? /* @__PURE__ */ import_jsx_runtime18.jsx(SelectScrollButtonImpl, {
+  return canScrollDown ? /* @__PURE__ */ import_jsx_runtime19.jsx(SelectScrollButtonImpl, {
     ...props,
     ref: composedRefs,
     onAutoScroll: () => {
@@ -33652,25 +33819,25 @@ var SelectScrollDownButton = React48.forwardRef((props, forwardedRef) => {
   }) : null;
 });
 SelectScrollDownButton.displayName = SCROLL_DOWN_BUTTON_NAME;
-var SelectScrollButtonImpl = React48.forwardRef((props, forwardedRef) => {
+var SelectScrollButtonImpl = React50.forwardRef((props, forwardedRef) => {
   const { __scopeSelect, onAutoScroll, ...scrollIndicatorProps } = props;
   const contentContext = useSelectContentContext("SelectScrollButton", __scopeSelect);
-  const autoScrollTimerRef = React48.useRef(null);
+  const autoScrollTimerRef = React50.useRef(null);
   const getItems = useCollection2(__scopeSelect);
-  const clearAutoScrollTimer = React48.useCallback(() => {
+  const clearAutoScrollTimer = React50.useCallback(() => {
     if (autoScrollTimerRef.current !== null) {
       window.clearInterval(autoScrollTimerRef.current);
       autoScrollTimerRef.current = null;
     }
   }, []);
-  React48.useEffect(() => {
+  React50.useEffect(() => {
     return () => clearAutoScrollTimer();
   }, [clearAutoScrollTimer]);
   useLayoutEffect2(() => {
     const activeItem = getItems().find((item) => item.ref.current === document.activeElement);
     activeItem?.ref.current?.scrollIntoView({ block: "nearest" });
   }, [getItems]);
-  return /* @__PURE__ */ import_jsx_runtime18.jsx(Primitive.div, {
+  return /* @__PURE__ */ import_jsx_runtime19.jsx(Primitive.div, {
     "aria-hidden": true,
     ...scrollIndicatorProps,
     ref: forwardedRef,
@@ -33692,26 +33859,26 @@ var SelectScrollButtonImpl = React48.forwardRef((props, forwardedRef) => {
   });
 });
 var SEPARATOR_NAME = "SelectSeparator";
-var SelectSeparator = React48.forwardRef((props, forwardedRef) => {
+var SelectSeparator = React50.forwardRef((props, forwardedRef) => {
   const { __scopeSelect, ...separatorProps } = props;
-  return /* @__PURE__ */ import_jsx_runtime18.jsx(Primitive.div, { "aria-hidden": true, ...separatorProps, ref: forwardedRef });
+  return /* @__PURE__ */ import_jsx_runtime19.jsx(Primitive.div, { "aria-hidden": true, ...separatorProps, ref: forwardedRef });
 });
 SelectSeparator.displayName = SEPARATOR_NAME;
 var ARROW_NAME2 = "SelectArrow";
-var SelectArrow = React48.forwardRef((props, forwardedRef) => {
+var SelectArrow = React50.forwardRef((props, forwardedRef) => {
   const { __scopeSelect, ...arrowProps } = props;
   const popperScope = usePopperScope(__scopeSelect);
   const context = useSelectContext(ARROW_NAME2, __scopeSelect);
   const contentContext = useSelectContentContext(ARROW_NAME2, __scopeSelect);
-  return context.open && contentContext.position === "popper" ? /* @__PURE__ */ import_jsx_runtime18.jsx(Arrow2, { ...popperScope, ...arrowProps, ref: forwardedRef }) : null;
+  return context.open && contentContext.position === "popper" ? /* @__PURE__ */ import_jsx_runtime19.jsx(Arrow2, { ...popperScope, ...arrowProps, ref: forwardedRef }) : null;
 });
 SelectArrow.displayName = ARROW_NAME2;
-var BUBBLE_INPUT_NAME = "SelectBubbleInput";
-var SelectBubbleInput = React48.forwardRef(({ __scopeSelect, value, ...props }, forwardedRef) => {
-  const ref = React48.useRef(null);
+var BUBBLE_INPUT_NAME2 = "SelectBubbleInput";
+var SelectBubbleInput = React50.forwardRef(({ __scopeSelect, value, ...props }, forwardedRef) => {
+  const ref = React50.useRef(null);
   const composedRefs = useComposedRefs(forwardedRef, ref);
   const prevValue = usePrevious(value);
-  React48.useEffect(() => {
+  React50.useEffect(() => {
     const select = ref.current;
     if (!select)
       return;
@@ -33724,22 +33891,22 @@ var SelectBubbleInput = React48.forwardRef(({ __scopeSelect, value, ...props }, 
       select.dispatchEvent(event);
     }
   }, [prevValue, value]);
-  return /* @__PURE__ */ import_jsx_runtime18.jsx(Primitive.select, {
+  return /* @__PURE__ */ import_jsx_runtime19.jsx(Primitive.select, {
     ...props,
     style: { ...VISUALLY_HIDDEN_STYLES, ...props.style },
     ref: composedRefs,
     defaultValue: value
   });
 });
-SelectBubbleInput.displayName = BUBBLE_INPUT_NAME;
+SelectBubbleInput.displayName = BUBBLE_INPUT_NAME2;
 function shouldShowPlaceholder(value) {
   return value === "" || value === undefined;
 }
 function useTypeaheadSearch(onSearchChange) {
   const handleSearchChange = useCallbackRef(onSearchChange);
-  const searchRef = React48.useRef("");
-  const timerRef = React48.useRef(0);
-  const handleTypeaheadSearch = React48.useCallback((key) => {
+  const searchRef = React50.useRef("");
+  const timerRef = React50.useRef(0);
+  const handleTypeaheadSearch = React50.useCallback((key) => {
     const search = searchRef.current + key;
     handleSearchChange(search);
     (function updateSearch(value) {
@@ -33749,11 +33916,11 @@ function useTypeaheadSearch(onSearchChange) {
         timerRef.current = window.setTimeout(() => updateSearch(""), 1000);
     })(search);
   }, [handleSearchChange]);
-  const resetTypeahead = React48.useCallback(() => {
+  const resetTypeahead = React50.useCallback(() => {
     searchRef.current = "";
     window.clearTimeout(timerRef.current);
   }, []);
-  React48.useEffect(() => {
+  React50.useEffect(() => {
     return () => window.clearTimeout(timerRef.current);
   }, []);
   return [searchRef, handleTypeaheadSearch, resetTypeahead];
@@ -33791,7 +33958,7 @@ var Separator = SelectSeparator;
 var jsx_dev_runtime12 = __toESM(require_jsx_dev_runtime(), 1);
 var Select2 = Root25;
 var SelectValue2 = Value;
-var SelectTrigger2 = React49.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Trigger3, {
+var SelectTrigger2 = React51.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Trigger3, {
   ref,
   className: cn("flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1", className),
   ...props,
@@ -33806,7 +33973,7 @@ var SelectTrigger2 = React49.forwardRef(({ className, children, ...props }, ref)
   ]
 }, undefined, true, undefined, this));
 SelectTrigger2.displayName = Trigger3.displayName;
-var SelectScrollUpButton2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ScrollUpButton, {
+var SelectScrollUpButton2 = React51.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ScrollUpButton, {
   ref,
   className: cn("flex cursor-default items-center justify-center py-1", className),
   ...props,
@@ -33815,7 +33982,7 @@ var SelectScrollUpButton2 = React49.forwardRef(({ className, ...props }, ref) =>
   }, undefined, false, undefined, this)
 }, undefined, false, undefined, this));
 SelectScrollUpButton2.displayName = ScrollUpButton.displayName;
-var SelectScrollDownButton2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ScrollDownButton, {
+var SelectScrollDownButton2 = React51.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ScrollDownButton, {
   ref,
   className: cn("flex cursor-default items-center justify-center py-1", className),
   ...props,
@@ -33824,7 +33991,7 @@ var SelectScrollDownButton2 = React49.forwardRef(({ className, ...props }, ref) 
   }, undefined, false, undefined, this)
 }, undefined, false, undefined, this));
 SelectScrollDownButton2.displayName = ScrollDownButton.displayName;
-var SelectContent2 = React49.forwardRef(({ className, children, position = "popper", ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Portal3, {
+var SelectContent2 = React51.forwardRef(({ className, children, position = "popper", ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Portal3, {
   children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Content23, {
     ref,
     className: cn("relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2", position === "popper" && "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1", className),
@@ -33841,13 +34008,13 @@ var SelectContent2 = React49.forwardRef(({ className, children, position = "popp
   }, undefined, true, undefined, this)
 }, undefined, false, undefined, this));
 SelectContent2.displayName = Content23.displayName;
-var SelectLabel2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Label3, {
+var SelectLabel2 = React51.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Label3, {
   ref,
   className: cn("py-1.5 pl-8 pr-2 text-sm font-semibold", className),
   ...props
 }, undefined, false, undefined, this));
 SelectLabel2.displayName = Label3.displayName;
-var SelectItem2 = React49.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Item2, {
+var SelectItem2 = React51.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Item2, {
   ref,
   className: cn("relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50", className),
   ...props,
@@ -33866,7 +34033,7 @@ var SelectItem2 = React49.forwardRef(({ className, children, ...props }, ref) =>
   ]
 }, undefined, true, undefined, this));
 SelectItem2.displayName = Item2.displayName;
-var SelectSeparator2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Separator, {
+var SelectSeparator2 = React51.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Separator, {
   ref,
   className: cn("-mx-1 my-1 h-px bg-muted", className),
   ...props
@@ -34034,7 +34201,31 @@ function LoadBalancerPanel() {
 
 // src/components/LogsPanel.tsx
 var import_react10 = __toESM(require_react(), 1);
+
+// src/components/ui/badge.tsx
 var jsx_dev_runtime14 = __toESM(require_jsx_dev_runtime(), 1);
+var badgeVariants = cva("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", {
+  variants: {
+    variant: {
+      default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+      secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+      destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+      outline: "text-foreground"
+    }
+  },
+  defaultVariants: {
+    variant: "default"
+  }
+});
+function Badge({ className, variant, ...props }) {
+  return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+    className: cn(badgeVariants({ variant }), className),
+    ...props
+  }, undefined, false, undefined, this);
+}
+
+// src/components/LogsPanel.tsx
+var jsx_dev_runtime15 = __toESM(require_jsx_dev_runtime(), 1);
 function LogsPanel() {
   const { t } = useTranslation();
   const [logs, setLogs] = import_react10.useState([]);
@@ -34084,58 +34275,58 @@ function LogsPanel() {
   };
   const getStatusBadge = (statusCode) => {
     if (statusCode >= 200 && statusCode < 300) {
-      return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Badge, {
+      return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Badge, {
         variant: "default",
         children: statusCode
       }, undefined, false, undefined, this);
     } else if (statusCode >= 400) {
-      return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Badge, {
+      return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Badge, {
         variant: "secondary",
         children: statusCode
       }, undefined, false, undefined, this);
     } else {
-      return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Badge, {
+      return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Badge, {
         variant: "secondary",
         children: statusCode
       }, undefined, false, undefined, this);
     }
   };
-  return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Card, {
+  return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Card, {
     children: [
-      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(CardHeader, {
-        children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardHeader, {
+        children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
           className: "flex items-center justify-between",
           children: [
-            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
               children: [
-                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(CardTitle, {
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardTitle, {
                   children: t("logs.title")
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(CardDescription, {
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardDescription, {
                   children: t("logs.description")
                 }, undefined, false, undefined, this)
               ]
             }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
               className: "flex gap-2",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Button, {
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Button, {
                   variant: "outline",
                   onClick: loadLogs,
                   disabled: loading,
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(RefreshCw, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(RefreshCw, {
                       className: `mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`
                     }, undefined, false, undefined, this),
                     t("logs.refresh")
                   ]
                 }, undefined, true, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Button, {
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Button, {
                   variant: "outline",
                   onClick: () => setClearDialogOpen(true),
                   disabled: logs.length === 0,
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Trash2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Trash2, {
                       className: "mr-2 h-4 w-4"
                     }, undefined, false, undefined, this),
                     t("logs.clear")
@@ -34146,71 +34337,71 @@ function LogsPanel() {
           ]
         }, undefined, true, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(CardContent, {
+      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardContent, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Table, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Table, {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHeader, {
-                children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableRow, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHeader, {
+                children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableRow, {
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
                       children: t("logs.table.timestamp")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
                       children: t("common.service")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
                       children: t("common.method")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
                       children: t("common.targetUrl")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
                       children: t("common.status")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
                       children: t("common.duration")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
                       className: "text-right",
                       children: t("common.actions")
                     }, undefined, false, undefined, this)
                   ]
                 }, undefined, true, undefined, this)
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableBody, {
-                children: logs.map((log) => /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableRow, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableBody, {
+                children: logs.map((log) => /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableRow, {
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
                       children: new Date(log.timestamp).toLocaleString()
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
                       children: log.service
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
                       className: "font-mono text-sm",
                       children: log.method
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
                       className: "font-mono text-sm",
                       children: log.target_url ?? log.path
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
                       children: getStatusBadge(log.status_code)
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
                       children: [
                         log.duration_ms,
                         "ms"
                       ]
                     }, undefined, true, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
                       className: "text-right",
-                      children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Button, {
+                      children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Button, {
                         variant: "ghost",
                         size: "sm",
                         onClick: () => handleViewDetails(log.id),
-                        children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Eye, {
+                        children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Eye, {
                           className: "h-4 w-4"
                         }, undefined, false, undefined, this)
                       }, undefined, false, undefined, this)
@@ -34220,120 +34411,120 @@ function LogsPanel() {
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Dialog2, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Dialog2, {
             open: dialogOpen,
             onOpenChange: setDialogOpen,
-            children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(DialogContent2, {
+            children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(DialogContent2, {
               className: "max-w-4xl max-h-[80vh] overflow-y-auto",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(DialogHeader, {
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(DialogHeader, {
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(DialogTitle2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(DialogTitle2, {
                       children: t("logs.detailsTitle")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(DialogDescription2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(DialogDescription2, {
                       children: selectedLog && (selectedLog.target_url ?? `${selectedLog.method} ${selectedLog.path}`)
                     }, undefined, false, undefined, this)
                   ]
                 }, undefined, true, undefined, this),
-                selectedLog && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Tabs2, {
+                selectedLog && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Tabs2, {
                   defaultValue: "basic",
                   className: "w-full",
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsList2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsList2, {
                       children: [
-                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsTrigger2, {
+                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
                           value: "basic",
                           children: t("logs.tabs.basic")
                         }, undefined, false, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsTrigger2, {
+                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
                           value: "request",
                           children: t("logs.tabs.request")
                         }, undefined, false, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsTrigger2, {
+                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
                           value: "response",
                           children: t("logs.tabs.response")
                         }, undefined, false, undefined, this),
-                        selectedLog.usage && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsTrigger2, {
+                        selectedLog.usage && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
                           value: "usage",
                           children: t("logs.tabs.usage")
                         }, undefined, false, undefined, this)
                       ]
                     }, undefined, true, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsContent2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
                       value: "basic",
                       className: "space-y-4",
                       children: [
-                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                           className: "grid grid-cols-2 gap-4",
                           children: [
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm font-medium",
                                   children: t("common.id")
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm text-muted-foreground font-mono",
                                   children: selectedLog.id
                                 }, undefined, false, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm font-medium",
                                   children: t("logs.table.timestamp")
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm text-muted-foreground",
                                   children: new Date(selectedLog.timestamp).toLocaleString()
                                 }, undefined, false, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm font-medium",
                                   children: t("common.service")
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm text-muted-foreground",
                                   children: selectedLog.service
                                 }, undefined, false, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
-                            selectedLog.channel && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            selectedLog.channel && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm font-medium",
                                   children: t("common.channel")
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm text-muted-foreground",
                                   children: selectedLog.channel
                                 }, undefined, false, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm font-medium",
                                   children: t("common.statusCode")
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm text-muted-foreground",
                                   children: selectedLog.status_code
                                 }, undefined, false, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm font-medium",
                                   children: t("common.duration")
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm text-muted-foreground",
                                   children: [
                                     selectedLog.duration_ms,
@@ -34342,14 +34533,14 @@ function LogsPanel() {
                                 }, undefined, true, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
-                            selectedLog.target_url && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            selectedLog.target_url && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                               className: "col-span-2",
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm font-medium",
                                   children: t("common.targetUrl")
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm text-muted-foreground break-all",
                                   children: selectedLog.target_url
                                 }, undefined, false, undefined, this)
@@ -34357,13 +34548,13 @@ function LogsPanel() {
                             }, undefined, true, undefined, this)
                           ]
                         }, undefined, true, undefined, this),
-                        selectedLog.error_message && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                        selectedLog.error_message && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                           children: [
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                               className: "text-sm font-medium text-destructive",
                               children: t("common.error")
                             }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("pre", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("pre", {
                               className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
                               children: selectedLog.error_message
                             }, undefined, false, undefined, this)
@@ -34371,29 +34562,29 @@ function LogsPanel() {
                         }, undefined, true, undefined, this)
                       ]
                     }, undefined, true, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsContent2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
                       value: "request",
                       className: "space-y-4",
                       children: [
-                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                           children: [
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                               className: "text-sm font-medium",
                               children: t("common.headers")
                             }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("pre", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("pre", {
                               className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
                               children: JSON.stringify(selectedLog.request_headers ?? {}, null, 2)
                             }, undefined, false, undefined, this)
                           ]
                         }, undefined, true, undefined, this),
-                        selectedLog.request_body && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                        selectedLog.request_body && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                           children: [
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                               className: "text-sm font-medium",
                               children: t("common.body")
                             }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("pre", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("pre", {
                               className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
                               children: selectedLog.request_body
                             }, undefined, false, undefined, this)
@@ -34401,29 +34592,29 @@ function LogsPanel() {
                         }, undefined, true, undefined, this)
                       ]
                     }, undefined, true, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsContent2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
                       value: "response",
                       className: "space-y-4",
                       children: [
-                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                           children: [
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                               className: "text-sm font-medium",
                               children: t("common.headers")
                             }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("pre", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("pre", {
                               className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
                               children: JSON.stringify(selectedLog.response_headers ?? {}, null, 2)
                             }, undefined, false, undefined, this)
                           ]
                         }, undefined, true, undefined, this),
-                        selectedLog.response_body && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                        selectedLog.response_body && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                           children: [
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                               className: "text-sm font-medium",
                               children: t("common.body")
                             }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("pre", {
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("pre", {
                               className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
                               children: selectedLog.response_body
                             }, undefined, false, undefined, this)
@@ -34431,55 +34622,55 @@ function LogsPanel() {
                         }, undefined, true, undefined, this)
                       ]
                     }, undefined, true, undefined, this),
-                    selectedLog.usage && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsContent2, {
+                    selectedLog.usage && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
                       value: "usage",
                       className: "space-y-4",
-                      children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                      children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                         className: "grid grid-cols-2 gap-4",
                         children: [
-                          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                             children: [
-                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                 className: "text-sm font-medium",
                                 children: t("common.model")
                               }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                 className: "text-sm text-muted-foreground",
                                 children: selectedLog.usage.model
                               }, undefined, false, undefined, this)
                             ]
                           }, undefined, true, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                             children: [
-                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                 className: "text-sm font-medium",
                                 children: t("common.totalTokens")
                               }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                 className: "text-sm text-muted-foreground",
                                 children: selectedLog.usage.total_tokens
                               }, undefined, false, undefined, this)
                             ]
                           }, undefined, true, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                             children: [
-                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                 className: "text-sm font-medium",
                                 children: t("common.promptTokens")
                               }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                 className: "text-sm text-muted-foreground",
                                 children: selectedLog.usage.prompt_tokens
                               }, undefined, false, undefined, this)
                             ]
                           }, undefined, true, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
                             children: [
-                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                 className: "text-sm font-medium",
                                 children: t("common.completionTokens")
                               }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                 className: "text-sm text-muted-foreground",
                                 children: selectedLog.usage.completion_tokens
                               }, undefined, false, undefined, this)
@@ -34493,28 +34684,28 @@ function LogsPanel() {
               ]
             }, undefined, true, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialog2, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialog2, {
             open: clearDialogOpen,
             onOpenChange: setClearDialogOpen,
-            children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogContent2, {
+            children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogContent2, {
               children: [
-                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogHeader, {
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogHeader, {
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogTitle2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogTitle2, {
                       children: t("logs.confirmClear")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogDescription2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogDescription2, {
                       children: t("logs.confirmClearDescription")
                     }, undefined, false, undefined, this)
                   ]
                 }, undefined, true, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogFooter, {
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogFooter, {
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogCancel2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogCancel2, {
                       disabled: clearing,
                       children: t("common.cancel")
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogAction2, {
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogAction2, {
                       onClick: handleClearLogs,
                       disabled: clearing,
                       children: clearing ? t("common.loading") : t("common.delete")
@@ -34532,7 +34723,7 @@ function LogsPanel() {
 
 // src/components/DashboardPanel.tsx
 var import_react11 = __toESM(require_react(), 1);
-var jsx_dev_runtime15 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime16 = __toESM(require_jsx_dev_runtime(), 1);
 var SERVICES = [
   {
     id: "claude",
@@ -34688,28 +34879,28 @@ function DashboardPanel() {
       setConfigUpdating((prev) => ({ ...prev, [service]: false }));
     }
   };
-  return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Card, {
+  return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Card, {
     children: [
-      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardHeader, {
+      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(CardHeader, {
         className: "flex flex-col gap-4 md:flex-row md:items-center md:justify-between",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardTitle, {
+              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(CardTitle, {
                 children: t("dashboard.title")
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardDescription, {
+              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(CardDescription, {
                 children: t("dashboard.subtitle")
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Button, {
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Button, {
             variant: "outline",
             size: "sm",
             onClick: loadDashboardData,
             disabled: loading,
             children: [
-              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(RefreshCw, {
+              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(RefreshCw, {
                 className: `mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`
               }, undefined, false, undefined, this),
               t("dashboard.refresh")
@@ -34717,56 +34908,60 @@ function DashboardPanel() {
           }, undefined, true, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardContent, {
+      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(CardContent, {
         children: [
-          hasError && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+          hasError && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
             className: "mb-4 rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive",
             children: t("dashboard.error")
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
             className: "grid gap-6 md:grid-cols-2",
             children: SERVICES.map((service) => {
               const serviceData = data.services[service.id] ?? { configs: [], activeName: null, mode: "manual" };
+              const enabledConfigs = serviceData.configs.filter((config) => config.enabled !== false);
               const activeConfig = serviceData.activeName ? serviceData.configs.find((config) => config.name === serviceData.activeName) : undefined;
               const statusInfo = resolveServiceStatus(serviceData, loading, hasError);
               const currentMode = serviceData.mode;
-              return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+              const selectValue = serviceData.activeName || "";
+              const hasConfigs = serviceData.configs.length > 0;
+              const hasEnabledConfigs = enabledConfigs.length > 0;
+              return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                 className: "flex flex-col gap-4 rounded-lg border p-4",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                     className: "flex items-start justify-between gap-2",
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                         children: [
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
                             className: "text-sm font-semibold",
                             children: t(service.labelKey)
                           }, undefined, false, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
                             className: "text-xs text-muted-foreground",
                             children: t(service.descriptionKey)
                           }, undefined, false, undefined, this)
                         ]
                       }, undefined, true, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Badge, {
+                      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Badge, {
                         variant: statusInfo.variant,
                         children: t(statusInfo.labelKey)
                       }, undefined, false, undefined, this)
                     ]
                   }, undefined, true, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
                         className: "text-sm font-medium text-muted-foreground",
                         children: t("dashboard.proxyUrl")
                       }, undefined, false, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                         className: "mt-1 flex items-center gap-2 font-mono text-xs md:text-sm",
                         children: [
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Link, {
+                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Link, {
                             className: "h-4 w-4 text-muted-foreground"
                           }, undefined, false, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("a", {
+                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("a", {
                             href: buildProxyUrl(service.port),
                             className: "transition hover:text-primary",
                             target: "_blank",
@@ -34775,80 +34970,79 @@ function DashboardPanel() {
                           }, undefined, false, undefined, this)
                         ]
                       }, undefined, true, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Tabs2, {
+                      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Tabs2, {
                         value: currentMode,
                         onValueChange: (value) => handleModeChange(service.id, value),
                         className: "mt-3",
                         children: [
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsList2, {
+                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsList2, {
                             className: "grid w-full grid-cols-2",
                             children: [
-                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
+                              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsTrigger2, {
                                 value: "manual",
                                 disabled: modeUpdating[service.id],
                                 children: t("dashboard.mode.manual")
                               }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
+                              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsTrigger2, {
                                 value: "load_balance",
                                 disabled: modeUpdating[service.id],
                                 children: t("dashboard.mode.loadBalance")
                               }, undefined, false, undefined, this)
                             ]
                           }, undefined, true, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
+                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsContent2, {
                             value: "manual",
                             className: "mt-3",
-                            children: loading ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                            children: loading ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               className: "h-16 animate-pulse rounded-md bg-muted"
-                            }, undefined, false, undefined, this) : serviceData.configs.length === 0 ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                            }, undefined, false, undefined, this) : !hasConfigs ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               className: "rounded-lg border border-dashed p-4 text-sm text-muted-foreground",
                               children: t("dashboard.noConfigs", { service: t(service.labelKey) })
-                            }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                            }, undefined, false, undefined, this) : !hasEnabledConfigs ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+                              className: "rounded-lg border border-dashed p-4 text-sm text-muted-foreground",
+                              children: t("dashboard.noEnabledConfigs", { service: t(service.labelKey) })
+                            }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               className: "space-y-3",
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("label", {
+                                  className: "text-xs font-medium text-muted-foreground",
+                                  children: t("dashboard.forwardingConfig")
+                                }, undefined, false, undefined, this),
+                                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Select2, {
+                                  value: selectValue,
+                                  onValueChange: (value) => handleConfigSelect(service.id, value),
+                                  disabled: configUpdating[service.id],
                                   children: [
-                                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("label", {
-                                      className: "text-xs font-medium text-muted-foreground",
-                                      children: t("dashboard.forwardingConfig")
+                                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectTrigger2, {
+                                      className: "mt-1.5",
+                                      children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectValue2, {
+                                        placeholder: t("dashboard.noActive", { service: t(service.labelKey) })
+                                      }, undefined, false, undefined, this)
                                     }, undefined, false, undefined, this),
-                                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Select2, {
-                                      value: serviceData.activeName || "",
-                                      onValueChange: (value) => handleConfigSelect(service.id, value),
-                                      disabled: configUpdating[service.id],
-                                      children: [
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(SelectTrigger2, {
-                                          className: "mt-1.5",
-                                          children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(SelectValue2, {
-                                            placeholder: t("dashboard.noActive", { service: t(service.labelKey) })
-                                          }, undefined, false, undefined, this)
-                                        }, undefined, false, undefined, this),
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(SelectContent2, {
-                                          children: serviceData.configs.map((config) => /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(SelectItem2, {
-                                            value: config.name,
-                                            children: config.name
-                                          }, config.name, false, undefined, this))
-                                        }, undefined, false, undefined, this)
-                                      ]
-                                    }, undefined, true, undefined, this)
+                                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectContent2, {
+                                      children: enabledConfigs.map((config) => /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectItem2, {
+                                        value: config.name,
+                                        children: config.name
+                                      }, config.name, false, undefined, this))
+                                    }, undefined, false, undefined, this)
                                   ]
                                 }, undefined, true, undefined, this),
-                                activeConfig && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                                activeConfig && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                                   className: "rounded-lg border bg-muted/40 p-4",
                                   children: [
-                                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                                       className: "flex flex-wrap items-center gap-2",
                                       children: [
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Badge, {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Badge, {
                                           children: activeConfig.name
                                         }, undefined, false, undefined, this),
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("span", {
                                           className: "text-xs text-muted-foreground",
                                           children: t("dashboard.weightLabel", {
                                             value: activeConfig.weight !== undefined ? activeConfig.weight.toFixed(2) : "1.00"
                                           })
                                         }, undefined, false, undefined, this),
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("span", {
                                           className: "text-xs text-muted-foreground",
                                           children: t("dashboard.authLabel", {
                                             value: t(getAuthLabelKey(activeConfig))
@@ -34856,14 +35050,14 @@ function DashboardPanel() {
                                         }, undefined, false, undefined, this)
                                       ]
                                     }, undefined, true, undefined, this),
-                                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                                       className: "mt-3 text-sm",
                                       children: [
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
                                           className: "text-xs uppercase tracking-wide text-muted-foreground",
                                           children: t("dashboard.upstreamUrl")
                                         }, undefined, false, undefined, this),
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
                                           className: "mt-1 font-mono text-sm break-all",
                                           children: activeConfig.base_url
                                         }, undefined, false, undefined, this)
@@ -34874,36 +35068,39 @@ function DashboardPanel() {
                               ]
                             }, undefined, true, undefined, this)
                           }, undefined, false, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
+                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsContent2, {
                             value: "load_balance",
                             className: "mt-3",
-                            children: loading ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                            children: loading ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               className: "h-16 animate-pulse rounded-md bg-muted"
-                            }, undefined, false, undefined, this) : serviceData.configs.length === 0 ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                            }, undefined, false, undefined, this) : serviceData.configs.length === 0 ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               className: "rounded-lg border border-dashed p-4 text-sm text-muted-foreground",
                               children: t("dashboard.noConfigs", { service: t(service.labelKey) })
-                            }, undefined, false, undefined, this) : activeConfig ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                            }, undefined, false, undefined, this) : !hasEnabledConfigs ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+                              className: "rounded-lg border border-dashed p-4 text-sm text-muted-foreground",
+                              children: t("dashboard.noEnabledConfigs", { service: t(service.labelKey) })
+                            }, undefined, false, undefined, this) : activeConfig ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               children: [
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("label", {
+                                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("label", {
                                   className: "text-xs font-medium text-muted-foreground",
                                   children: t("dashboard.forwardingConfig")
                                 }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                                   className: "mt-1.5 rounded-lg border bg-muted/40 p-4",
                                   children: [
-                                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                                       className: "flex flex-wrap items-center gap-2",
                                       children: [
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Badge, {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Badge, {
                                           children: activeConfig.name
                                         }, undefined, false, undefined, this),
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("span", {
                                           className: "text-xs text-muted-foreground",
                                           children: t("dashboard.weightLabel", {
                                             value: activeConfig.weight !== undefined ? activeConfig.weight.toFixed(2) : "1.00"
                                           })
                                         }, undefined, false, undefined, this),
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("span", {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("span", {
                                           className: "text-xs text-muted-foreground",
                                           children: t("dashboard.authLabel", {
                                             value: t(getAuthLabelKey(activeConfig))
@@ -34911,14 +35108,14 @@ function DashboardPanel() {
                                         }, undefined, false, undefined, this)
                                       ]
                                     }, undefined, true, undefined, this),
-                                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                                       className: "mt-3 text-sm",
                                       children: [
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
                                           className: "text-xs uppercase tracking-wide text-muted-foreground",
                                           children: t("dashboard.upstreamUrl")
                                         }, undefined, false, undefined, this),
-                                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
                                           className: "mt-1 font-mono text-sm break-all",
                                           children: activeConfig.base_url
                                         }, undefined, false, undefined, this)
@@ -34927,7 +35124,7 @@ function DashboardPanel() {
                                   ]
                                 }, undefined, true, undefined, this)
                               ]
-                            }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                            }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               className: "rounded-lg border border-dashed p-4 text-sm text-muted-foreground",
                               children: t("dashboard.noActive", { service: t(service.labelKey) })
                             }, undefined, false, undefined, this)
@@ -34947,7 +35144,7 @@ function DashboardPanel() {
 }
 
 // src/App.tsx
-var jsx_dev_runtime16 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime17 = __toESM(require_jsx_dev_runtime(), 1);
 function App() {
   const [theme, setTheme] = import_react12.useState("light");
   const [isReady, setIsReady] = import_react12.useState(false);
@@ -34985,51 +35182,51 @@ function App() {
   if (!isReady) {
     return null;
   }
-  return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+  return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
     className: "min-h-screen bg-background",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("header", {
+      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("header", {
         className: "border-b",
-        children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+        children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
           className: "container mx-auto px-4 py-4",
-          children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+          children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
             className: "flex items-center justify-between",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("h1", {
+                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("h1", {
                     className: "text-3xl font-bold text-primary",
                     children: t("app.title")
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
+                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("p", {
                     className: "text-sm text-muted-foreground",
                     children: t("app.subtitle")
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+              /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
                 className: "flex items-center gap-2",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Select2, {
+                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Select2, {
                     value: language,
                     onValueChange: handleLanguageChange,
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectTrigger2, {
+                      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(SelectTrigger2, {
                         className: "w-[100px]",
                         children: [
-                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Globe, {
+                          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Globe, {
                             className: "mr-2 h-4 w-4"
                           }, undefined, false, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectValue2, {}, undefined, false, undefined, this)
+                          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(SelectValue2, {}, undefined, false, undefined, this)
                         ]
                       }, undefined, true, undefined, this),
-                      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectContent2, {
+                      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(SelectContent2, {
                         children: [
-                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectItem2, {
+                          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(SelectItem2, {
                             value: "en",
                             children: t("language.en")
                           }, undefined, false, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectItem2, {
+                          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(SelectItem2, {
                             value: "zh",
                             children: t("language.zh")
                           }, undefined, false, undefined, this)
@@ -35037,13 +35234,13 @@ function App() {
                       }, undefined, true, undefined, this)
                     ]
                   }, undefined, true, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Button, {
+                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Button, {
                     variant: "outline",
                     size: "icon",
                     onClick: toggleTheme,
-                    children: theme === "light" ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Moon, {
+                    children: theme === "light" ? /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Moon, {
                       className: "h-4 w-4"
-                    }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Sun, {
+                    }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Sun, {
                       className: "h-4 w-4"
                     }, undefined, false, undefined, this)
                   }, undefined, false, undefined, this)
@@ -35053,72 +35250,72 @@ function App() {
           }, undefined, true, undefined, this)
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("main", {
+      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("main", {
         className: "container mx-auto px-4 py-8",
-        children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Tabs2, {
+        children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Tabs2, {
           defaultValue: "dashboard",
           className: "space-y-4",
           children: [
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsList2, {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsList2, {
               children: [
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsTrigger2, {
+                /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsTrigger2, {
                   value: "dashboard",
                   children: t("nav.dashboard")
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsTrigger2, {
+                /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsTrigger2, {
                   value: "configs",
                   children: t("nav.configs")
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsTrigger2, {
+                /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsTrigger2, {
                   value: "loadbalancer",
                   children: t("nav.loadbalancer")
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsTrigger2, {
+                /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsTrigger2, {
                   value: "logs",
                   children: t("nav.logs")
                 }, undefined, false, undefined, this)
               ]
             }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsContent2, {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsContent2, {
               value: "dashboard",
               className: "space-y-4",
-              children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ErrorBoundary, {
-                children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(DashboardPanel, {}, undefined, false, undefined, this)
+              children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ErrorBoundary, {
+                children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(DashboardPanel, {}, undefined, false, undefined, this)
               }, undefined, false, undefined, this)
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsContent2, {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsContent2, {
               value: "configs",
               className: "space-y-4",
-              children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ErrorBoundary, {
-                children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ConfigPanel, {}, undefined, false, undefined, this)
+              children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ErrorBoundary, {
+                children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ConfigPanel, {}, undefined, false, undefined, this)
               }, undefined, false, undefined, this)
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsContent2, {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsContent2, {
               value: "loadbalancer",
               className: "space-y-4",
-              children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ErrorBoundary, {
-                children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(LoadBalancerPanel, {}, undefined, false, undefined, this)
+              children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ErrorBoundary, {
+                children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(LoadBalancerPanel, {}, undefined, false, undefined, this)
               }, undefined, false, undefined, this)
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsContent2, {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(TabsContent2, {
               value: "logs",
               className: "space-y-4",
-              children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ErrorBoundary, {
-                children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(LogsPanel, {}, undefined, false, undefined, this)
+              children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ErrorBoundary, {
+                children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(LogsPanel, {}, undefined, false, undefined, this)
               }, undefined, false, undefined, this)
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("footer", {
+      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("footer", {
         className: "border-t mt-12",
-        children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+        children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("div", {
           className: "container mx-auto px-4 py-4 text-center text-sm text-muted-foreground",
           children: [
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("p", {
               children: t("footer.builtWith")
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV("p", {
               children: t("footer.version")
             }, undefined, false, undefined, this)
           ]
@@ -35130,9 +35327,9 @@ function App() {
 var App_default = App;
 
 // src/main.tsx
-var jsx_dev_runtime17 = __toESM(require_jsx_dev_runtime(), 1);
-import_client.default.createRoot(document.getElementById("root")).render(/* @__PURE__ */ jsx_dev_runtime17.jsxDEV(import_react13.default.StrictMode, {
-  children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(App_default, {}, undefined, false, undefined, this)
+var jsx_dev_runtime18 = __toESM(require_jsx_dev_runtime(), 1);
+import_client.default.createRoot(document.getElementById("root")).render(/* @__PURE__ */ jsx_dev_runtime18.jsxDEV(import_react13.default.StrictMode, {
+  children: /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(App_default, {}, undefined, false, undefined, this)
 }, undefined, false, undefined, this));
 
-//# debugId=0C747CDE94B06D7A64756E2164756E21
+//# debugId=60D829B870A8C4B064756E2164756E21
