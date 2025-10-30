@@ -9,6 +9,7 @@ export interface RequestLog {
   service?: string;             // Service name (claude, codex, etc.)
   method: string;
   path: string;
+  targetUrl?: string;
   configName: string;
   statusCode?: number;
   duration?: number;
@@ -41,6 +42,7 @@ export class LogDatabase {
         service TEXT,
         method TEXT NOT NULL,
         path TEXT NOT NULL,
+        target_url TEXT,
         config_name TEXT NOT NULL,
         status_code INTEGER,
         duration INTEGER,
@@ -70,6 +72,7 @@ export class LogDatabase {
     addColumnIfNotExists('response_preview', 'TEXT');
     addColumnIfNotExists('request_headers', 'TEXT');
     addColumnIfNotExists('response_headers', 'TEXT');
+    addColumnIfNotExists('target_url', 'TEXT');
 
     // Create indices for common queries
     this.db.run('CREATE INDEX IF NOT EXISTS idx_timestamp ON requests(timestamp DESC)');
@@ -83,11 +86,11 @@ export class LogDatabase {
   insertLog(log: RequestLog): void {
     const stmt = this.db.prepare(`
       INSERT INTO requests (
-        id, timestamp, service, method, path, config_name,
+        id, timestamp, service, method, path, target_url, config_name,
         status_code, duration, input_tokens, output_tokens, model, error,
         request_model, request_body, response_preview,
         request_headers, response_headers
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     stmt.run(
@@ -96,6 +99,7 @@ export class LogDatabase {
       log.service ?? null,
       log.method,
       log.path,
+      log.targetUrl ?? null,
       log.configName,
       log.statusCode ?? null,
       log.duration ?? null,
@@ -238,6 +242,7 @@ export class LogDatabase {
       service: row.service,
       method: row.method,
       path: row.path,
+      targetUrl: row.target_url ?? undefined,
       configName: row.config_name,
       statusCode: row.status_code,
       duration: row.duration,

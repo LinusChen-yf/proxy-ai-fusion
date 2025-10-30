@@ -34423,6 +34423,7 @@ function LogsPanel() {
                       children: t("logs.detailsTitle")
                     }, undefined, false, undefined, this),
                     /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(DialogDescription2, {
+                      className: "font-mono break-all",
                       children: selectedLog && (selectedLog.target_url ?? `${selectedLog.method} ${selectedLog.path}`)
                     }, undefined, false, undefined, this)
                   ]
@@ -35332,4 +35333,4 @@ import_client.default.createRoot(document.getElementById("root")).render(/* @__P
   children: /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(App_default, {}, undefined, false, undefined, this)
 }, undefined, false, undefined, this));
 
-//# debugId=60D829B870A8C4B064756E2164756E21
+//# debugId=E3D691200CB10C5A64756E2164756E21

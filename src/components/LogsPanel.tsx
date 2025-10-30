@@ -146,7 +146,7 @@ export function LogsPanel() {
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t('logs.detailsTitle')}</DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="font-mono break-all">
                 {selectedLog && (selectedLog.target_url ?? `${selectedLog.method} ${selectedLog.path}`)}
               </DialogDescription>
             </DialogHeader>

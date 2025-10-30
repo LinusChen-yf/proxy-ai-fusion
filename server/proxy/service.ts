@@ -30,6 +30,7 @@ export class ProxyService {
   ): Promise<Response> {
     const requestId = crypto.randomUUID();
     const startTime = Date.now();
+    let upstreamUrl: string | null = null;
 
     // Select upstream server
     const server = this.loadBalancer.selectServer(servers);
@@ -63,7 +64,7 @@ export class ProxyService {
       const url = new URL(request.url);
       const base = server.baseUrl.replace(/\/+$/, '');
       const path = url.pathname.startsWith('/') ? url.pathname : `/${url.pathname}`;
-      const upstreamUrl = `${base}${path}${url.search}`;
+      upstreamUrl = `${base}${path}${url.search}`;
 
       // Build headers
       const headers = this.buildHeaders(request, server);
@@ -100,7 +101,8 @@ export class ProxyService {
           server,
           startTime,
           request,
-          requestBodyJson
+          requestBodyJson,
+          upstreamUrl
         );
       } else {
         if (!upstreamResponse.ok) {
@@ -112,7 +114,8 @@ export class ProxyService {
           server,
           startTime,
           request,
-          requestBodyJson
+          requestBodyJson,
+          upstreamUrl
         );
       }
     } catch (error) {
@@ -132,13 +135,17 @@ export class ProxyService {
         requestHeaders[key] = value;
       });
 
+      const originalUrl = new URL(request.url);
+      const pathWithQuery = `${originalUrl.pathname}${originalUrl.search}`;
+
       // Log error
       await this.logger.logRequest({
         id: requestId,
         timestamp: startTime,
         service: this.serviceName,
         method: request.method,
-        path: new URL(request.url).pathname,
+        path: pathWithQuery,
+        targetUrl: upstreamUrl ?? undefined,
         configName: server.name,
         error: errorMessage,
         duration: Date.now() - startTime,
@@ -166,9 +173,12 @@ export class ProxyService {
     server: ProxyConfig,
     startTime: number,
     originalRequest: Request,
-    requestBodyJson: any
+    requestBodyJson: any,
+    targetUrl: string
   ): Promise<Response> {
     const duration = Date.now() - startTime;
+    const originalUrl = new URL(originalRequest.url);
+    const pathWithQuery = `${originalUrl.pathname}${originalUrl.search}`;
 
     // Clone response to read body
     const responseClone = upstreamResponse.clone();
@@ -210,7 +220,8 @@ export class ProxyService {
       timestamp: startTime,
       service: this.serviceName,
       method: originalRequest.method,
-      path: new URL(originalRequest.url).pathname,
+      path: pathWithQuery,
+      targetUrl,
       configName: server.name,
       statusCode: upstreamResponse.status,
       duration,
@@ -238,12 +249,15 @@ export class ProxyService {
     server: ProxyConfig,
     startTime: number,
     originalRequest: Request,
-    requestBodyJson: any
+    requestBodyJson: any,
+    targetUrl: string
   ): Response {
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
     const reader = upstreamResponse.body!.getReader();
     const decoder = new TextDecoder();
+    const originalUrl = new URL(originalRequest.url);
+    const pathWithQuery = `${originalUrl.pathname}${originalUrl.search}`;
 
     // Collect headers early
     const requestHeaders: Record<string, string> = {};
@@ -294,7 +308,8 @@ export class ProxyService {
           timestamp: startTime,
           service: this.serviceName,
           method: originalRequest.method,
-          path: new URL(originalRequest.url).pathname,
+          path: pathWithQuery,
+          targetUrl,
           configName: server.name,
           statusCode: upstreamResponse.status,
           duration,

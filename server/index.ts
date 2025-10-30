@@ -195,6 +195,7 @@ function convertLogToFrontendFormat(log: any): any {
     service: log.service || 'claude', // Use actual service field or default to claude
     method: log.method,
     path: log.path,
+    target_url: log.targetUrl,
     status_code: log.statusCode,
     duration_ms: log.duration,
     error_message: log.error,
@@ -490,9 +491,10 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
       const testStartTime = Date.now();
       const logId = `test-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
+      let testUrl: string | null = null;
+
       try {
         // Build test request based on service type
-        let testUrl: string;
         let testBody: any;
         let testHeaders: HeadersInit = {
           'Content-Type': 'application/json',
@@ -569,6 +571,10 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
           ...authHeaders,
         };
 
+        if (!testUrl) {
+          throw new Error('Test URL not configured');
+        }
+
         const testResponse = await fetch(testUrl, {
           method: 'POST',
           headers: testHeaders,
@@ -603,13 +609,17 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
           responseHeaders[key] = value;
         });
 
+        const testUrlObj = new URL(testUrl);
+        const testPathWithQuery = `${testUrlObj.pathname}${testUrlObj.search}`;
+
         // Log the test request
         await logger.logRequest({
           id: logId,
           timestamp: testStartTime,
           service: serviceName,
           method: 'POST',
-          path: new URL(testUrl).pathname,
+          path: testPathWithQuery,
+          targetUrl: testUrl,
           configName: configName,
           statusCode: testResponse.status,
           duration: duration,
@@ -637,12 +647,25 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
         const errorMessage = error instanceof Error ? error.message : 'Connection failed';
 
         // Log failed test request
+        const failedPathWithQuery = (() => {
+          if (!testUrl) {
+            return '/test';
+          }
+          try {
+            const url = new URL(testUrl);
+            return `${url.pathname}${url.search}`;
+          } catch {
+            return '/test';
+          }
+        })();
+
         await logger.logRequest({
           id: logId,
           timestamp: testStartTime,
           service: serviceName,
           method: 'POST',
-          path: '/test',
+          path: failedPathWithQuery,
+          targetUrl: testUrl ?? undefined,
           configName: configName,
           statusCode: 0,
           duration: duration,
