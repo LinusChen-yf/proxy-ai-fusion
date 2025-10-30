@@ -1,0 +1,13 @@
+# Bun configuration file
+
+[serve]
+# Development server configuration
+development = true
+
+[serve.static]
+# Enable static file serving
+plugins = []
+
+[install]
+# Package manager configuration
+registry = "https://registry.npmjs.org/"

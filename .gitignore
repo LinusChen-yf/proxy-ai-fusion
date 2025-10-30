@@ -1,1 +1,36 @@
-/target
+# Bun
+node_modules/
+dist/
+*.log
+
+# Build artifacts
+*.js.map
+*.d.ts
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Old project files (kept for reference)
+target/
+frontend/
+Cargo.lock
+Cargo.toml
+build.rs
+rustfmt.toml
+cli_proxy/
+
+# Database
+*.db
+*.db-shm
+*.db-wal
