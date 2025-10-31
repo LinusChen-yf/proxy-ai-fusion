@@ -293,47 +293,52 @@ export function ConfigPanel() {
   };
 
   const handleTest = async (service: ServiceId) => {
-    const configName = activeConfigMap[service];
-    if (!configName) {
-      return;
-    }
+    // Get all enabled configs for this service
+    const enabledConfigs = configs[service].filter(config => config.enabled !== false);
 
-    const activeConfig = configs[service].find(c => c.name === configName);
-    if (!activeConfig || activeConfig.enabled === false) {
+    if (enabledConfigs.length === 0) {
       return;
     }
 
     setTestLoading((prev) => ({ ...prev, [service]: true }));
     try {
-      let result: TestConnectionResponse;
-      if (service === 'claude') {
-        result = await api.testClaudeApi(configName);
-      } else {
-        result = await api.testCodexApi(configName);
-      }
+      // Test all enabled configs in parallel
+      const testPromises = enabledConfigs.map(async (config) => {
+        try {
+          let result: TestConnectionResponse;
+          if (service === 'claude') {
+            result = await api.testClaudeApi(config.name);
+          } else {
+            result = await api.testCodexApi(config.name);
+          }
+          return { configName: config.name, result, error: null };
+        } catch (error) {
+          return {
+            configName: config.name,
+            result: {
+              success: false,
+              message: String(error),
+            },
+            error,
+          };
+        }
+      });
 
       const timestamp = new Date().toISOString();
+      const results = await Promise.all(testPromises);
+
+      // Update all test results
       setTestResults((prev) => ({
         ...prev,
         [service]: {
           ...(prev[service] ?? {}),
-          [configName]: {
-            ...result,
-            completedAt: timestamp,
-          },
-        },
-      }));
-    } catch (error) {
-      const timestamp = new Date().toISOString();
-      setTestResults((prev) => ({
-        ...prev,
-        [service]: {
-          ...(prev[service] ?? {}),
-          [configName]: {
-            success: false,
-            message: String(error),
-            completedAt: timestamp,
-          },
+          ...results.reduce((acc, { configName, result }) => {
+            acc[configName] = {
+              ...result,
+              completedAt: timestamp,
+            };
+            return acc;
+          }, {} as Record<string, TestConnectionResponse & { completedAt: string }>),
         },
       }));
     } finally {
@@ -507,6 +512,8 @@ export function ConfigPanel() {
 
   const activeConfig = configs[activeService].find(config => config.name === activeConfigMap[activeService]);
   const isActiveConfigDisabled = activeConfig ? activeConfig.enabled === false : false;
+  const enabledConfigs = configs[activeService].filter(config => config.enabled !== false);
+  const hasEnabledConfigs = enabledConfigs.length > 0;
 
   const editingMeta = SERVICE_METADATA[editingService];
   const editingServiceLabel = t(editingMeta.labelKey);
@@ -525,8 +532,7 @@ export function ConfigPanel() {
               variant="outline"
               onClick={() => handleTest(activeService)}
               disabled={
-                !activeConfigMap[activeService] ||
-                isActiveConfigDisabled ||
+                !hasEnabledConfigs ||
                 testLoading[activeService]
               }
             >

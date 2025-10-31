@@ -30057,44 +30057,45 @@ function ConfigPanel() {
     }
   };
   const handleTest = async (service) => {
-    const configName = activeConfigMap[service];
-    if (!configName) {
-      return;
-    }
-    const activeConfig2 = configs[service].find((c) => c.name === configName);
-    if (!activeConfig2 || activeConfig2.enabled === false) {
+    const enabledConfigs2 = configs[service].filter((config) => config.enabled !== false);
+    if (enabledConfigs2.length === 0) {
       return;
     }
     setTestLoading((prev) => ({ ...prev, [service]: true }));
     try {
-      let result;
-      if (service === "claude") {
-        result = await api.testClaudeApi(configName);
-      } else {
-        result = await api.testCodexApi(configName);
-      }
-      const timestamp = new Date().toISOString();
-      setTestResults((prev) => ({
-        ...prev,
-        [service]: {
-          ...prev[service] ?? {},
-          [configName]: {
-            ...result,
-            completedAt: timestamp
+      const testPromises = enabledConfigs2.map(async (config) => {
+        try {
+          let result;
+          if (service === "claude") {
+            result = await api.testClaudeApi(config.name);
+          } else {
+            result = await api.testCodexApi(config.name);
           }
+          return { configName: config.name, result, error: null };
+        } catch (error) {
+          return {
+            configName: config.name,
+            result: {
+              success: false,
+              message: String(error)
+            },
+            error
+          };
         }
-      }));
-    } catch (error) {
+      });
       const timestamp = new Date().toISOString();
+      const results = await Promise.all(testPromises);
       setTestResults((prev) => ({
         ...prev,
         [service]: {
           ...prev[service] ?? {},
-          [configName]: {
-            success: false,
-            message: String(error),
-            completedAt: timestamp
-          }
+          ...results.reduce((acc, { configName, result }) => {
+            acc[configName] = {
+              ...result,
+              completedAt: timestamp
+            };
+            return acc;
+          }, {})
         }
       }));
     } finally {
@@ -30353,6 +30354,8 @@ function ConfigPanel() {
   };
   const activeConfig = configs[activeService].find((config) => config.name === activeConfigMap[activeService]);
   const isActiveConfigDisabled = activeConfig ? activeConfig.enabled === false : false;
+  const enabledConfigs = configs[activeService].filter((config) => config.enabled !== false);
+  const hasEnabledConfigs = enabledConfigs.length > 0;
   const editingMeta = SERVICE_METADATA[editingService];
   const editingServiceLabel = t(editingMeta.labelKey);
   const editingExampleUrl = t(editingMeta.exampleUrlKey);
@@ -30378,7 +30381,7 @@ function ConfigPanel() {
                 /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
                   variant: "outline",
                   onClick: () => handleTest(activeService),
-                  disabled: !activeConfigMap[activeService] || isActiveConfigDisabled || testLoading[activeService],
+                  disabled: !hasEnabledConfigs || testLoading[activeService],
                   children: [
                     /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(ShieldCheck, {
                       className: "mr-2 h-4 w-4"
@@ -35303,4 +35306,4 @@ import_client.default.createRoot(document.getElementById("root")).render(/* @__P
   }, undefined, false, undefined, this)
 }, undefined, false, undefined, this));
 
-//# debugId=C9D636651E34D7D364756E2164756E21
+//# debugId=DD621B55754A5D7064756E2164756E21
