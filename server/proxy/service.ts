@@ -31,6 +31,8 @@ export class ProxyService {
     const requestId = crypto.randomUUID();
     const startTime = Date.now();
     let upstreamUrl: string | null = null;
+    let sanitizedThinking = false;
+    let thinkingBlocksRemoved = 0;
 
     // Select upstream server
     const server = this.loadBalancer.selectServer(servers);
@@ -51,7 +53,17 @@ export class ProxyService {
         const requestText = await requestClone.text();
         if (requestText) {
           requestBodyJson = JSON.parse(requestText);
-          requestBodyForUpstream = requestText;
+          if (this.serviceName === 'claude') {
+            const sanitized = this.sanitizeClaudeRequestBody(requestBodyJson);
+            sanitizedThinking = sanitized.removedThinkingBlocks > 0;
+            thinkingBlocksRemoved = sanitized.removedThinkingBlocks;
+            requestBodyJson = sanitized.body;
+            requestBodyForUpstream = sanitizedThinking
+              ? JSON.stringify(requestBodyJson)
+              : requestText;
+          } else {
+            requestBodyForUpstream = requestText;
+          }
         }
       } catch (error) {
         console.error('Failed to read request body:', error);
@@ -68,6 +80,9 @@ export class ProxyService {
 
       // Build headers
       const headers = this.buildHeaders(request, server);
+      if (sanitizedThinking) {
+        console.log(`[proxy:${this.serviceName}] removed ${thinkingBlocksRemoved} thinking block(s) before forwarding to ${server.name}`);
+      }
 
       // Use the request body
       const body = requestBodyForUpstream;
@@ -359,7 +374,7 @@ export class ProxyService {
   /**
    * Build headers for upstream request
    */
-  private buildHeaders(request: Request, server: ProxyConfig): HeadersInit {
+  private buildHeaders(request: Request, server: ProxyConfig): Record<string, string> {
     const headers: Record<string, string> = {};
 
     // Forward almost all original headers to mimic legacy proxy behaviour.
@@ -396,6 +411,80 @@ export class ProxyService {
     }
 
     return headers;
+  }
+
+  /**
+   * Remove thinking blocks from Claude requests so upstreams without
+   * signed reasoning support do not reject them.
+   */
+  private sanitizeClaudeRequestBody(body: any): {
+    body: any;
+    removedThinkingBlocks: number;
+  } {
+    if (this.serviceName !== 'claude') {
+      return { body, removedThinkingBlocks: 0 };
+    }
+
+    if (!body || typeof body !== 'object') {
+      return { body, removedThinkingBlocks: 0 };
+    }
+
+    const totalRemoved =
+      this.stripThinkingFromMessages(body.messages) +
+      this.stripThinkingFromMessages(body.previous_messages);
+
+    return {
+      body,
+      removedThinkingBlocks: totalRemoved,
+    };
+  }
+
+  private stripThinkingFromMessages(messages: unknown): number {
+    if (!Array.isArray(messages)) {
+      return 0;
+    }
+
+    let removed = 0;
+
+    for (const message of messages) {
+      if (!message || typeof message !== 'object') {
+        continue;
+      }
+
+      const content = Array.isArray((message as any).content)
+        ? (message as any).content
+        : [];
+
+      if (content.length === 0) {
+        continue;
+      }
+
+      const filtered: any[] = [];
+      for (const block of content) {
+        if (block && typeof block === 'object') {
+          const blockType = typeof (block as any).type === 'string'
+            ? ((block as any).type as string).toLowerCase()
+            : '';
+
+          if (
+            blockType === 'thinking' ||
+            blockType === 'assistant_thinking' ||
+            blockType === 'reasoning'
+          ) {
+            removed += 1;
+            continue;
+          }
+        }
+
+        filtered.push(block);
+      }
+
+      if (filtered.length !== content.length) {
+        (message as any).content = filtered;
+      }
+    }
+
+    return removed;
   }
 
   /**
