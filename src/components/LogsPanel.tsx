@@ -68,7 +68,7 @@ export function LogsPanel() {
   const handleClearLogs = async () => {
     setClearing(true);
     try {
-      const result = await api.clearLogs();
+      await api.clearLogs();
       setLogs([]);
       setClearDialogOpen(false);
     } catch (error) {

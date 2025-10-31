@@ -143,31 +143,7 @@ export class ProxyService {
       // Mark server as failed
       this.loadBalancer.markFailure(server.name);
 
-      // Auto-freeze config on proxy failure
-      try {
-        const { ConfigManager } = await import('../config/manager');
-        const manager = new ConfigManager();
-        await manager.initialize();
 
-        const serviceName = this.serviceName;
-        const serviceConfig = manager.getServiceConfig(serviceName);
-        if (serviceConfig) {
-          const index = serviceConfig.configs.findIndex((c: any) => c.name === server.name);
-          if (index !== -1) {
-            const freezeDuration = serviceConfig.loadBalancer.freezeDuration || 5 * 60 * 1000;
-            const freezeUntil = Date.now() + freezeDuration;
-            serviceConfig.configs[index] = {
-              ...serviceConfig.configs[index],
-              freezeUntil,
-            };
-            await manager.saveServiceConfig(serviceName, serviceConfig);
-            const freezeMinutes = Math.round(freezeDuration / 60000);
-            console.log(`[proxy:${serviceName}] Auto-frozen config ${server.name} for ${freezeMinutes} minutes due to failure`);
-          }
-        }
-      } catch (freezeError) {
-        console.error(`[proxy:${this.serviceName}] Failed to auto-freeze config:`, freezeError);
-      }
 
       // Extract request info
       const requestInfo = this.logger.extractRequestInfo(requestBodyJson);

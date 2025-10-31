@@ -29865,6 +29865,14 @@ var SERVICE_METADATA = {
     exampleUrlKey: "service.codex.exampleUrl"
   }
 };
+function normalizeFreezeUntil(config) {
+  const raw = config.freeze_until ?? config.freezeUntil ?? null;
+  if (typeof raw === "string") {
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  return typeof raw === "number" && Number.isFinite(raw) ? raw : undefined;
+}
 function normalizeServiceConfigs(configs) {
   if (!configs) {
     return [];
@@ -29875,7 +29883,8 @@ function normalizeServiceConfigs(configs) {
     base_url: config.baseUrl || config.base_url,
     auth_token: config.authToken || config.auth_token,
     api_key: config.apiKey || config.api_key,
-    enabled: config.enabled ?? true
+    enabled: config.enabled ?? true,
+    freeze_until: normalizeFreezeUntil(config)
   }));
 }
 function ConfigPanel() {
@@ -29885,10 +29894,6 @@ function ConfigPanel() {
   const [configs, setConfigs] = import_react8.useState({
     claude: [],
     codex: []
-  });
-  const [activeConfigMap, setActiveConfigMap] = import_react8.useState({
-    claude: "",
-    codex: ""
   });
   const [dialogOpen, setDialogOpen] = import_react8.useState(false);
   const [editingConfig, setEditingConfig] = import_react8.useState(null);
@@ -29943,14 +29948,9 @@ function ConfigPanel() {
         claude: normalizeServiceConfigs(claudeData.configs),
         codex: normalizeServiceConfigs(codexData.configs)
       });
-      setActiveConfigMap({
-        claude: claudeData.active ?? "",
-        codex: codexData.active ?? ""
-      });
     } catch (error) {
       console.error("Failed to load configs:", error);
       setConfigs({ claude: [], codex: [] });
-      setActiveConfigMap({ claude: "", codex: "" });
     }
   };
   import_react8.useEffect(() => {
@@ -30098,6 +30098,7 @@ function ConfigPanel() {
           }, {})
         }
       }));
+      await loadConfigs();
     } finally {
       setTestLoading((prev) => ({ ...prev, [service]: false }));
     }
@@ -30228,7 +30229,11 @@ function ConfigPanel() {
           children: currentConfigs.map((config) => {
             const isEnabled = config.enabled !== false;
             const result = testResults[service]?.[config.name];
-            const status = !isEnabled ? { label: t("config.status.disabled"), className: "text-muted-foreground" } : result?.success === false ? { label: t("config.status.error"), className: "text-destructive" } : result?.success ? { label: t("config.status.ok"), className: "text-emerald-600" } : { label: t("config.status.ok"), className: "text-muted-foreground" };
+            const isFrozen = config.freeze_until && Date.now() < config.freeze_until;
+            const status = !isEnabled ? { label: t("config.status.disabled"), className: "text-muted-foreground" } : isFrozen ? { label: t("config.status.frozen"), className: "text-destructive" } : {
+              label: t("config.status.ok"),
+              className: result?.success ? "text-emerald-600" : "text-muted-foreground"
+            };
             return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableRow, {
               children: [
                 /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
@@ -30352,8 +30357,6 @@ function ConfigPanel() {
       ]
     }, undefined, true, undefined, this);
   };
-  const activeConfig = configs[activeService].find((config) => config.name === activeConfigMap[activeService]);
-  const isActiveConfigDisabled = activeConfig ? activeConfig.enabled === false : false;
   const enabledConfigs = configs[activeService].filter((config) => config.enabled !== false);
   const hasEnabledConfigs = enabledConfigs.length > 0;
   const editingMeta = SERVICE_METADATA[editingService];
@@ -34031,7 +34034,8 @@ function LoadBalancerPanel() {
     mode: "weight_selection",
     health_check_interval_secs: 30,
     failure_threshold: 3,
-    success_threshold: 2
+    success_threshold: 2,
+    freeze_duration_secs: 300
   });
   const loadConfig = async () => {
     try {
@@ -34040,7 +34044,8 @@ function LoadBalancerPanel() {
         mode: data.mode || "weight_selection",
         health_check_interval_secs: data.health_check_interval_secs ?? 30,
         failure_threshold: data.failure_threshold ?? 3,
-        success_threshold: data.success_threshold ?? 2
+        success_threshold: data.success_threshold ?? 2,
+        freeze_duration_secs: data.freeze_duration_secs ?? 300
       });
     } catch (error) {
       console.error("Failed to load load balancer config:", error);
@@ -34174,6 +34179,26 @@ function LoadBalancerPanel() {
                   children: t("lb.successHint")
                 }, undefined, false, undefined, this)
               ]
+            }, undefined, true, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
+              className: "grid gap-2",
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Label2, {
+                  htmlFor: "freeze_duration",
+                  children: t("lb.freezeDuration")
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Input, {
+                  id: "freeze_duration",
+                  type: "number",
+                  value: config.freeze_duration_secs ?? "",
+                  onChange: (e) => setConfig({ ...config, freeze_duration_secs: parseInt(e.target.value) || 0 }),
+                  min: "60"
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("p", {
+                  className: "text-xs text-muted-foreground",
+                  children: t("lb.freezeHint")
+                }, undefined, false, undefined, this)
+              ]
             }, undefined, true, undefined, this)
           ]
         }, undefined, true, undefined, this)
@@ -34246,7 +34271,7 @@ function LogsPanel() {
   const handleClearLogs = async () => {
     setClearing(true);
     try {
-      const result = await api.clearLogs();
+      await api.clearLogs();
       setLogs([]);
       setClearDialogOpen(false);
     } catch (error) {
@@ -34763,7 +34788,8 @@ function resolveServiceStatus(serviceData, loading, hasError) {
   if (loading) {
     return { labelKey: "dashboard.status.loading", variant: "secondary" };
   }
-  if (serviceData.activeName) {
+  const hasActiveConfig = serviceData.mode === "load_balance" ? serviceData.currentName : serviceData.activeName;
+  if (hasActiveConfig) {
     return { labelKey: "dashboard.status.active", variant: "default" };
   }
   if (serviceData.configs.length > 0) {
@@ -34776,8 +34802,8 @@ function DashboardPanel() {
   const feedback = useFeedback();
   const [data, setData] = import_react12.useState({
     services: {
-      claude: { configs: [], activeName: null, mode: "manual" },
-      codex: { configs: [], activeName: null, mode: "manual" }
+      claude: { configs: [], activeName: null, currentName: null, mode: "manual" },
+      codex: { configs: [], activeName: null, currentName: null, mode: "manual" }
     }
   });
   const [loading, setLoading] = import_react12.useState(false);
@@ -34800,11 +34826,13 @@ function DashboardPanel() {
           claude: {
             configs: normalizeConfigs(separatedConfigs.claude?.configs),
             activeName: separatedConfigs.claude?.active ?? null,
+            currentName: separatedConfigs.claude?.current ?? null,
             mode: separatedConfigs.claude?.mode ?? "manual"
           },
           codex: {
             configs: normalizeConfigs(separatedConfigs.codex?.configs),
             activeName: separatedConfigs.codex?.active ?? null,
+            currentName: separatedConfigs.codex?.current ?? null,
             mode: separatedConfigs.codex?.mode ?? "manual"
           }
         }
@@ -34819,20 +34847,25 @@ function DashboardPanel() {
   import_react12.useEffect(() => {
     loadDashboardData();
   }, [loadDashboardData]);
+  import_react12.useEffect(() => {
+    let interval = null;
+    const hasLoadBalanceMode = Object.values(data.services).some((service) => service.mode === "load_balance");
+    if (hasLoadBalanceMode) {
+      interval = setInterval(() => {
+        loadDashboardData();
+      }, 5000);
+    }
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [data.services, loadDashboardData]);
   const handleModeChange = async (service, newMode) => {
     try {
       setModeUpdating((prev) => ({ ...prev, [service]: true }));
       await api.updateServiceMode(service, newMode);
-      setData((prev) => ({
-        ...prev,
-        services: {
-          ...prev.services,
-          [service]: {
-            ...prev.services[service],
-            mode: newMode
-          }
-        }
-      }));
+      await loadDashboardData();
     } catch (error) {
       console.error("Failed to update mode:", error);
       feedback.showError(t("config.error.mode"));
@@ -34848,16 +34881,7 @@ function DashboardPanel() {
       } else {
         await api.activateCodexConfig(configName);
       }
-      setData((prev) => ({
-        ...prev,
-        services: {
-          ...prev.services,
-          [service]: {
-            ...prev.services[service],
-            activeName: configName
-          }
-        }
-      }));
+      await loadDashboardData();
     } catch (error) {
       console.error("Failed to activate config:", error);
       feedback.showError(t("config.error.activate"));
@@ -34903,9 +34927,10 @@ function DashboardPanel() {
           /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
             className: "grid gap-6 md:grid-cols-2",
             children: SERVICES.map((service) => {
-              const serviceData = data.services[service.id] ?? { configs: [], activeName: null, mode: "manual" };
+              const serviceData = data.services[service.id] ?? { configs: [], activeName: null, currentName: null, mode: "manual" };
               const enabledConfigs = serviceData.configs.filter((config) => config.enabled !== false);
-              const activeConfig = serviceData.activeName ? serviceData.configs.find((config) => config.name === serviceData.activeName) : undefined;
+              const displayName = serviceData.mode === "load_balance" ? serviceData.currentName : serviceData.activeName;
+              const displayConfig = displayName ? serviceData.configs.find((config) => config.name === displayName) : undefined;
               const statusInfo = resolveServiceStatus(serviceData, loading, hasError);
               const currentMode = serviceData.mode;
               const selectValue = serviceData.activeName || "";
@@ -35013,25 +35038,25 @@ function DashboardPanel() {
                                     }, undefined, false, undefined, this)
                                   ]
                                 }, undefined, true, undefined, this),
-                                activeConfig && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+                                displayConfig && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                                   className: "rounded-lg border bg-muted/40 p-4",
                                   children: [
                                     /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                                       className: "flex flex-wrap items-center gap-2",
                                       children: [
                                         /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Badge, {
-                                          children: activeConfig.name
+                                          children: displayConfig.name
                                         }, undefined, false, undefined, this),
                                         /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("span", {
                                           className: "text-xs text-muted-foreground",
                                           children: t("dashboard.weightLabel", {
-                                            value: activeConfig.weight !== undefined ? activeConfig.weight.toFixed(2) : "1.00"
+                                            value: displayConfig.weight !== undefined ? displayConfig.weight.toFixed(2) : "1.00"
                                           })
                                         }, undefined, false, undefined, this),
                                         /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("span", {
                                           className: "text-xs text-muted-foreground",
                                           children: t("dashboard.authLabel", {
-                                            value: t(getAuthLabelKey(activeConfig))
+                                            value: t(getAuthLabelKey(displayConfig))
                                           })
                                         }, undefined, false, undefined, this)
                                       ]
@@ -35045,7 +35070,7 @@ function DashboardPanel() {
                                         }, undefined, false, undefined, this),
                                         /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
                                           className: "mt-1 font-mono text-sm break-all",
-                                          children: activeConfig.base_url
+                                          children: displayConfig.base_url
                                         }, undefined, false, undefined, this)
                                       ]
                                     }, undefined, true, undefined, this)
@@ -35065,7 +35090,7 @@ function DashboardPanel() {
                             }, undefined, false, undefined, this) : !hasEnabledConfigs ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               className: "rounded-lg border border-dashed p-4 text-sm text-muted-foreground",
                               children: t("dashboard.noEnabledConfigs", { service: t(service.labelKey) })
-                            }, undefined, false, undefined, this) : activeConfig ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
+                            }, undefined, false, undefined, this) : displayConfig ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
                               children: [
                                 /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("label", {
                                   className: "text-xs font-medium text-muted-foreground",
@@ -35078,18 +35103,18 @@ function DashboardPanel() {
                                       className: "flex flex-wrap items-center gap-2",
                                       children: [
                                         /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Badge, {
-                                          children: activeConfig.name
+                                          children: displayConfig.name
                                         }, undefined, false, undefined, this),
                                         /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("span", {
                                           className: "text-xs text-muted-foreground",
                                           children: t("dashboard.weightLabel", {
-                                            value: activeConfig.weight !== undefined ? activeConfig.weight.toFixed(2) : "1.00"
+                                            value: displayConfig.weight !== undefined ? displayConfig.weight.toFixed(2) : "1.00"
                                           })
                                         }, undefined, false, undefined, this),
                                         /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("span", {
                                           className: "text-xs text-muted-foreground",
                                           children: t("dashboard.authLabel", {
-                                            value: t(getAuthLabelKey(activeConfig))
+                                            value: t(getAuthLabelKey(displayConfig))
                                           })
                                         }, undefined, false, undefined, this)
                                       ]
@@ -35103,10 +35128,14 @@ function DashboardPanel() {
                                         }, undefined, false, undefined, this),
                                         /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
                                           className: "mt-1 font-mono text-sm break-all",
-                                          children: activeConfig.base_url
+                                          children: displayConfig.base_url
                                         }, undefined, false, undefined, this)
                                       ]
-                                    }, undefined, true, undefined, this)
+                                    }, undefined, true, undefined, this),
+                                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
+                                      className: "mt-2 text-xs text-muted-foreground",
+                                      children: t("dashboard.autoRefresh")
+                                    }, undefined, false, undefined, this)
                                   ]
                                 }, undefined, true, undefined, this)
                               ]
@@ -35306,4 +35335,4 @@ import_client.default.createRoot(document.getElementById("root")).render(/* @__P
   }, undefined, false, undefined, this)
 }, undefined, false, undefined, this));
 
-//# debugId=DD621B55754A5D7064756E2164756E21
+//# debugId=CF21A338827C777C64756E2164756E21

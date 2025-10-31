@@ -7,6 +7,7 @@ export interface ProxyConfig {
   apiKey?: string;
   weight: number;
   enabled: boolean;
+  freezeUntil?: number; // Unix timestamp in milliseconds
 }
 
 export interface LoadBalancerConfig {
@@ -18,6 +19,7 @@ export interface LoadBalancerConfig {
     failureThreshold: number;
     successThreshold: number;
   };
+  freezeDuration: number; // milliseconds, default 5 minutes (300000)
 }
 
 export interface ServiceConfig {

@@ -18,6 +18,7 @@ export function LoadBalancerPanel() {
     health_check_interval_secs: 30,
     failure_threshold: 3,
     success_threshold: 2,
+    freeze_duration_secs: 300,
   });
 
   const loadConfig = async () => {
@@ -28,6 +29,7 @@ export function LoadBalancerPanel() {
         health_check_interval_secs: data.health_check_interval_secs ?? 30,
         failure_threshold: data.failure_threshold ?? 3,
         success_threshold: data.success_threshold ?? 2,
+        freeze_duration_secs: data.freeze_duration_secs ?? 300,
       });
     } catch (error) {
       console.error('Failed to load load balancer config:', error);
@@ -118,6 +120,22 @@ export function LoadBalancerPanel() {
             />
             <p className="text-xs text-muted-foreground">
               {t('lb.successHint')}
+            </p>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="freeze_duration">{t('lb.freezeDuration')}</Label>
+            <Input
+              id="freeze_duration"
+              type="number"
+              value={config.freeze_duration_secs ?? ''}
+              onChange={(e) =>
+                setConfig({ ...config, freeze_duration_secs: parseInt(e.target.value) || 0 })
+              }
+              min="60"
+            />
+            <p className="text-xs text-muted-foreground">
+              {t('lb.freezeHint')}
             </p>
           </div>
         </div>

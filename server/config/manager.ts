@@ -87,6 +87,7 @@ codex = ${defaultConfig.proxyPorts.codex}
       apiKey: c.api_key,
       weight: c.weight || 1.0,
       enabled: c.enabled !== false,
+      freezeUntil: typeof c.freeze_until === 'number' ? c.freeze_until : undefined,
     }));
 
     const loadBalancer: LoadBalancerConfig = {
@@ -98,6 +99,8 @@ codex = ${defaultConfig.proxyPorts.codex}
         failureThreshold: (data.loadbalancer as any)?.health_check?.failure_threshold || 3,
         successThreshold: (data.loadbalancer as any)?.health_check?.success_threshold || 2,
       },
+      freezeDuration:
+        (data.loadbalancer as any)?.freeze_duration ?? 5 * 60 * 1000,
     };
 
     const serviceConfig: ServiceConfig = {
@@ -148,12 +151,14 @@ codex = ${defaultConfig.proxyPorts.codex}
         api_key: c.apiKey || undefined,
         weight: c.weight,
         enabled: c.enabled,
+        freeze_until: typeof c.freezeUntil === 'number' ? Math.floor(c.freezeUntil) : undefined,
       })),
       active: {
         name: sanitizedConfig.active,
       },
       loadbalancer: {
         strategy: sanitizedConfig.loadBalancer.strategy,
+        freeze_duration: sanitizedConfig.loadBalancer.freezeDuration,
         health_check: {
           enabled: sanitizedConfig.loadBalancer.healthCheck.enabled,
           interval: sanitizedConfig.loadBalancer.healthCheck.interval,

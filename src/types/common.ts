@@ -7,6 +7,7 @@ export interface ServiceConfig {
   auth_token?: string;
   weight: number;
   enabled?: boolean;
+  freeze_until?: number;
 }
 
 export interface TestConnectionResponse {
@@ -25,6 +26,7 @@ export interface ClaudeConfig {
   auth_token?: string;     // Bearer token credentials
   weight: number;          // Load-balancing weight
   enabled?: boolean;
+  freeze_until?: number;
 }
 
 // Codex-specific configuration
@@ -35,6 +37,7 @@ export interface CodexConfig {
   auth_token?: string;     // Bearer token credentials
   weight: number;          // Load-balancing weight
   enabled?: boolean;
+  freeze_until?: number;
 }
 
 // Response structure for separated configs
@@ -43,11 +46,13 @@ export interface SeparatedConfigResponse {
     configs: Record<string, ClaudeConfig> | ClaudeConfig[];
     active: string | null;
     mode: 'manual' | 'load_balance';
+    current?: string | null;
   };
   codex: {
     configs: Record<string, CodexConfig> | CodexConfig[];
     active: string | null;
     mode: 'manual' | 'load_balance';
+    current?: string | null;
   };
 }
 

@@ -54,6 +54,15 @@ const SERVICE_METADATA: Record<
   },
 };
 
+function normalizeFreezeUntil(config: ServiceConfig | Record<string, unknown>): number | undefined {
+  const raw = (config as any).freeze_until ?? (config as any).freezeUntil ?? null;
+  if (typeof raw === 'string') {
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  return typeof raw === 'number' && Number.isFinite(raw) ? raw : undefined;
+}
+
 function normalizeServiceConfigs<T extends ServiceConfig>(
   configs: Record<string, T> | T[] | undefined,
 ): T[] {
@@ -72,6 +81,7 @@ function normalizeServiceConfigs<T extends ServiceConfig>(
     auth_token: (config as any).authToken || (config as any).auth_token,
     api_key: (config as any).apiKey || (config as any).api_key,
     enabled: (config as any).enabled ?? true,
+    freeze_until: normalizeFreezeUntil(config),
   } as T));
 }
 
@@ -90,10 +100,6 @@ export function ConfigPanel() {
   const [configs, setConfigs] = useState<{ claude: ClaudeConfig[]; codex: CodexConfig[] }>({
     claude: [],
     codex: [],
-  });
-  const [activeConfigMap, setActiveConfigMap] = useState<Record<ServiceId, string>>({
-    claude: '',
-    codex: '',
   });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingConfig, setEditingConfig] = useState<ServiceConfig | null>(null);
@@ -149,21 +155,16 @@ export function ConfigPanel() {
       const [claudeData, codexData] = await Promise.all([
         api.listClaudeConfigs(),
         api.listCodexConfigs(),
-      ]);
+  ]);
 
       setConfigs({
         claude: normalizeServiceConfigs<ClaudeConfig>(claudeData.configs),
         codex: normalizeServiceConfigs<CodexConfig>(codexData.configs),
       });
 
-      setActiveConfigMap({
-        claude: claudeData.active ?? '',
-        codex: codexData.active ?? '',
-      });
     } catch (error) {
       console.error('Failed to load configs:', error);
       setConfigs({ claude: [], codex: [] });
-      setActiveConfigMap({ claude: '', codex: '' });
     }
   };
 
@@ -338,9 +339,11 @@ export function ConfigPanel() {
               completedAt: timestamp,
             };
             return acc;
-          }, {} as Record<string, TestConnectionResponse & { completedAt: string }>),
+                  }, {} as Record<string, TestConnectionResponse & { completedAt: string }>),
         },
       }));
+
+      await loadConfigs();
     } finally {
       setTestLoading((prev) => ({ ...prev, [service]: false }));
     }
@@ -407,13 +410,15 @@ export function ConfigPanel() {
           {currentConfigs.map((config) => {
             const isEnabled = config.enabled !== false;
             const result = testResults[service]?.[config.name];
+            const isFrozen = config.freeze_until && Date.now() < config.freeze_until;
             const status = !isEnabled
               ? { label: t('config.status.disabled'), className: 'text-muted-foreground' }
-              : result?.success === false
-                ? { label: t('config.status.error'), className: 'text-destructive' }
-                : result?.success
-                  ? { label: t('config.status.ok'), className: 'text-emerald-600' }
-                  : { label: t('config.status.ok'), className: 'text-muted-foreground' };
+              : isFrozen
+                ? { label: t('config.status.frozen'), className: 'text-destructive' }
+                : {
+                    label: t('config.status.ok'),
+                    className: result?.success ? 'text-emerald-600' : 'text-muted-foreground',
+                  };
 
             return (
               <TableRow key={config.name}>
@@ -510,8 +515,6 @@ export function ConfigPanel() {
     );
   };
 
-  const activeConfig = configs[activeService].find(config => config.name === activeConfigMap[activeService]);
-  const isActiveConfigDisabled = activeConfig ? activeConfig.enabled === false : false;
   const enabledConfigs = configs[activeService].filter(config => config.enabled !== false);
   const hasEnabledConfigs = enabledConfigs.length > 0;
 

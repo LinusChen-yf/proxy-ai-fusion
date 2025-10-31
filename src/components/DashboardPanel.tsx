@@ -32,6 +32,7 @@ interface DashboardService {
 interface DashboardServiceState {
   configs: ServiceConfig[];
   activeName: string | null;
+  currentName: string | null;
   mode: 'manual' | 'load_balance';
 }
 
@@ -107,7 +108,11 @@ function resolveServiceStatus(
   if (loading) {
     return { labelKey: 'dashboard.status.loading', variant: 'secondary' };
   }
-  if (serviceData.activeName) {
+  // For load_balance mode, check currentName; for manual mode, check activeName
+  const hasActiveConfig = serviceData.mode === 'load_balance'
+    ? serviceData.currentName
+    : serviceData.activeName;
+  if (hasActiveConfig) {
     return { labelKey: 'dashboard.status.active', variant: 'default' };
   }
   if (serviceData.configs.length > 0) {
@@ -121,8 +126,8 @@ export function DashboardPanel() {
   const feedback = useFeedback();
   const [data, setData] = useState<DashboardData>({
     services: {
-      claude: { configs: [], activeName: null, mode: 'manual' },
-      codex: { configs: [], activeName: null, mode: 'manual' },
+      claude: { configs: [], activeName: null, currentName: null, mode: 'manual' },
+      codex: { configs: [], activeName: null, currentName: null, mode: 'manual' },
     },
   });
   const [loading, setLoading] = useState(false);
@@ -148,11 +153,13 @@ export function DashboardPanel() {
           claude: {
             configs: normalizeConfigs(separatedConfigs.claude?.configs),
             activeName: separatedConfigs.claude?.active ?? null,
+            currentName: separatedConfigs.claude?.current ?? null,
             mode: separatedConfigs.claude?.mode ?? 'manual',
           },
           codex: {
             configs: normalizeConfigs(separatedConfigs.codex?.configs),
             activeName: separatedConfigs.codex?.active ?? null,
+            currentName: separatedConfigs.codex?.current ?? null,
             mode: separatedConfigs.codex?.mode ?? 'manual',
           },
         },
@@ -169,21 +176,36 @@ export function DashboardPanel() {
     loadDashboardData();
   }, [loadDashboardData]);
 
+  // Auto-refresh for load balance mode
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    // Check if any service is in load_balance mode
+    const hasLoadBalanceMode = Object.values(data.services).some(
+      service => service.mode === 'load_balance'
+    );
+
+    if (hasLoadBalanceMode) {
+      // Auto-refresh every 5 seconds for load balance mode
+      interval = setInterval(() => {
+        loadDashboardData();
+      }, 5000);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [data.services, loadDashboardData]);
+
   const handleModeChange = async (service: ServiceId, newMode: 'manual' | 'load_balance') => {
     try {
       setModeUpdating((prev) => ({ ...prev, [service]: true }));
       await api.updateServiceMode(service, newMode);
-      
-      setData((prev) => ({
-        ...prev,
-        services: {
-          ...prev.services,
-          [service]: {
-            ...prev.services[service],
-            mode: newMode,
-          },
-        },
-      }));
+
+      // Refresh data after mode change to get current config
+      await loadDashboardData();
     } catch (error) {
       console.error('Failed to update mode:', error);
       feedback.showError(t('config.error.mode'));
@@ -201,16 +223,8 @@ export function DashboardPanel() {
         await api.activateCodexConfig(configName);
       }
 
-      setData((prev) => ({
-        ...prev,
-        services: {
-          ...prev.services,
-          [service]: {
-            ...prev.services[service],
-            activeName: configName,
-          },
-        },
-      }));
+      // Refresh data after config selection
+      await loadDashboardData();
     } catch (error) {
       console.error('Failed to activate config:', error);
       feedback.showError(t('config.error.activate'));
@@ -241,11 +255,18 @@ export function DashboardPanel() {
         <div className="grid gap-6 md:grid-cols-2">
           {SERVICES.map((service) => {
             const serviceData =
-              data.services[service.id] ?? { configs: [], activeName: null, mode: 'manual' };
+              data.services[service.id] ?? { configs: [], activeName: null, currentName: null, mode: 'manual' };
             const enabledConfigs = serviceData.configs.filter(config => config.enabled !== false);
-            const activeConfig = serviceData.activeName
-              ? serviceData.configs.find((config) => config.name === serviceData.activeName)
+
+            // Use currentName for load_balance mode, activeName for manual mode
+            const displayName = serviceData.mode === 'load_balance'
+              ? serviceData.currentName
+              : serviceData.activeName;
+
+            const displayConfig = displayName
+              ? serviceData.configs.find((config) => config.name === displayName)
               : undefined;
+
             const statusInfo = resolveServiceStatus(serviceData, loading, hasError);
             const currentMode = serviceData.mode;
             const selectValue = serviceData.activeName || '';
@@ -321,18 +342,18 @@ export function DashboardPanel() {
                               ))}
                             </SelectContent>
                           </Select>
-                          {activeConfig && (
+                          {displayConfig && (
                             <div className="rounded-lg border bg-muted/40 p-4">
                               <div className="flex flex-wrap items-center gap-2">
-                                <Badge>{activeConfig.name}</Badge>
+                                <Badge>{displayConfig.name}</Badge>
                                 <span className="text-xs text-muted-foreground">
                                   {t('dashboard.weightLabel', {
-                                    value: activeConfig.weight !== undefined ? activeConfig.weight.toFixed(2) : '1.00',
+                                    value: displayConfig.weight !== undefined ? displayConfig.weight.toFixed(2) : '1.00',
                                   })}
                                 </span>
                                 <span className="text-xs text-muted-foreground">
                                   {t('dashboard.authLabel', {
-                                    value: t(getAuthLabelKey(activeConfig)),
+                                    value: t(getAuthLabelKey(displayConfig)),
                                   })}
                                 </span>
                               </div>
@@ -340,7 +361,7 @@ export function DashboardPanel() {
                                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                                   {t('dashboard.upstreamUrl')}
                                 </p>
-                                <p className="mt-1 font-mono text-sm break-all">{activeConfig.base_url}</p>
+                                <p className="mt-1 font-mono text-sm break-all">{displayConfig.base_url}</p>
                               </div>
                             </div>
                           )}
@@ -358,22 +379,22 @@ export function DashboardPanel() {
                         <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
                           {t('dashboard.noEnabledConfigs', { service: t(service.labelKey) })}
                         </div>
-                      ) : activeConfig ? (
+                      ) : displayConfig ? (
                         <div>
                           <label className="text-xs font-medium text-muted-foreground">
                             {t('dashboard.forwardingConfig')}
                           </label>
                           <div className="mt-1.5 rounded-lg border bg-muted/40 p-4">
                             <div className="flex flex-wrap items-center gap-2">
-                              <Badge>{activeConfig.name}</Badge>
+                              <Badge>{displayConfig.name}</Badge>
                               <span className="text-xs text-muted-foreground">
                                 {t('dashboard.weightLabel', {
-                                  value: activeConfig.weight !== undefined ? activeConfig.weight.toFixed(2) : '1.00',
+                                  value: displayConfig.weight !== undefined ? displayConfig.weight.toFixed(2) : '1.00',
                                 })}
                               </span>
                               <span className="text-xs text-muted-foreground">
                                 {t('dashboard.authLabel', {
-                                  value: t(getAuthLabelKey(activeConfig)),
+                                  value: t(getAuthLabelKey(displayConfig)),
                                 })}
                               </span>
                             </div>
@@ -381,8 +402,11 @@ export function DashboardPanel() {
                               <p className="text-xs uppercase tracking-wide text-muted-foreground">
                                 {t('dashboard.upstreamUrl')}
                               </p>
-                              <p className="mt-1 font-mono text-sm break-all">{activeConfig.base_url}</p>
+                              <p className="mt-1 font-mono text-sm break-all">{displayConfig.base_url}</p>
                             </div>
+                            <p className="mt-2 text-xs text-muted-foreground">
+                              {t('dashboard.autoRefresh')}
+                            </p>
                           </div>
                         </div>
                       ) : (

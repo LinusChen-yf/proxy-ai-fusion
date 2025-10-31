@@ -30,6 +30,7 @@ await configManager.loadServiceConfig('claude').catch(async () => {
         failureThreshold: 3,
         successThreshold: 2,
       },
+      freezeDuration: 5 * 60 * 1000, // 5 minutes
     },
   });
 });
@@ -50,6 +51,7 @@ await configManager.loadServiceConfig('codex').catch(async () => {
         failureThreshold: 3,
         successThreshold: 2,
       },
+      freezeDuration: 5 * 60 * 1000, // 5 minutes
     },
   });
 });
@@ -66,6 +68,7 @@ const claudeLoadBalancer = new LoadBalancer(
       failureThreshold: 3,
       successThreshold: 2,
     },
+    freezeDuration: 5 * 60 * 1000,
   }
 );
 
@@ -80,6 +83,7 @@ const codexLoadBalancer = new LoadBalancer(
       failureThreshold: 3,
       successThreshold: 2,
     },
+    freezeDuration: 5 * 60 * 1000,
   }
 );
 
@@ -246,16 +250,46 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
       const claudeConfig = configManager.getServiceConfig('claude');
       const codexConfig = configManager.getServiceConfig('codex');
 
+      // For load_balance mode, simulate selecting a config to display as "current"
+      const getCurrentConfig = (config: any) => {
+        if (!config || config.mode !== 'load_balance') {
+          return config?.active || null;
+        }
+        const enabled = (config.configs || []).filter((c: any) => c.enabled !== false);
+        if (enabled.length === 0) return null;
+
+        const now = Date.now();
+        const eligible = enabled.filter((c: any) => {
+          const freezeUntil = c.freezeUntil ?? c.freeze_until ?? null;
+          return !freezeUntil || now >= freezeUntil;
+        });
+        if (eligible.length === 0) {
+          return enabled[0]?.name || null;
+        }
+        // Random selection based on weights
+        const totalWeight = eligible.reduce((sum: number, c: any) => sum + (c.weight || 1), 0);
+        let random = Math.random() * totalWeight;
+        for (const c of eligible) {
+          random -= c.weight || 1;
+          if (random <= 0) {
+            return c.name;
+          }
+        }
+        return eligible[0].name;
+      };
+
       return Response.json({
         claude: {
           configs: claudeConfig?.configs || [],
           active: claudeConfig?.active,
           mode: claudeConfig?.mode || 'manual',
+          current: getCurrentConfig(claudeConfig),
         },
         codex: {
           configs: codexConfig?.configs || [],
           active: codexConfig?.active,
           mode: codexConfig?.mode || 'manual',
+          current: getCurrentConfig(codexConfig),
         },
       }, { headers: corsHeaders });
     }
@@ -315,6 +349,13 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
 
       // Set mode
       serviceConfig.mode = body.mode;
+
+      // If switching to load_balance mode, clear the active config
+      // The load balancer will dynamically select servers based on weights
+      if (body.mode === 'load_balance') {
+        serviceConfig.active = '';
+      }
+
       await configManager.saveServiceConfig(serviceName, serviceConfig);
 
       return Response.json({ success: true }, { headers: corsHeaders });
@@ -366,6 +407,34 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
 
       // Remove config
       serviceConfig.configs = serviceConfig.configs.filter(c => c.name !== configName);
+      await configManager.saveServiceConfig(serviceName, serviceConfig);
+
+      return Response.json({ success: true }, { headers: corsHeaders });
+    }
+
+    // Freeze/unfreeze config
+    if (path.match(/^\/api\/configs\/[^/]+\/freeze$/) && req.method === 'PUT') {
+      const configName = path.split('/')[3];
+      const serviceName = url.searchParams.get('service') || 'claude';
+      const serviceConfig = configManager.getServiceConfig(serviceName);
+
+      if (!serviceConfig) {
+        return Response.json({ error: 'Service not found' }, { status: 404, headers: corsHeaders });
+      }
+
+      const body = await req.json();
+      const freezeUntil = body.freezeUntil || null;
+
+      // Update config
+      const index = serviceConfig.configs.findIndex(c => c.name === configName);
+      if (index === -1) {
+        return Response.json({ error: 'Config not found' }, { status: 404, headers: corsHeaders });
+      }
+
+      serviceConfig.configs[index] = {
+        ...serviceConfig.configs[index],
+        freezeUntil,
+      };
       await configManager.saveServiceConfig(serviceName, serviceConfig);
 
       return Response.json({ success: true }, { headers: corsHeaders });
@@ -662,6 +731,20 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
         const testUrlObj = new URL(testUrl);
         const testPathWithQuery = `${testUrlObj.pathname}${testUrlObj.search}`;
 
+        // Auto-freeze config if test fails
+        if (!testResponse.ok) {
+          const index = serviceConfig.configs.findIndex(c => c.name === configName);
+          if (index !== -1) {
+            const freezeDuration = serviceConfig.loadBalancer.freezeDuration || 5 * 60 * 1000;
+            const freezeUntil = Date.now() + freezeDuration;
+            serviceConfig.configs[index] = {
+              ...serviceConfig.configs[index],
+              freezeUntil,
+            };
+            await configManager.saveServiceConfig(serviceName, serviceConfig);
+          }
+        }
+
         // Log the test request
         const messageRequestEndTime = Date.now();
         await logger.logRequest({
@@ -696,6 +779,18 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
       } catch (error) {
         const duration = Date.now() - testStartTime;
         const errorMessage = error instanceof Error ? error.message : 'Connection failed';
+
+        // Auto-freeze config on test failure
+        const index = serviceConfig.configs.findIndex(c => c.name === configName);
+        if (index !== -1) {
+          const freezeDuration = serviceConfig.loadBalancer.freezeDuration || 5 * 60 * 1000;
+          const freezeUntil = Date.now() + freezeDuration;
+          serviceConfig.configs[index] = {
+            ...serviceConfig.configs[index],
+            freezeUntil,
+          };
+          await configManager.saveServiceConfig(serviceName, serviceConfig);
+        }
 
         // Log failed test request
         const failedPathWithQuery = (() => {

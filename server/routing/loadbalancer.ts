@@ -23,19 +23,38 @@ export class LoadBalancer {
    */
   selectServer(servers: ProxyConfig[]): ProxyConfig | null {
     const healthyServers = servers.filter(s => this.isServerHealthy(s.name));
+    const now = Date.now();
 
-    if (healthyServers.length === 0) {
-      // Fallback: try any server if all marked unhealthy
-      return servers[0] || null;
+    // Filter out frozen servers
+    const availableServers = healthyServers.filter(s => {
+      if (!s.freezeUntil) return true;
+      return now >= s.freezeUntil;
+    });
+
+    if (availableServers.length === 0) {
+      // Fallback: try any server if all marked unhealthy or frozen
+      const fallbackServers = healthyServers.filter(s => !s.freezeUntil || now >= s.freezeUntil);
+      if (fallbackServers.length === 0) {
+        return healthyServers[0] || null;
+      }
+      // Choose based on strategy from available servers
+      switch (this.config.strategy) {
+        case 'weighted':
+          return this.selectWeighted(fallbackServers);
+        case 'round-robin':
+          return this.selectRoundRobin(fallbackServers);
+        default:
+          return fallbackServers[0];
+      }
     }
 
     switch (this.config.strategy) {
       case 'weighted':
-        return this.selectWeighted(healthyServers);
+        return this.selectWeighted(availableServers);
       case 'round-robin':
-        return this.selectRoundRobin(healthyServers);
+        return this.selectRoundRobin(availableServers);
       default:
-        return healthyServers[0];
+        return availableServers[0];
     }
   }
 
