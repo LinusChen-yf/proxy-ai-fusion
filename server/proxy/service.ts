@@ -241,14 +241,14 @@ export class ProxyService {
 
     // Clone response and remove content-encoding header to prevent decompression errors
     // This ensures the client receives uncompressed data
-    const responseHeaders = new Headers(upstreamResponse.headers);
-    responseHeaders.delete('content-encoding');
-    responseHeaders.delete('content-length'); // Content-Length may be invalid after decompression
+    const modifiedHeaders = new Headers(upstreamResponse.headers);
+    modifiedHeaders.delete('content-encoding');
+    modifiedHeaders.delete('content-length'); // Content-Length may be invalid after decompression
 
     return new Response(upstreamResponse.body, {
       status: upstreamResponse.status,
       statusText: upstreamResponse.statusText,
-      headers: responseHeaders,
+      headers: modifiedHeaders,
     });
   }
 
@@ -345,14 +345,14 @@ export class ProxyService {
     })();
 
     // Return streaming response
-    const responseHeaders = new Headers(upstreamResponse.headers);
-    responseHeaders.delete('content-encoding');
-    responseHeaders.delete('content-length');
+    const modifiedHeaders = new Headers(upstreamResponse.headers);
+    modifiedHeaders.delete('content-encoding');
+    modifiedHeaders.delete('content-length');
 
     return new Response(readable, {
       status: upstreamResponse.status,
       statusText: upstreamResponse.statusText,
-      headers: responseHeaders,
+      headers: modifiedHeaders,
     });
   }
 

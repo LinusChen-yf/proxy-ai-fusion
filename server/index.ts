@@ -523,12 +523,38 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
           let selectedModel = 'claude-3-haiku-20240307';
           try {
             const modelsUrl = new URL('v1/models', normalizedBase).toString();
+            const modelListRequestHeaders = {
+              Accept: 'application/json',
+              'Accept-Encoding': 'identity',
+              ...authHeaders,
+            };
+            const modelListStartTime = Date.now();
             const modelResponse = await fetch(modelsUrl, {
               method: 'GET',
-              headers: {
-                Accept: 'application/json',
-                ...authHeaders,
-              },
+              headers: modelListRequestHeaders,
+            });
+            const modelListEndTime = Date.now();
+            const modelListDuration = modelListEndTime - modelListStartTime;
+
+            // Log the model list request
+            const modelUrlObj = new URL(modelsUrl);
+            const modelPathWithQuery = `${modelUrlObj.pathname}${modelUrlObj.search}`;
+
+            await logger.logRequest({
+              id: `models-${modelListEndTime}-${Math.random().toString(36).substring(7)}`,
+              timestamp: modelListStartTime,
+              service: serviceName,
+              method: 'GET',
+              path: modelPathWithQuery,
+              targetUrl: modelsUrl,
+              configName: configName,
+              statusCode: modelResponse.status,
+              duration: modelListDuration,
+              error: modelResponse.ok ? undefined : `HTTP ${modelResponse.status}: ${modelResponse.statusText}`,
+              requestHeaders: modelListRequestHeaders as Record<string, string>,
+              responseHeaders: Object.fromEntries(modelResponse.headers.entries()),
+              requestBody: undefined,
+              responsePreview: modelResponse.ok ? 'Model list retrieved successfully' : 'Failed to retrieve model list',
             });
 
             if (modelResponse.ok) {
@@ -550,7 +576,28 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
               );
             }
           } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch model list';
             console.warn(`[proxy:${serviceName}] Failed to fetch model list`, error);
+
+            // Log the failed model list request
+            const modelListStartTime = Date.now();
+            const modelsUrl = new URL('v1/models', normalizedBase).toString();
+            const modelUrlObj = new URL(modelsUrl);
+            const modelPathWithQuery = `${modelUrlObj.pathname}${modelUrlObj.search}`;
+            const modelListDuration = 0;
+
+            await logger.logRequest({
+              id: `models-${modelListStartTime}-${Math.random().toString(36).substring(7)}`,
+              timestamp: modelListStartTime,
+              service: serviceName,
+              method: 'GET',
+              path: modelPathWithQuery,
+              targetUrl: modelsUrl,
+              configName: configName,
+              statusCode: 0,
+              duration: modelListDuration,
+              error: errorMessage,
+            });
           }
 
           testUrl = new URL('v1/messages', normalizedBase).toString();
@@ -616,9 +663,10 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
         const testPathWithQuery = `${testUrlObj.pathname}${testUrlObj.search}`;
 
         // Log the test request
+        const messageRequestEndTime = Date.now();
         await logger.logRequest({
           id: logId,
-          timestamp: testStartTime,
+          timestamp: messageRequestEndTime - duration,
           service: serviceName,
           method: 'POST',
           path: testPathWithQuery,
@@ -662,9 +710,10 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
           }
         })();
 
+        const failedRequestEndTime = Date.now();
         await logger.logRequest({
           id: logId,
-          timestamp: testStartTime,
+          timestamp: failedRequestEndTime - duration,
           service: serviceName,
           method: 'POST',
           path: failedPathWithQuery,
