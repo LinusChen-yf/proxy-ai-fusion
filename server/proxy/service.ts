@@ -76,6 +76,10 @@ export class ProxyService {
       const acceptHeader = request.headers.get('accept') || '';
       const isStreaming = acceptHeader.includes('text/event-stream');
 
+      // Remove Accept-Encoding to get uncompressed responses from upstream
+      // This prevents Brotli compression issues
+      delete headers['accept-encoding'];
+
       // Make upstream request
       const upstreamResponse = await fetch(upstreamUrl, {
         method: request.method,
@@ -208,10 +212,10 @@ export class ProxyService {
       requestHeaders[key] = value;
     });
 
-    // Collect response headers
-    const responseHeaders: Record<string, string> = {};
+    // Collect response headers for logging
+    const headersForLogging: Record<string, string> = {};
     upstreamResponse.headers.forEach((value, key) => {
-      responseHeaders[key] = value;
+      headersForLogging[key] = value;
     });
 
     // Log request
@@ -232,12 +236,20 @@ export class ProxyService {
       requestBody: requestInfo.preview,
       responsePreview,
       requestHeaders,
-      responseHeaders,
+      responseHeaders: headersForLogging,
     });
 
+    // Clone response and remove content-encoding header to prevent decompression errors
+    // This ensures the client receives uncompressed data
+    const responseHeaders = new Headers(upstreamResponse.headers);
+    responseHeaders.delete('content-encoding');
+    responseHeaders.delete('content-length'); // Content-Length may be invalid after decompression
 
-
-    return upstreamResponse;
+    return new Response(upstreamResponse.body, {
+      status: upstreamResponse.status,
+      statusText: upstreamResponse.statusText,
+      headers: responseHeaders,
+    });
   }
 
   /**
@@ -265,9 +277,9 @@ export class ProxyService {
       requestHeaders[key] = value;
     });
 
-    const responseHeaders: Record<string, string> = {};
+    const headersForLogging: Record<string, string> = {};
     upstreamResponse.headers.forEach((value, key) => {
-      responseHeaders[key] = value;
+      headersForLogging[key] = value;
     });
 
     // Stream response chunks
@@ -320,7 +332,7 @@ export class ProxyService {
           requestBody: requestInfo.preview,
           responsePreview,
           requestHeaders,
-          responseHeaders,
+          responseHeaders: headersForLogging,
         });
 
 
@@ -333,9 +345,14 @@ export class ProxyService {
     })();
 
     // Return streaming response
+    const responseHeaders = new Headers(upstreamResponse.headers);
+    responseHeaders.delete('content-encoding');
+    responseHeaders.delete('content-length');
+
     return new Response(readable, {
       status: upstreamResponse.status,
-      headers: upstreamResponse.headers,
+      statusText: upstreamResponse.statusText,
+      headers: responseHeaders,
     });
   }
 

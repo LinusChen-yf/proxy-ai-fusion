@@ -514,6 +514,9 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
           }
         }
 
+        // Remove Accept-Encoding to prevent Brotli compression issues
+        authHeaders['Accept-Encoding'] = 'identity';
+
         if (serviceName === 'claude') {
           authHeaders['anthropic-version'] = authHeaders['anthropic-version'] || '2023-06-01';
 
