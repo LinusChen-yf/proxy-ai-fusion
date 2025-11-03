@@ -66,8 +66,8 @@ export const api = {
   },
 
   // Claude configuration management
-  async listClaudeConfigs(): Promise<{ configs: Record<string, ClaudeConfig> | ClaudeConfig[]; active: string | null; mode: 'manual' | 'load_balance' }> {
-    return fetchJSON(`${API_BASE}/configs?service=claude`);
+  async listClaudeConfigs(): Promise<ConfigListResponse<ClaudeConfig>> {
+    return fetchJSON<ConfigListResponse<ClaudeConfig>>(`${API_BASE}/configs?service=claude`);
   },
 
   async createClaudeConfig(config: Omit<ClaudeConfig, 'weight'> & { weight?: number }): Promise<void> {
@@ -104,8 +104,8 @@ export const api = {
   },
 
   // Codex configuration management
-  async listCodexConfigs(): Promise<{ configs: Record<string, CodexConfig> | CodexConfig[]; active: string | null; mode: 'manual' | 'load_balance' }> {
-    return fetchJSON(`${API_BASE}/configs?service=codex`);
+  async listCodexConfigs(): Promise<ConfigListResponse<CodexConfig>> {
+    return fetchJSON<ConfigListResponse<CodexConfig>>(`${API_BASE}/configs?service=codex`);
   },
 
   async createCodexConfig(config: Omit<CodexConfig, 'weight'> & { weight?: number }): Promise<void> {

@@ -22,29 +22,30 @@ export class LoadBalancer {
    * Select an upstream server based on the configured strategy
    */
   selectServer(servers: ProxyConfig[]): ProxyConfig | null {
+    if (servers.length === 0) {
+      return null;
+    }
+
     const healthyServers = servers.filter(s => this.isServerHealthy(s.name));
+    const pool = healthyServers.length > 0 ? healthyServers : servers;
     const now = Date.now();
 
     // Filter out frozen servers
-    const availableServers = healthyServers.filter(s => {
+    const availableServers = pool.filter(s => {
       if (!s.freezeUntil) return true;
       return now >= s.freezeUntil;
     });
 
     if (availableServers.length === 0) {
-      // Fallback: try any server if all marked unhealthy or frozen
-      const fallbackServers = healthyServers.filter(s => !s.freezeUntil || now >= s.freezeUntil);
-      if (fallbackServers.length === 0) {
-        return healthyServers[0] || null;
-      }
-      // Choose based on strategy from available servers
+      // Fallback: allow previously unhealthy servers to be retried rather than returning 503
+      // This is especially important in manual mode where the user wants to force a specific config.
       switch (this.config.strategy) {
         case 'weighted':
-          return this.selectWeighted(fallbackServers);
+          return this.selectWeighted(pool);
         case 'round-robin':
-          return this.selectRoundRobin(fallbackServers);
+          return this.selectRoundRobin(pool);
         default:
-          return fallbackServers[0];
+          return pool[0];
       }
     }
 
@@ -112,6 +113,14 @@ export class LoadBalancer {
     }
 
     health.lastChecked = Date.now();
+  }
+
+  /**
+   * Determine whether a server has exceeded the configured failure threshold
+   */
+  hasExceededFailureThreshold(serverName: string): boolean {
+    const health = this.getOrCreateHealth(serverName);
+    return health.consecutiveFailures >= this.config.healthCheck.failureThreshold;
   }
 
   /**

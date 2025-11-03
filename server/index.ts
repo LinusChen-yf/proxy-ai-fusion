@@ -3,8 +3,12 @@
 import { serve } from 'bun';
 import { ConfigManager } from './config/manager';
 import { LoadBalancer } from './routing/loadbalancer';
-import { RequestLogger } from './logging/logger';
+import { RequestLogger, type LastRequestSnapshot } from './logging/logger';
 import { ProxyService } from './proxy/service';
+import type { ProxyConfig, ServiceConfig } from './config/types';
+import { join } from 'path';
+import { tmpdir } from 'os';
+import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'fs';
 
 // Initialize services
 const configManager = new ConfigManager();
@@ -12,6 +16,13 @@ await configManager.initialize();
 
 const systemConfig = configManager.getSystemConfig();
 const logger = new RequestLogger(systemConfig.dataDir);
+
+const autoRetestLocks: Record<'claude' | 'codex', Set<string>> = {
+  claude: new Set(),
+  codex: new Set(),
+};
+
+const AUTO_RETEST_INTERVAL_MS = 60 * 1000;
 
 // Load service configurations
 await configManager.loadServiceConfig('claude').catch(async () => {
@@ -92,13 +103,28 @@ const claudeProxy = new ProxyService({
   loadBalancer: claudeLoadBalancer,
   logger,
   serviceName: 'claude',
+  configManager,
 });
 
 const codexProxy = new ProxyService({
   loadBalancer: codexLoadBalancer,
   logger,
   serviceName: 'codex',
+  configManager,
 });
+
+setTimeout(() => {
+  void autoRetestFrozenConfigs('claude');
+  void autoRetestFrozenConfigs('codex');
+}, 0);
+
+setInterval(() => {
+  void autoRetestFrozenConfigs('claude');
+}, AUTO_RETEST_INTERVAL_MS);
+
+setInterval(() => {
+  void autoRetestFrozenConfigs('codex');
+}, AUTO_RETEST_INTERVAL_MS);
 
 console.log('Starting Proxy AI Fusion server...');
 console.log(`Web UI: http://localhost:${systemConfig.webPort}`);
@@ -218,6 +244,64 @@ function convertLogToFrontendFormat(log: any): any {
   };
 }
 
+function serializeLastResult(result: LastRequestSnapshot) {
+  return {
+    success: result.success,
+    status_code: result.statusCode,
+    message: result.message,
+    duration_ms: result.durationMs,
+    response_preview: result.responsePreview,
+    completed_at: result.completedAt,
+    source: result.source,
+    method: result.method,
+    path: result.path,
+  };
+}
+
+function buildLastResults(serviceName: string) {
+  const snapshots = logger.getLastResultsByService(serviceName);
+  const payload: Record<string, ReturnType<typeof serializeLastResult>> = {};
+  for (const [configName, snapshot] of Object.entries(snapshots)) {
+    payload[configName] = serializeLastResult(snapshot);
+  }
+  return payload;
+}
+
+async function applyConfigFreeze(
+  serviceName: 'claude' | 'codex',
+  serviceConfig: ServiceConfig,
+  configName: string,
+  freezeUntil?: number
+): Promise<ProxyConfig | undefined> {
+  const index = serviceConfig.configs.findIndex(c => c.name === configName);
+  if (index === -1) {
+    return undefined;
+  }
+
+  const nextConfig = { ...serviceConfig.configs[index] };
+  if (freezeUntil && Number.isFinite(freezeUntil)) {
+    nextConfig.freezeUntil = freezeUntil;
+  } else {
+    delete nextConfig.freezeUntil;
+  }
+
+  serviceConfig.configs[index] = nextConfig;
+  await configManager.saveServiceConfig(serviceName, serviceConfig);
+
+  const refreshed = configManager.getServiceConfig(serviceName);
+  if (!refreshed) {
+    return undefined;
+  }
+
+  serviceConfig.configs = refreshed.configs;
+  serviceConfig.active = refreshed.active;
+  serviceConfig.mode = refreshed.mode;
+  serviceConfig.loadBalancer = refreshed.loadBalancer;
+
+  const updated = refreshed.configs.find(c => c.name === configName);
+  return updated ? { ...updated } : undefined;
+}
+
 /**
  * Handle API requests
  */
@@ -284,12 +368,14 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
           active: claudeConfig?.active,
           mode: claudeConfig?.mode || 'manual',
           current: getCurrentConfig(claudeConfig),
+          last_results: buildLastResults('claude'),
         },
         codex: {
           configs: codexConfig?.configs || [],
           active: codexConfig?.active,
           mode: codexConfig?.mode || 'manual',
           current: getCurrentConfig(codexConfig),
+          last_results: buildLastResults('codex'),
         },
       }, { headers: corsHeaders });
     }
@@ -298,11 +384,13 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
     if (path === '/api/configs' && req.method === 'GET') {
       const serviceName = url.searchParams.get('service') || 'claude';
       const serviceConfig = configManager.getServiceConfig(serviceName);
+      const lastResults = buildLastResults(serviceName);
 
       return Response.json({
         configs: serviceConfig?.configs || [],
         active: serviceConfig?.active,
         mode: serviceConfig?.mode || 'manual',
+        last_results: lastResults,
       }, { headers: corsHeaders });
     }
 
@@ -408,6 +496,7 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
       // Remove config
       serviceConfig.configs = serviceConfig.configs.filter(c => c.name !== configName);
       await configManager.saveServiceConfig(serviceName, serviceConfig);
+      logger.clearLastResult(serviceName, configName);
 
       return Response.json({ success: true }, { headers: corsHeaders });
     }
@@ -535,8 +624,14 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
     }
 
     // Test API connection
+    // Test API connection
     if (path.match(/^\/api\/configs\/[^/]+\/test$/) && req.method === 'POST') {
-      const configName = path.split('/')[3];
+      const segments = path.split('/');
+      const configName = decodeURIComponent(segments[3] || '');
+
+      if (!configName) {
+        return Response.json({ error: 'Config name missing' }, { status: 400, headers: corsHeaders });
+      }
       const serviceName = url.searchParams.get('service') || 'claude';
       const serviceConfig = configManager.getServiceConfig(serviceName);
 
@@ -556,280 +651,40 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
         }, { status: 400, headers: corsHeaders });
       }
 
-      // Test the API connection
-      const testStartTime = Date.now();
-      const logId = `test-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-
-      let testUrl: string | null = null;
-
       try {
-        // Build test request based on service type
-        let testBody: any;
-        let testHeaders: HeadersInit = {
-          'Content-Type': 'application/json',
-        };
-
-        const normalizedBase =
-          config.baseUrl.endsWith('/') ? config.baseUrl : `${config.baseUrl}/`;
-
-        const authHeaders: Record<string, string> = {};
-        if (config.apiKey) {
-          authHeaders['x-api-key'] = config.apiKey;
-        }
-        if (config.authToken) {
-          authHeaders['Authorization'] = `Bearer ${config.authToken}`;
-          if (serviceName === 'claude' && !authHeaders['x-api-key']) {
-            authHeaders['x-api-key'] = config.authToken;
-          }
-        }
-
-        // Remove Accept-Encoding to prevent Brotli compression issues
-        authHeaders['Accept-Encoding'] = 'identity';
-
         if (serviceName === 'claude') {
-          authHeaders['anthropic-version'] = authHeaders['anthropic-version'] || '2023-06-01';
-
-          let selectedModel = 'claude-3-haiku-20240307';
-          try {
-            const modelsUrl = new URL('v1/models', normalizedBase).toString();
-            const modelListRequestHeaders = {
-              Accept: 'application/json',
-              'Accept-Encoding': 'identity',
-              ...authHeaders,
-            };
-            const modelListStartTime = Date.now();
-            const modelResponse = await fetch(modelsUrl, {
-              method: 'GET',
-              headers: modelListRequestHeaders,
-            });
-            const modelListEndTime = Date.now();
-            const modelListDuration = modelListEndTime - modelListStartTime;
-
-            // Log the model list request
-            const modelUrlObj = new URL(modelsUrl);
-            const modelPathWithQuery = `${modelUrlObj.pathname}${modelUrlObj.search}`;
-
-            await logger.logRequest({
-              id: `models-${modelListEndTime}-${Math.random().toString(36).substring(7)}`,
-              timestamp: modelListStartTime,
-              service: serviceName,
-              method: 'GET',
-              path: modelPathWithQuery,
-              targetUrl: modelsUrl,
-              configName: configName,
-              statusCode: modelResponse.status,
-              duration: modelListDuration,
-              error: modelResponse.ok ? undefined : `HTTP ${modelResponse.status}: ${modelResponse.statusText}`,
-              requestHeaders: modelListRequestHeaders as Record<string, string>,
-              responseHeaders: Object.fromEntries(modelResponse.headers.entries()),
-              requestBody: undefined,
-              responsePreview: modelResponse.ok ? 'Model list retrieved successfully' : 'Failed to retrieve model list',
-            });
-
-            if (modelResponse.ok) {
-              const modelJson = await modelResponse.json();
-              const candidates: string[] = Array.isArray(modelJson?.data)
-                ? modelJson.data
-                    .map((item: any) => item?.id ?? item?.model ?? item)
-                    .filter((id: any) => typeof id === 'string')
-                : [];
-
-              const haikuModel =
-                candidates.find(id => /haiku/i.test(id)) ?? candidates[0];
-              if (haikuModel) {
-                selectedModel = haikuModel;
-              }
-            } else {
-              console.warn(
-                `[proxy:${serviceName}] Model list request failed with ${modelResponse.status} ${modelResponse.statusText}`
-              );
-            }
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch model list';
-            console.warn(`[proxy:${serviceName}] Failed to fetch model list`, error);
-
-            // Log the failed model list request
-            const modelListStartTime = Date.now();
-            const modelsUrl = new URL('v1/models', normalizedBase).toString();
-            const modelUrlObj = new URL(modelsUrl);
-            const modelPathWithQuery = `${modelUrlObj.pathname}${modelUrlObj.search}`;
-            const modelListDuration = 0;
-
-            await logger.logRequest({
-              id: `models-${modelListStartTime}-${Math.random().toString(36).substring(7)}`,
-              timestamp: modelListStartTime,
-              service: serviceName,
-              method: 'GET',
-              path: modelPathWithQuery,
-              targetUrl: modelsUrl,
-              configName: configName,
-              statusCode: 0,
-              duration: modelListDuration,
-              error: errorMessage,
-            });
-          }
-
-          testUrl = new URL('v1/messages', normalizedBase).toString();
-          testBody = {
-            model: selectedModel,
-            max_tokens: 10,
-            messages: [{ role: 'user', content: 'hi' }],
-          };
-        } else {
-          // OpenAI-compatible API test
-          testUrl = new URL('v1/chat/completions', normalizedBase).toString();
-          testBody = {
-            model: 'gpt-3.5-turbo',
-            max_tokens: 10,
-            messages: [{ role: 'user', content: 'hi' }],
-          };
+          const result = await runClaudeConfigTest({
+            configName,
+            config,
+            serviceConfig,
+          });
+          return Response.json(result, { headers: corsHeaders });
         }
 
-        testHeaders = {
-          ...testHeaders,
-          ...authHeaders,
-        };
-
-        if (!testUrl) {
-          throw new Error('Test URL not configured');
-        }
-
-        const testResponse = await fetch(testUrl, {
-          method: 'POST',
-          headers: testHeaders,
-          body: JSON.stringify(testBody),
+        const result = await runOpenAICompatTest({
+          serviceName: serviceName as 'claude' | 'codex',
+          configName,
+          config,
+          serviceConfig,
         });
 
-        const duration = Date.now() - testStartTime;
-        const responseText = await testResponse.text();
-        let responsePreview = '';
-        let responseJson: any = null;
-
-        try {
-          responseJson = JSON.parse(responseText);
-          // Get first content block for preview
-          if (serviceName === 'claude' && responseJson.content?.[0]?.text) {
-            responsePreview = responseJson.content[0].text;
-          } else if (responseJson.choices?.[0]?.message?.content) {
-            responsePreview = responseJson.choices[0].message.content;
-          } else if (responseJson.error) {
-            responsePreview = `Error: ${responseJson.error.message || JSON.stringify(responseJson.error)}`;
-          }
-        } catch {
-          responsePreview = responseText.substring(0, 100);
-        }
-
-        // Parse usage information
-        const usage = logger.parseUsage(responseJson);
-
-        // Collect response headers
-        const responseHeaders: Record<string, string> = {};
-        testResponse.headers.forEach((value, key) => {
-          responseHeaders[key] = value;
-        });
-
-        const testUrlObj = new URL(testUrl);
-        const testPathWithQuery = `${testUrlObj.pathname}${testUrlObj.search}`;
-
-        // Auto-freeze config if test fails
-        if (!testResponse.ok) {
-          const index = serviceConfig.configs.findIndex(c => c.name === configName);
-          if (index !== -1) {
-            const freezeDuration = serviceConfig.loadBalancer.freezeDuration || 5 * 60 * 1000;
-            const freezeUntil = Date.now() + freezeDuration;
-            serviceConfig.configs[index] = {
-              ...serviceConfig.configs[index],
-              freezeUntil,
-            };
-            await configManager.saveServiceConfig(serviceName, serviceConfig);
-          }
-        }
-
-        // Log the test request
-        const messageRequestEndTime = Date.now();
-        await logger.logRequest({
-          id: logId,
-          timestamp: messageRequestEndTime - duration,
-          service: serviceName,
-          method: 'POST',
-          path: testPathWithQuery,
-          targetUrl: testUrl,
-          configName: configName,
-          statusCode: testResponse.status,
-          duration: duration,
-          inputTokens: usage.inputTokens,
-          outputTokens: usage.outputTokens,
-          model: usage.model,
-          error: testResponse.ok ? undefined : `HTTP ${testResponse.status}: ${responsePreview}`,
-          requestHeaders: testHeaders as Record<string, string>,
-          responseHeaders: responseHeaders,
-          requestBody: JSON.stringify(testBody),
-          responsePreview: responsePreview,
-        });
-
-
-
-        return Response.json({
-          success: testResponse.ok,
-          status_code: testResponse.status,
-          duration_ms: duration,
-          message: testResponse.ok ? 'Connection successful' : `HTTP ${testResponse.status}`,
-          response_preview: responsePreview,
-        }, { headers: corsHeaders });
+        return Response.json(result, { headers: corsHeaders });
       } catch (error) {
-        const duration = Date.now() - testStartTime;
-        const errorMessage = error instanceof Error ? error.message : 'Connection failed';
-
-        // Auto-freeze config on test failure
-        const index = serviceConfig.configs.findIndex(c => c.name === configName);
-        if (index !== -1) {
-          const freezeDuration = serviceConfig.loadBalancer.freezeDuration || 5 * 60 * 1000;
-          const freezeUntil = Date.now() + freezeDuration;
-          serviceConfig.configs[index] = {
-            ...serviceConfig.configs[index],
-            freezeUntil,
-          };
-          await configManager.saveServiceConfig(serviceName, serviceConfig);
-        }
-
-        // Log failed test request
-        const failedPathWithQuery = (() => {
-          if (!testUrl) {
-            return '/test';
-          }
-          try {
-            const url = new URL(testUrl);
-            return `${url.pathname}${url.search}`;
-          } catch {
-            return '/test';
-          }
-        })();
-
-        const failedRequestEndTime = Date.now();
-        await logger.logRequest({
-          id: logId,
-          timestamp: failedRequestEndTime - duration,
-          service: serviceName,
-          method: 'POST',
-          path: failedPathWithQuery,
-          targetUrl: testUrl ?? undefined,
-          configName: configName,
-          statusCode: 0,
-          duration: duration,
-          error: errorMessage,
-        });
-
-
-
+        console.error(`[proxy:${serviceName}] Test execution failed:`, error);
         return Response.json({
           success: false,
           status_code: 0,
-          duration_ms: duration,
-          message: errorMessage,
+          duration_ms: 0,
+          message: error instanceof Error ? error.message : 'Test execution failed',
           response_preview: '',
+          completed_at: Date.now(),
+          source: serviceName === 'claude' ? 'cli' : 'proxy',
+          method: serviceName === 'claude' ? 'CLI' : 'POST',
+          path: '/test',
         }, { headers: corsHeaders });
       }
     }
+
 
     return Response.json({ error: 'Not found' }, { status: 404, headers: corsHeaders });
   } catch (error) {
@@ -838,6 +693,554 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500, headers: corsHeaders }
     );
+  }
+}
+
+const CLAUDE_CLI_TIMEOUT_MS = 10000;
+
+interface ConfigTestExecutionResult {
+  success: boolean;
+  status_code: number;
+  duration_ms: number;
+  message: string;
+  response_preview: string;
+  completed_at: number;
+  source: 'cli' | 'proxy';
+  method: string;
+  path: string;
+}
+
+interface ClaudeConfigTestParams {
+  configName: string;
+  config: ProxyConfig;
+  serviceConfig: ServiceConfig;
+}
+
+interface OpenAICompatTestParams {
+  serviceName: 'claude' | 'codex';
+  configName: string;
+  config: ProxyConfig;
+  serviceConfig: ServiceConfig;
+}
+
+async function runClaudeConfigTest({
+  configName,
+  config,
+  serviceConfig,
+}: ClaudeConfigTestParams): Promise<ConfigTestExecutionResult> {
+  const testStartTime = Date.now();
+  const logId = `test-${testStartTime}-${Math.random().toString(36).substring(7)}`;
+
+  let success = false;
+  let statusCode = 500;
+  let message = '';
+  let responsePreview = '';
+  let errorDetail = '';
+  let shouldFreeze = false;
+
+  const baseUrl = config.baseUrl;
+  const token = config.authToken || config.apiKey;
+
+  let sandboxHome: string | null = null;
+  let controller: AbortController | null = null;
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+  let stdoutPromise: Promise<string> | null = null;
+  let stderrPromise: Promise<string> | null = null;
+  let stdout = '';
+  let stderr = '';
+
+  const finalize = async (): Promise<ConfigTestExecutionResult> => {
+    const durationMs = Date.now() - testStartTime;
+    const completedAt = testStartTime + durationMs;
+
+    if (!responsePreview && message) {
+      responsePreview = trimPreview(message);
+    }
+
+    await logger.logRequest({
+      id: logId,
+      timestamp: testStartTime,
+      service: 'claude',
+      method: 'CLI',
+      path: '/cli/test',
+      targetUrl: baseUrl,
+      configName,
+      statusCode,
+      duration: durationMs,
+      error: success ? undefined : errorDetail || message,
+      requestBody: 'claude "hi"',
+      responsePreview,
+      requestHeaders: {
+        'anthropic-base-url': baseUrl ?? '',
+        'auth-strategy': config.authToken ? 'auth_token' : (config.apiKey ? 'api_key' : 'none'),
+      },
+    }).catch(error => {
+      console.error('[proxy:claude] Failed to log CLI test request:', error);
+    });
+
+    if (shouldFreeze && !success) {
+      const freezeDuration = serviceConfig.loadBalancer.freezeDuration || 5 * 60 * 1000;
+      const updatedConfig = await applyConfigFreeze('claude', serviceConfig, configName, Date.now() + freezeDuration);
+      if (updatedConfig) {
+        Object.assign(config, updatedConfig);
+      }
+    } else if (success && config.freezeUntil !== undefined) {
+      const updatedConfig = await applyConfigFreeze('claude', serviceConfig, configName, undefined);
+      if (updatedConfig) {
+        delete config.freezeUntil;
+        Object.assign(config, updatedConfig);
+      } else {
+        delete config.freezeUntil;
+      }
+    }
+
+    return {
+      success,
+      status_code: statusCode,
+      duration_ms: durationMs,
+      message,
+      response_preview: responsePreview,
+      completed_at: completedAt,
+      source: 'cli',
+      method: 'CLI',
+      path: '/cli/test',
+    };
+  };
+
+  try {
+    if (!baseUrl) {
+      statusCode = 400;
+      message = 'Claude configuration is missing a base URL';
+      errorDetail = message;
+      responsePreview = trimPreview(message);
+      return finalize();
+    }
+
+    if (!token) {
+      statusCode = 400;
+      message = 'Claude configuration requires an auth token or API key';
+      errorDetail = message;
+      responsePreview = trimPreview(message);
+      return finalize();
+    }
+
+    const claudeCli = Bun.which('claude');
+    if (!claudeCli) {
+      message = 'Claude CLI not found on PATH. Install `claude` to run connection tests.';
+      errorDetail = message;
+      return finalize();
+    }
+
+    const env: Record<string, string> = {};
+    for (const key of Object.keys(process.env)) {
+      const value = process.env[key];
+      if (typeof value === 'string') {
+        env[key] = value;
+      }
+    }
+
+    delete env.ANTHROPIC_BASE_URL;
+    delete env.ANTHROPIC_API_KEY;
+    delete env.ANTHROPIC_AUTH_TOKEN;
+    delete env.CLAUDE_DIR;
+
+    sandboxHome = createClaudeSandbox();
+
+    env.ANTHROPIC_BASE_URL = baseUrl;
+    env.ANTHROPIC_AUTH_TOKEN = token;
+    env.ANTHROPIC_API_KEY = token;
+    env.NO_COLOR = '1';
+    env.HOME = sandboxHome;
+    env.XDG_CONFIG_HOME = sandboxHome;
+    env.CLAUDE_DIR = sandboxHome;
+    env.PWD = sandboxHome;
+
+    controller = new AbortController();
+    timeout = setTimeout(() => controller?.abort(), CLAUDE_CLI_TIMEOUT_MS);
+
+    const proc = Bun.spawn([claudeCli, '--dangerously-skip-permissions', 'hi'], {
+      stdout: 'pipe',
+      stderr: 'pipe',
+      stdin: 'ignore',
+      env,
+      cwd: sandboxHome,
+      signal: controller.signal,
+    });
+
+    stdoutPromise = readStream(proc.stdout);
+    stderrPromise = readStream(proc.stderr);
+
+    const exitCode = await proc.exited;
+
+    if (timeout) {
+      clearTimeout(timeout);
+      timeout = null;
+    }
+
+    stdout = await (stdoutPromise ?? Promise.resolve(''));
+    stderr = await (stderrPromise ?? Promise.resolve(''));
+
+    success = exitCode === 0;
+    shouldFreeze = !success;
+
+    if (!success && (controller?.signal.aborted || exitCode === 143)) {
+      statusCode = 504;
+      message = `Claude CLI test timed out after ${CLAUDE_CLI_TIMEOUT_MS}ms`;
+    } else {
+      statusCode = success ? 200 : 500;
+    }
+
+    const previewSource = success ? stdout : (stderr || stdout);
+    responsePreview = trimPreview(previewSource || '');
+
+    if (success) {
+      message = 'Claude CLI connection verified';
+      errorDetail = '';
+    } else if (!message) {
+      const trimmed = stderr.trim() || stdout.trim();
+      message = trimmed || `Claude CLI exited with status ${exitCode}`;
+      errorDetail = message;
+    }
+
+    return finalize();
+  } catch (error) {
+    if (timeout) {
+      clearTimeout(timeout);
+      timeout = null;
+    }
+
+    shouldFreeze = true;
+
+    if (stdoutPromise && !stdout) {
+      try {
+        stdout = await stdoutPromise;
+      } catch {
+        stdout = '';
+      }
+    }
+
+    if (stderrPromise && !stderr) {
+      try {
+        stderr = await stderrPromise;
+      } catch {
+        stderr = '';
+      }
+    }
+
+    if (controller?.signal.aborted && statusCode === 500) {
+      statusCode = 504;
+    }
+
+    const errMessage = error instanceof Error ? error.message : String(error);
+    if (!message) {
+      message = errMessage;
+    }
+    if (!errorDetail) {
+      errorDetail = errMessage;
+    }
+    if (!responsePreview) {
+      responsePreview = trimPreview(stderr || stdout || errMessage);
+    }
+
+    console.error(`[proxy:claude] CLI test failed for config ${configName}:`, error);
+
+    return finalize();
+  } finally {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+    cleanupClaudeSandbox(sandboxHome);
+  }
+}
+
+async function runOpenAICompatTest({
+  serviceName,
+  configName,
+  config,
+  serviceConfig,
+}: OpenAICompatTestParams): Promise<ConfigTestExecutionResult> {
+  const testStartTime = Date.now();
+  const logId = `test-${testStartTime}-${Math.random().toString(36).substring(7)}`;
+
+  if (!config.baseUrl) {
+    const message = 'Configuration is missing a base URL';
+    await logger.logRequest({
+      id: logId,
+      timestamp: testStartTime,
+      service: serviceName,
+      method: 'POST',
+      path: '/test',
+      configName,
+      statusCode: 0,
+      duration: 0,
+      error: message,
+    });
+
+    return {
+      success: false,
+      status_code: 0,
+      duration_ms: 0,
+      message,
+      response_preview: '',
+      completed_at: testStartTime,
+      source: 'proxy',
+      method: 'POST',
+      path: '/test',
+    };
+  }
+
+  const normalizedBase =
+    config.baseUrl.endsWith('/') ? config.baseUrl : `${config.baseUrl}/`;
+
+  const testUrl = new URL('v1/chat/completions', normalizedBase).toString();
+
+  const authHeaders: Record<string, string> = {
+    'Accept-Encoding': 'identity',
+  };
+
+  if (config.apiKey) {
+    authHeaders['x-api-key'] = config.apiKey;
+  }
+  if (config.authToken) {
+    authHeaders['Authorization'] = `Bearer ${config.authToken}`;
+  }
+
+  const testHeaders: HeadersInit = {
+    'Content-Type': 'application/json',
+    ...authHeaders,
+  };
+
+  const testBody = {
+    model: 'gpt-3.5-turbo',
+    max_tokens: 10,
+    messages: [{ role: 'user', content: 'hi' }],
+  };
+
+  const freezeDuration = serviceConfig.loadBalancer.freezeDuration || 5 * 60 * 1000;
+
+  try {
+    const response = await fetch(testUrl, {
+      method: 'POST',
+      headers: testHeaders,
+      body: JSON.stringify(testBody),
+    });
+
+    const duration = Date.now() - testStartTime;
+    const responseText = await response.text();
+    let responseJson: any = null;
+    let responsePreview = '';
+
+    try {
+      responseJson = JSON.parse(responseText);
+    } catch {
+      responsePreview = responseText.substring(0, 100);
+    }
+
+    if (!responsePreview && responseJson) {
+      if (responseJson.error) {
+        responsePreview = `Error: ${responseJson.error.message || JSON.stringify(responseJson.error)}`;
+      } else if (responseJson.choices?.[0]?.message?.content) {
+        responsePreview = responseJson.choices[0].message.content;
+      }
+    }
+
+    responsePreview = trimPreview(responsePreview);
+
+    const usage = logger.parseUsage(responseJson);
+
+    const responseHeaders: Record<string, string> = {};
+    response.headers.forEach((value, key) => {
+      responseHeaders[key] = value;
+    });
+
+    const testUrlObj = new URL(testUrl);
+    const pathWithQuery = `${testUrlObj.pathname}${testUrlObj.search}`;
+
+    await logger.logRequest({
+      id: logId,
+      timestamp: testStartTime,
+      service: serviceName,
+      method: 'POST',
+      path: pathWithQuery,
+      targetUrl: testUrl,
+      configName,
+      statusCode: response.status,
+      duration,
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+      model: usage.model,
+      error: response.ok ? undefined : `HTTP ${response.status}: ${response.statusText}`,
+      requestBody: JSON.stringify(testBody),
+      responsePreview,
+      requestHeaders: testHeaders as Record<string, string>,
+      responseHeaders,
+    });
+
+    if (!response.ok) {
+      const updated = await applyConfigFreeze(
+        serviceName,
+        serviceConfig,
+        configName,
+        Date.now() + freezeDuration
+      );
+      if (updated) {
+        Object.assign(config, updated);
+      }
+    } else if (config.freezeUntil !== undefined) {
+      const updated = await applyConfigFreeze(serviceName, serviceConfig, configName, undefined);
+      if (updated) {
+        delete config.freezeUntil;
+        Object.assign(config, updated);
+      } else {
+        delete config.freezeUntil;
+      }
+    }
+
+    return {
+      success: response.ok,
+      status_code: response.status,
+      duration_ms: duration,
+      message: response.ok ? 'Connection successful' : `HTTP ${response.status}`,
+      response_preview: responsePreview,
+      completed_at: testStartTime + duration,
+      source: 'proxy',
+      method: 'POST',
+      path: pathWithQuery,
+    };
+  } catch (error) {
+    const duration = Date.now() - testStartTime;
+    const errorMessage = error instanceof Error ? error.message : 'Connection failed';
+
+    const pathWithQuery = (() => {
+      try {
+        const url = new URL(testUrl);
+        return `${url.pathname}${url.search}`;
+      } catch {
+        return '/test';
+      }
+    })();
+
+    await logger.logRequest({
+      id: logId,
+      timestamp: testStartTime,
+      service: serviceName,
+      method: 'POST',
+      path: pathWithQuery,
+      targetUrl: testUrl,
+      configName,
+      statusCode: 0,
+      duration,
+      error: errorMessage,
+      requestBody: JSON.stringify(testBody),
+      requestHeaders: testHeaders as Record<string, string>,
+    });
+
+    const updated = await applyConfigFreeze(
+      serviceName,
+      serviceConfig,
+      configName,
+      Date.now() + freezeDuration
+    );
+    if (updated) {
+      Object.assign(config, updated);
+    }
+
+    return {
+      success: false,
+      status_code: 0,
+      duration_ms: duration,
+      message: errorMessage,
+      response_preview: '',
+      completed_at: testStartTime + duration,
+      source: 'proxy',
+      method: 'POST',
+      path: pathWithQuery,
+    };
+  }
+}
+
+async function autoRetestFrozenConfigs(serviceName: 'claude' | 'codex'): Promise<void> {
+  const serviceConfig = configManager.getServiceConfig(serviceName);
+  if (!serviceConfig) {
+    return;
+  }
+
+  const now = Date.now();
+  const pending = serviceConfig.configs.filter(c => typeof c.freezeUntil === 'number' && now >= (c.freezeUntil ?? 0));
+
+  if (pending.length === 0) {
+    return;
+  }
+
+  const lock = autoRetestLocks[serviceName];
+
+  for (const frozenConfig of pending) {
+    if (lock.has(frozenConfig.name)) {
+      continue;
+    }
+
+    lock.add(frozenConfig.name);
+
+    (async () => {
+      try {
+        if (serviceName === 'claude') {
+          await runClaudeConfigTest({
+            configName: frozenConfig.name,
+            config: frozenConfig,
+            serviceConfig,
+          });
+        } else {
+          await runOpenAICompatTest({
+            serviceName,
+            configName: frozenConfig.name,
+            config: frozenConfig,
+            serviceConfig,
+          });
+        }
+      } catch (error) {
+        console.error(`[proxy:${serviceName}] Auto retest failed for ${frozenConfig.name}:`, error);
+      } finally {
+        lock.delete(frozenConfig.name);
+      }
+    })();
+  }
+}
+
+async function readStream(stream?: ReadableStream<Uint8Array> | null): Promise<string> {
+  if (!stream) {
+    return '';
+  }
+  try {
+    return await new Response(stream).text();
+  } catch {
+    return '';
+  }
+}
+
+function trimPreview(value: string, limit = 200): string {
+  const trimmed = value.trim();
+  if (trimmed.length <= limit) {
+    return trimmed;
+  }
+  return `${trimmed.slice(0, limit)}...`;
+}
+
+function createClaudeSandbox(): string {
+  const baseDir = join(tmpdir(), 'paf_claude_cli_tests');
+  if (!existsSync(baseDir)) {
+    mkdirSync(baseDir, { recursive: true });
+  }
+  return mkdtempSync(join(baseDir, 'run-'));
+}
+
+function cleanupClaudeSandbox(dir: string | null): void {
+  if (!dir) {
+    return;
+  }
+  try {
+    rmSync(dir, { recursive: true, force: true });
+  } catch (error) {
+    console.warn(`[proxy:claude] Failed to clean Claude CLI sandbox ${dir}:`, error);
   }
 }
 

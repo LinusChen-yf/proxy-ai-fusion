@@ -1,24 +1,28 @@
 // Proxy service - handles forwarding requests to upstream APIs
 
-import type { ProxyConfig } from '../config/types';
+import type { ProxyConfig, ServiceConfig } from '../config/types';
 import type { LoadBalancer } from '../routing/loadbalancer';
 import type { RequestLogger } from '../logging/logger';
+import { ConfigManager } from '../config/manager';
 
 export interface ProxyOptions {
   loadBalancer: LoadBalancer;
   logger: RequestLogger;
   serviceName: string;
+  configManager: ConfigManager;
 }
 
 export class ProxyService {
   private loadBalancer: LoadBalancer;
   private logger: RequestLogger;
   private serviceName: string;
+  private configManager: ConfigManager;
 
   constructor(options: ProxyOptions) {
     this.loadBalancer = options.loadBalancer;
     this.logger = options.logger;
     this.serviceName = options.serviceName;
+    this.configManager = options.configManager;
   }
 
   /**
@@ -107,6 +111,7 @@ export class ProxyService {
         this.loadBalancer.markSuccess(server.name);
       } else {
         this.loadBalancer.markFailure(server.name);
+        await this.maybeFreezeAfterFailure(server);
       }
 
       // Handle response
@@ -143,31 +148,7 @@ export class ProxyService {
       // Mark server as failed
       this.loadBalancer.markFailure(server.name);
 
-      // Auto-freeze config on proxy failure
-      try {
-        const { ConfigManager } = await import('../config/manager');
-        const manager = new ConfigManager();
-        await manager.initialize();
-
-        const serviceName = this.serviceName;
-        const serviceConfig = manager.getServiceConfig(serviceName);
-        if (serviceConfig) {
-          const index = serviceConfig.configs.findIndex((c: any) => c.name === server.name);
-          if (index !== -1) {
-            const freezeDuration = serviceConfig.loadBalancer.freezeDuration || 5 * 60 * 1000;
-            const freezeUntil = Date.now() + freezeDuration;
-            serviceConfig.configs[index] = {
-              ...serviceConfig.configs[index],
-              freezeUntil,
-            };
-            await manager.saveServiceConfig(serviceName, serviceConfig);
-            const freezeMinutes = Math.round(freezeDuration / 60000);
-            console.log(`[proxy:${serviceName}] Auto-frozen config ${server.name} for ${freezeMinutes} minutes due to failure`);
-          }
-        }
-      } catch (freezeError) {
-        console.error(`[proxy:${this.serviceName}] Failed to auto-freeze config:`, freezeError);
-      }
+      await this.freezeConfig(server, 'proxy failure');
 
       // Extract request info
       const requestInfo = this.logger.extractRequestInfo(requestBodyJson);
@@ -393,6 +374,57 @@ export class ProxyService {
       statusText: upstreamResponse.statusText,
       headers: modifiedHeaders,
     });
+  }
+
+  private async maybeFreezeAfterFailure(server: ProxyConfig): Promise<void> {
+    if (!this.loadBalancer.hasExceededFailureThreshold(server.name)) {
+      return;
+    }
+
+    const serviceConfig = this.configManager.getServiceConfig(this.serviceName);
+    if (!serviceConfig || serviceConfig.mode !== 'load_balance') {
+      return;
+    }
+
+    await this.freezeConfig(server, 'failure threshold reached', serviceConfig);
+  }
+
+  private async freezeConfig(server: ProxyConfig, reason: string, existingConfig?: ServiceConfig): Promise<void> {
+    try {
+      const serviceConfig = existingConfig ?? this.configManager.getServiceConfig(this.serviceName);
+      if (!serviceConfig) {
+        return;
+      }
+
+      const index = serviceConfig.configs.findIndex(c => c.name === server.name);
+      if (index === -1) {
+        return;
+      }
+
+      const now = Date.now();
+      const freezeDuration = serviceConfig.loadBalancer.freezeDuration || 5 * 60 * 1000;
+      const freezeUntil = now + freezeDuration;
+      const existing = serviceConfig.configs[index];
+
+      if (existing.freezeUntil && existing.freezeUntil > now && existing.freezeUntil >= freezeUntil) {
+        return;
+      }
+
+      serviceConfig.configs[index] = {
+        ...existing,
+        freezeUntil,
+      };
+
+      server.freezeUntil = freezeUntil;
+
+      await this.configManager.saveServiceConfig(this.serviceName, serviceConfig);
+      const freezeMinutes = Math.ceil(freezeDuration / 60000);
+      console.log(
+        `[proxy:${this.serviceName}] Auto-froze config ${server.name} for ${freezeMinutes} minute(s) (${reason})`
+      );
+    } catch (error) {
+      console.error(`[proxy:${this.serviceName}] Failed to freeze config ${server.name}:`, error);
+    }
   }
 
   /**

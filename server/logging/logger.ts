@@ -2,11 +2,27 @@
 
 import { LogDatabase, type RequestLog } from './database';
 
+export interface LastRequestSnapshot {
+  service: string;
+  configName: string;
+  success: boolean;
+  statusCode?: number;
+  durationMs?: number;
+  message?: string;
+  responsePreview?: string;
+  completedAt: number;
+  method: string;
+  path: string;
+  source: 'cli' | 'proxy';
+}
+
 export class RequestLogger {
   private db: LogDatabase;
+  private lastResults: Map<string, LastRequestSnapshot>;
 
   constructor(dataDir: string) {
     this.db = new LogDatabase(dataDir);
+    this.lastResults = new Map();
   }
 
   /**
@@ -17,6 +33,7 @@ export class RequestLogger {
     queueMicrotask(() => {
       try {
         this.db.insertLog(log);
+        this.updateLastResult(log);
       } catch (error) {
         console.error('Failed to log request:', error);
       }
@@ -171,6 +188,7 @@ export class RequestLogger {
    * Clear all logs
    */
   clearAllLogs(): number {
+    this.lastResults.clear();
     return this.db.clearAllLogs();
   }
 
@@ -179,5 +197,69 @@ export class RequestLogger {
    */
   close(): void {
     this.db.close();
+  }
+
+  /**
+   * Get the last recorded result for each config belonging to a service
+   */
+  getLastResultsByService(serviceName: string): Record<string, LastRequestSnapshot> {
+    const results: Record<string, LastRequestSnapshot> = {};
+    for (const snapshot of this.lastResults.values()) {
+      if (snapshot.service === serviceName) {
+        results[snapshot.configName] = snapshot;
+      }
+    }
+    return results;
+  }
+
+  /**
+   * Remove cached result for a config (e.g. after deletion)
+   */
+  clearLastResult(serviceName: string, configName: string): void {
+    this.lastResults.delete(this.buildKey(serviceName, configName));
+  }
+
+  private updateLastResult(log: RequestLog): void {
+    if (!log.service || !log.configName) {
+      return;
+    }
+
+    const success =
+      typeof log.statusCode === 'number'
+        ? log.statusCode >= 200 && log.statusCode < 400
+        : !log.error;
+
+    let message = log.error || '';
+    if (!message) {
+      if (typeof log.statusCode === 'number') {
+        message = `HTTP ${log.statusCode}`;
+      } else if (success) {
+        message = 'OK';
+      } else {
+        message = 'Request failed';
+      }
+    }
+
+    const completedAt = log.timestamp + (log.duration ?? 0);
+
+    const snapshot: LastRequestSnapshot = {
+      service: log.service,
+      configName: log.configName,
+      success,
+      statusCode: log.statusCode,
+      durationMs: log.duration,
+      message,
+      responsePreview: log.responsePreview ?? '',
+      completedAt,
+      method: log.method,
+      path: log.path,
+      source: log.method === 'CLI' ? 'cli' : 'proxy',
+    };
+
+    this.lastResults.set(this.buildKey(log.service, log.configName), snapshot);
+  }
+
+  private buildKey(serviceName: string, configName: string): string {
+    return `${serviceName}::${configName}`;
   }
 }

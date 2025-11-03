@@ -1,6 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/services/api';
-import type { ServiceConfig, ClaudeConfig, CodexConfig, ServiceId, TestConnectionResponse } from '@/types/common';
+import { ConfigStatus } from '@/types/common';
+import type {
+  ServiceConfig,
+  ClaudeConfig,
+  CodexConfig,
+  ServiceId,
+  TestConnectionResponse,
+  RequestResultPayload,
+} from '@/types/common';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -85,6 +93,141 @@ function normalizeServiceConfigs<T extends ServiceConfig>(
   } as T));
 }
 
+type RequestResultState = TestConnectionResponse & {
+  completedAt: string;
+  source?: 'cli' | 'proxy';
+  method?: string;
+  path?: string;
+};
+
+const STATUS_METADATA: Record<
+  ConfigStatus,
+  {
+    labelKey: string;
+    className: string;
+  }
+> = {
+  [ConfigStatus.Ok]: {
+    labelKey: 'config.status.ok',
+    className: 'text-emerald-600',
+  },
+  [ConfigStatus.Frozen]: {
+    labelKey: 'config.status.frozen',
+    className: 'text-destructive',
+  },
+  [ConfigStatus.Disabled]: {
+    labelKey: 'config.status.disabled',
+    className: 'text-muted-foreground',
+  },
+  [ConfigStatus.Unknown]: {
+    labelKey: 'config.status.unknown',
+    className: 'text-muted-foreground',
+  },
+};
+
+function resolveConfigStatus(
+  config: ServiceConfig,
+  result: RequestResultState | undefined,
+  now: number,
+): ConfigStatus {
+  if (config.enabled === false) {
+    return ConfigStatus.Disabled;
+  }
+
+  const freezeUntil = config.freeze_until;
+  if (typeof freezeUntil === 'number' && Number.isFinite(freezeUntil) && freezeUntil > now) {
+    return ConfigStatus.Frozen;
+  }
+
+  if (!result) {
+    return ConfigStatus.Unknown;
+  }
+
+  if (!result.success) {
+    // Manual mode continues forwarding even when frozen; surface frozen status in UI.
+    return ConfigStatus.Frozen;
+  }
+
+  return ConfigStatus.Ok;
+}
+
+function createEmptyResults(): Record<ServiceId, Record<string, RequestResultState>> {
+  return {
+    claude: {},
+    codex: {},
+  };
+}
+
+function convertPayloadToState(payload: RequestResultPayload): RequestResultState {
+  const completedAtMillis = payload.completed_at ?? Date.now();
+  return {
+    ...payload,
+    completedAt: new Date(completedAtMillis).toISOString(),
+  };
+}
+
+function restoreStoredResults(data: unknown): Record<ServiceId, Record<string, RequestResultState>> {
+  const empty = createEmptyResults();
+  if (!data || typeof data !== 'object') {
+    return empty;
+  }
+
+  for (const service of SERVICE_ORDER) {
+    const rawService = (data as Record<string, unknown>)[service];
+    if (!rawService || typeof rawService !== 'object') {
+      continue;
+    }
+
+    const restored: Record<string, RequestResultState> = {};
+    for (const [configName, rawResult] of Object.entries(rawService)) {
+      if (!rawResult || typeof rawResult !== 'object') {
+        continue;
+      }
+      const payload = rawResult as RequestResultPayload & { completedAt?: string };
+      const state: RequestResultState = {
+        success: Boolean(payload.success),
+        status_code: payload.status_code,
+        message: payload.message,
+        duration_ms: payload.duration_ms,
+        response_preview: payload.response_preview,
+        completed_at: payload.completed_at,
+        source: payload.source,
+        method: payload.method,
+        path: payload.path,
+        completedAt:
+          typeof payload.completedAt === 'string'
+            ? payload.completedAt
+            : new Date((payload.completed_at ?? Date.now())).toISOString(),
+      };
+      restored[configName] = state;
+    }
+
+    empty[service] = restored;
+  }
+
+  return empty;
+}
+
+function buildServiceResults(
+  service: ServiceId,
+  configs: ServiceConfig[],
+  serverResults: Record<string, RequestResultPayload> | undefined,
+  previous: Record<ServiceId, Record<string, RequestResultState>>,
+): Record<string, RequestResultState> {
+  const merged: Record<string, RequestResultState> = {};
+
+  configs.forEach(config => {
+    const fromServer = serverResults?.[config.name];
+    if (fromServer) {
+      merged[config.name] = convertPayloadToState(fromServer);
+    } else if (previous[service]?.[config.name]) {
+      merged[config.name] = previous[service][config.name];
+    }
+  });
+
+  return merged;
+}
+
 type ConfigFormState = {
   name: string;
   base_url: string;
@@ -120,63 +263,71 @@ export function ConfigPanel() {
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [configToDelete, setConfigToDelete] = useState<{ service: ServiceId; name: string } | null>(null);
-  const STORAGE_KEY = 'config_test_results';
-  const [testResults, setTestResults] = useState<
-    Record<ServiceId, Record<string, TestConnectionResponse & { completedAt: string }>>
-  >(() => {
-    const empty: Record<ServiceId, Record<string, TestConnectionResponse & { completedAt: string }>> = {
-      claude: {},
-      codex: {},
-    };
+  const STORAGE_KEY = 'config_request_results';
+  const LEGACY_STORAGE_KEY = 'config_test_results';
+  const [requestResults, setRequestResults] = useState<Record<ServiceId, Record<string, RequestResultState>>>(() => {
     if (typeof window === 'undefined') {
-      return empty;
+      return createEmptyResults();
     }
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw =
+        localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
       if (!raw) {
-        return empty;
+        return createEmptyResults();
       }
-      const parsed = JSON.parse(raw) as Record<
-        ServiceId,
-        Record<string, TestConnectionResponse & { completedAt: string }>
-      >;
-      return {
-        claude: parsed?.claude ?? {},
-        codex: parsed?.codex ?? {},
-      };
+      const parsed = JSON.parse(raw);
+      return restoreStoredResults(parsed);
     } catch (error) {
-      console.warn('Failed to parse stored test results', error);
-      return empty;
+      console.warn('Failed to parse stored request results', error);
+      return createEmptyResults();
     }
   });
 
-  const loadConfigs = async () => {
+  const loadConfigs = useCallback(async () => {
     try {
       const [claudeData, codexData] = await Promise.all([
         api.listClaudeConfigs(),
         api.listCodexConfigs(),
-  ]);
+      ]);
+
+      const normalizedClaude = normalizeServiceConfigs<ClaudeConfig>(claudeData.configs);
+      const normalizedCodex = normalizeServiceConfigs<CodexConfig>(codexData.configs);
 
       setConfigs({
-        claude: normalizeServiceConfigs<ClaudeConfig>(claudeData.configs),
-        codex: normalizeServiceConfigs<CodexConfig>(codexData.configs),
+        claude: normalizedClaude,
+        codex: normalizedCodex,
       });
+
+      setRequestResults(prev => ({
+        claude: buildServiceResults('claude', normalizedClaude, claudeData.last_results, prev),
+        codex: buildServiceResults('codex', normalizedCodex, codexData.last_results, prev),
+      }));
 
     } catch (error) {
       console.error('Failed to load configs:', error);
       setConfigs({ claude: [], codex: [] });
+      setRequestResults(createEmptyResults());
     }
-  };
-
-  useEffect(() => {
-    loadConfigs();
   }, []);
 
   useEffect(() => {
+    loadConfigs().catch(() => {});
+  }, [loadConfigs]);
+
+  useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(testResults));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(requestResults));
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
     }
-  }, [testResults]);
+  }, [requestResults]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadConfigs().catch(() => {});
+    }, 30_000);
+
+    return () => clearInterval(interval);
+  }, [loadConfigs]);
 
   const handleCreate = (service: ServiceId) => {
     setEditingConfig(null);
@@ -314,34 +465,45 @@ export function ConfigPanel() {
           }
           return { configName: config.name, result, error: null };
         } catch (error) {
+          const completedAt = Date.now();
+          const source: 'cli' | 'proxy' = service === 'claude' ? 'cli' : 'proxy';
           return {
             configName: config.name,
             result: {
               success: false,
               message: String(error),
+              status_code: 0,
+              completed_at: completedAt,
+              source,
+              method: service === 'claude' ? 'CLI' : 'POST',
+              path: service === 'claude' ? '/cli/test' : '/v1/chat/completions',
             },
             error,
           };
         }
       });
 
-      const timestamp = new Date().toISOString();
       const results = await Promise.all(testPromises);
 
       // Update all test results
-      setTestResults((prev) => ({
-        ...prev,
-        [service]: {
-          ...(prev[service] ?? {}),
-          ...results.reduce((acc, { configName, result }) => {
-            acc[configName] = {
-              ...result,
-              completedAt: timestamp,
-            };
-            return acc;
-                  }, {} as Record<string, TestConnectionResponse & { completedAt: string }>),
-        },
-      }));
+      setRequestResults(prev => {
+        const updated = { ...prev };
+        const serviceResults = { ...(prev[service] ?? {}) };
+        const fallbackIso = new Date().toISOString();
+
+        results.forEach(({ configName, result }) => {
+          const completedAtIso = result.completed_at
+            ? new Date(result.completed_at).toISOString()
+            : fallbackIso;
+          serviceResults[configName] = {
+            ...result,
+            completedAt: completedAtIso,
+          };
+        });
+
+        updated[service] = serviceResults;
+        return updated;
+      });
 
       await loadConfigs();
     } finally {
@@ -394,6 +556,8 @@ export function ConfigPanel() {
       );
     }
 
+    const now = Date.now();
+
     return (
       <Table>
         <TableHeader>
@@ -409,16 +573,10 @@ export function ConfigPanel() {
         <TableBody>
           {currentConfigs.map((config) => {
             const isEnabled = config.enabled !== false;
-            const result = testResults[service]?.[config.name];
-            const isFrozen = config.freeze_until && Date.now() < config.freeze_until;
-            const status = !isEnabled
-              ? { label: t('config.status.disabled'), className: 'text-muted-foreground' }
-              : isFrozen
-                ? { label: t('config.status.frozen'), className: 'text-destructive' }
-                : {
-                    label: t('config.status.ok'),
-                    className: result?.success ? 'text-emerald-600' : 'text-muted-foreground',
-                  };
+            const result = requestResults[service]?.[config.name];
+            const statusValue = resolveConfigStatus(config, result, now);
+            const statusMeta = STATUS_METADATA[statusValue] ?? STATUS_METADATA[ConfigStatus.Unknown];
+            const statusLabel = t(statusMeta.labelKey);
 
             return (
               <TableRow key={config.name}>
@@ -440,7 +598,7 @@ export function ConfigPanel() {
                 <TableCell className="font-mono text-sm">{config.base_url}</TableCell>
                 <TableCell>{config.weight}</TableCell>
                 <TableCell>
-                  <span className={`text-xs font-medium ${status.className}`}>{status.label}</span>
+                  <span className={`text-xs font-medium ${statusMeta.className}`}>{statusLabel}</span>
                 </TableCell>
                 <TableCell className="align-top">
                   {(() => {

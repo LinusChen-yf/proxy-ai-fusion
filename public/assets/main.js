@@ -29887,6 +29887,99 @@ function normalizeServiceConfigs(configs) {
     freeze_until: normalizeFreezeUntil(config)
   }));
 }
+var STATUS_METADATA = {
+  ["ok" /* Ok */]: {
+    labelKey: "config.status.ok",
+    className: "text-emerald-600"
+  },
+  ["frozen" /* Frozen */]: {
+    labelKey: "config.status.frozen",
+    className: "text-destructive"
+  },
+  ["disabled" /* Disabled */]: {
+    labelKey: "config.status.disabled",
+    className: "text-muted-foreground"
+  },
+  ["unknown" /* Unknown */]: {
+    labelKey: "config.status.unknown",
+    className: "text-muted-foreground"
+  }
+};
+function resolveConfigStatus(config, result, now) {
+  if (config.enabled === false) {
+    return "disabled" /* Disabled */;
+  }
+  const freezeUntil = config.freeze_until;
+  if (typeof freezeUntil === "number" && Number.isFinite(freezeUntil) && freezeUntil > now) {
+    return "frozen" /* Frozen */;
+  }
+  if (!result) {
+    return "unknown" /* Unknown */;
+  }
+  if (!result.success) {
+    return "frozen" /* Frozen */;
+  }
+  return "ok" /* Ok */;
+}
+function createEmptyResults() {
+  return {
+    claude: {},
+    codex: {}
+  };
+}
+function convertPayloadToState(payload) {
+  const completedAtMillis = payload.completed_at ?? Date.now();
+  return {
+    ...payload,
+    completedAt: new Date(completedAtMillis).toISOString()
+  };
+}
+function restoreStoredResults(data) {
+  const empty = createEmptyResults();
+  if (!data || typeof data !== "object") {
+    return empty;
+  }
+  for (const service of SERVICE_ORDER) {
+    const rawService = data[service];
+    if (!rawService || typeof rawService !== "object") {
+      continue;
+    }
+    const restored = {};
+    for (const [configName, rawResult] of Object.entries(rawService)) {
+      if (!rawResult || typeof rawResult !== "object") {
+        continue;
+      }
+      const payload = rawResult;
+      const state = {
+        success: Boolean(payload.success),
+        status_code: payload.status_code,
+        message: payload.message,
+        duration_ms: payload.duration_ms,
+        response_preview: payload.response_preview,
+        completed_at: payload.completed_at,
+        source: payload.source,
+        method: payload.method,
+        path: payload.path,
+        completedAt: typeof payload.completedAt === "string" ? payload.completedAt : new Date(payload.completed_at ?? Date.now()).toISOString()
+      };
+      restored[configName] = state;
+    }
+    empty[service] = restored;
+  }
+  return empty;
+}
+function buildServiceResults(service, configs, serverResults, previous) {
+  const merged = {};
+  configs.forEach((config) => {
+    const fromServer = serverResults?.[config.name];
+    if (fromServer) {
+      merged[config.name] = convertPayloadToState(fromServer);
+    } else if (previous[service]?.[config.name]) {
+      merged[config.name] = previous[service][config.name];
+    }
+  });
+  return merged;
+}
 function ConfigPanel() {
   const { t } = useTranslation();
   const feedback = useFeedback();
@@ -29914,53 +30007,61 @@ function ConfigPanel() {
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = import_react8.useState(false);
   const [configToDelete, setConfigToDelete] = import_react8.useState(null);
-  const STORAGE_KEY = "config_test_results";
-  const [testResults, setTestResults] = import_react8.useState(() => {
-    const empty = {
-      claude: {},
-      codex: {}
-    };
+  const STORAGE_KEY = "config_request_results";
+  const LEGACY_STORAGE_KEY = "config_test_results";
+  const [requestResults, setRequestResults] = import_react8.useState(() => {
     if (typeof window === "undefined") {
-      return empty;
+      return createEmptyResults();
     }
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
       if (!raw) {
-        return empty;
+        return createEmptyResults();
       }
       const parsed = JSON.parse(raw);
-      return {
-        claude: parsed?.claude ?? {},
-        codex: parsed?.codex ?? {}
-      };
+      return restoreStoredResults(parsed);
     } catch (error) {
-      console.warn("Failed to parse stored test results", error);
-      return empty;
+      console.warn("Failed to parse stored request results", error);
+      return createEmptyResults();
     }
   });
-  const loadConfigs = async () => {
+  const loadConfigs = import_react8.useCallback(async () => {
     try {
       const [claudeData, codexData] = await Promise.all([
         api.listClaudeConfigs(),
         api.listCodexConfigs()
       ]);
+      const normalizedClaude = normalizeServiceConfigs(claudeData.configs);
+      const normalizedCodex = normalizeServiceConfigs(codexData.configs);
       setConfigs({
-        claude: normalizeServiceConfigs(claudeData.configs),
-        codex: normalizeServiceConfigs(codexData.configs)
+        claude: normalizedClaude,
+        codex: normalizedCodex
       });
+      setRequestResults((prev) => ({
+        claude: buildServiceResults("claude", normalizedClaude, claudeData.last_results, prev),
+        codex: buildServiceResults("codex", normalizedCodex, codexData.last_results, prev)
+      }));
     } catch (error) {
       console.error("Failed to load configs:", error);
       setConfigs({ claude: [], codex: [] });
+      setRequestResults(createEmptyResults());
     }
-  };
-  import_react8.useEffect(() => {
-    loadConfigs();
   }, []);
   import_react8.useEffect(() => {
+    loadConfigs().catch(() => {});
+  }, [loadConfigs]);
+  import_react8.useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(testResults));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(requestResults));
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
     }
-  }, [testResults]);
+  }, [requestResults]);
+  import_react8.useEffect(() => {
+    const interval = setInterval(() => {
+      loadConfigs().catch(() => {});
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [loadConfigs]);
   const handleCreate = (service) => {
     setEditingConfig(null);
     setEditingService(service);
@@ -30073,31 +30174,38 @@ function ConfigPanel() {
           }
           return { configName: config.name, result, error: null };
         } catch (error) {
+          const completedAt = Date.now();
+          const source = service === "claude" ? "cli" : "proxy";
           return {
             configName: config.name,
             result: {
               success: false,
-              message: String(error)
+              message: String(error),
+              status_code: 0,
+              completed_at: completedAt,
+              source,
+              method: service === "claude" ? "CLI" : "POST",
+              path: service === "claude" ? "/cli/test" : "/v1/chat/completions"
             },
             error
           };
         }
       });
-      const timestamp = new Date().toISOString();
       const results = await Promise.all(testPromises);
-      setTestResults((prev) => ({
-        ...prev,
-        [service]: {
-          ...prev[service] ?? {},
-          ...results.reduce((acc, { configName, result }) => {
-            acc[configName] = {
-              ...result,
-              completedAt: timestamp
-            };
-            return acc;
-          }, {})
-        }
-      }));
+      setRequestResults((prev) => {
+        const updated = { ...prev };
+        const serviceResults = { ...prev[service] ?? {} };
+        const fallbackIso = new Date().toISOString();
+        results.forEach(({ configName, result }) => {
+          const completedAtIso = result.completed_at ? new Date(result.completed_at).toISOString() : fallbackIso;
+          serviceResults[configName] = {
+            ...result,
+            completedAt: completedAtIso
+          };
+        });
+        updated[service] = serviceResults;
+        return updated;
+      });
       await loadConfigs();
     } finally {
       setTestLoading((prev) => ({ ...prev, [service]: false }));
@@ -30198,6 +30306,7 @@ function ConfigPanel() {
         ]
       }, undefined, true, undefined, this);
     }
+    const now = Date.now();
     return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Table, {
       children: [
         /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableHeader, {
@@ -30228,12 +30337,10 @@ function ConfigPanel() {
         /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableBody, {
           children: currentConfigs.map((config) => {
             const isEnabled = config.enabled !== false;
-            const result = testResults[service]?.[config.name];
-            const isFrozen = config.freeze_until && Date.now() < config.freeze_until;
-            const status = !isEnabled ? { label: t("config.status.disabled"), className: "text-muted-foreground" } : isFrozen ? { label: t("config.status.frozen"), className: "text-destructive" } : {
-              label: t("config.status.ok"),
-              className: result?.success ? "text-emerald-600" : "text-muted-foreground"
-            };
+            const result = requestResults[service]?.[config.name];
+            const statusValue = resolveConfigStatus(config, result, now);
+            const statusMeta = STATUS_METADATA[statusValue] ?? STATUS_METADATA["unknown" /* Unknown */];
+            const statusLabel = t(statusMeta.labelKey);
             return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableRow, {
               children: [
                 /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
@@ -30268,8 +30375,8 @@ function ConfigPanel() {
                 }, undefined, false, undefined, this),
                 /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
                   children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
-                    className: `text-xs font-medium ${status.className}`,
-                    children: status.label
+                    className: `text-xs font-medium ${statusMeta.className}`,
+                    children: statusLabel
                   }, undefined, false, undefined, this)
                 }, undefined, false, undefined, this),
                 /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
@@ -35335,4 +35442,4 @@ import_client.default.createRoot(document.getElementById("root")).render(/* @__P
   }, undefined, false, undefined, this)
 }, undefined, false, undefined, this));
 
-//# debugId=CF21A338827C777C64756E2164756E21
+//# debugId=3EC14A810AA8343764756E2164756E21

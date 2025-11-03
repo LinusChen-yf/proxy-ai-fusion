@@ -1,5 +1,12 @@
 export type ServiceId = 'claude' | 'codex';
 
+export enum ConfigStatus {
+  Ok = 'ok',
+  Frozen = 'frozen',
+  Disabled = 'disabled',
+  Unknown = 'unknown',
+}
+
 export interface ServiceConfig {
   name: string;
   base_url: string;
@@ -16,7 +23,13 @@ export interface TestConnectionResponse {
   message?: string;
   duration_ms?: number;
   response_preview?: string;
+  completed_at?: number;
+  source?: 'cli' | 'proxy';
+  method?: string;
+  path?: string;
 }
+
+export interface RequestResultPayload extends TestConnectionResponse {}
 
 // Claude-specific configuration
 export interface ClaudeConfig {
@@ -47,19 +60,22 @@ export interface SeparatedConfigResponse {
     active: string | null;
     mode: 'manual' | 'load_balance';
     current?: string | null;
+    last_results?: Record<string, RequestResultPayload>;
   };
   codex: {
     configs: Record<string, CodexConfig> | CodexConfig[];
     active: string | null;
     mode: 'manual' | 'load_balance';
     current?: string | null;
+    last_results?: Record<string, RequestResultPayload>;
   };
 }
 
-export interface ConfigListResponse {
-  configs: Record<string, ServiceConfig> | ServiceConfig[];
+export interface ConfigListResponse<TConfig = ServiceConfig> {
+  configs: Record<string, TConfig> | TConfig[];
   active: string | null;
   mode?: 'manual' | 'load_balance';
+  last_results?: Record<string, RequestResultPayload>;
 }
 
 export interface StatusResponse {
