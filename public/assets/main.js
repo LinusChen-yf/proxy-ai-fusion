@@ -30025,6 +30025,7 @@ function ConfigPanel() {
       return createEmptyResults();
     }
   });
+  const [resultDialog, setResultDialog] = import_react8.useState(null);
   const loadConfigs = import_react8.useCallback(async () => {
     try {
       const [claudeData, codexData] = await Promise.all([
@@ -30308,6 +30309,7 @@ function ConfigPanel() {
     }
     const now = Date.now();
     return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Table, {
+      className: "table-fixed",
       children: [
         /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableHeader, {
           children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableRow, {
@@ -30316,6 +30318,7 @@ function ConfigPanel() {
                 children: t("config.name")
               }, undefined, false, undefined, this),
               /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableHead, {
+                className: "w-[10rem]",
                 children: t("config.baseUrl")
               }, undefined, false, undefined, this),
               /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableHead, {
@@ -30325,10 +30328,11 @@ function ConfigPanel() {
                 children: t("config.status")
               }, undefined, false, undefined, this),
               /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableHead, {
+                className: "w-[18rem]",
                 children: t("config.test.result")
               }, undefined, false, undefined, this),
               /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableHead, {
-                className: "text-right",
+                className: "w-[9rem] text-right",
                 children: t("config.actions")
               }, undefined, false, undefined, this)
             ]
@@ -30367,8 +30371,12 @@ function ConfigPanel() {
                   }, undefined, true, undefined, this)
                 }, undefined, false, undefined, this),
                 /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
-                  className: "font-mono text-sm",
-                  children: config.base_url
+                  className: "w-[10rem]",
+                  children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
+                    className: "font-mono text-sm truncate",
+                    title: config.base_url,
+                    children: config.base_url
+                  }, undefined, false, undefined, this)
                 }, undefined, false, undefined, this),
                 /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
                   children: config.weight
@@ -30380,7 +30388,7 @@ function ConfigPanel() {
                   }, undefined, false, undefined, this)
                 }, undefined, false, undefined, this),
                 /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
-                  className: "align-top",
+                  className: "align-top w-[18rem]",
                   children: (() => {
                     if (!result) {
                       return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
@@ -30408,20 +30416,30 @@ function ConfigPanel() {
                           className: "text-muted-foreground",
                           children: t("config.test.testedAt", { time: testedTime })
                         }, undefined, false, undefined, this),
-                        result.response_preview && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
-                          className: "text-muted-foreground break-words",
-                          children: result.response_preview
-                        }, undefined, false, undefined, this),
-                        result.message && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("span", {
-                          className: "text-muted-foreground break-words",
-                          children: result.message
-                        }, undefined, false, undefined, this)
+                        (() => {
+                          const detailMessage = [result.response_preview, result.message].filter((value) => Boolean(value)).join(`
+
+`);
+                          if (!detailMessage) {
+                            return null;
+                          }
+                          return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
+                            variant: "link",
+                            size: "sm",
+                            className: "inline-flex h-auto px-0 py-0 self-start justify-start text-xs font-normal",
+                            onClick: () => setResultDialog({
+                              title: t("config.test.dialogTitle", { name: config.name }),
+                              content: detailMessage
+                            }),
+                            children: t("config.test.viewMessage")
+                          }, undefined, false, undefined, this);
+                        })()
                       ]
                     }, undefined, true, undefined, this);
                   })()
                 }, undefined, false, undefined, this),
                 /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(TableCell, {
-                  className: "text-right",
+                  className: "text-right w-[9rem]",
                   children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
                     className: "flex justify-end gap-2",
                     children: [
@@ -30789,6 +30807,35 @@ function ConfigPanel() {
                     }, undefined, false, undefined, this)
                   ]
                 }, undefined, true, undefined, this)
+              ]
+            }, undefined, true, undefined, this)
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Dialog2, {
+            open: Boolean(resultDialog),
+            onOpenChange: (open) => {
+              if (!open) {
+                setResultDialog(null);
+              }
+            },
+            children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(DialogContent2, {
+              className: "max-w-lg",
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(DialogHeader, {
+                  children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(DialogTitle2, {
+                    children: resultDialog?.title ?? ""
+                  }, undefined, false, undefined, this)
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
+                  className: "mt-2 max-h-64 overflow-y-auto whitespace-pre-wrap break-words font-mono text-sm",
+                  children: resultDialog?.content
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(DialogFooter, {
+                  children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Button, {
+                    variant: "outline",
+                    onClick: () => setResultDialog(null),
+                    children: t("common.close")
+                  }, undefined, false, undefined, this)
+                }, undefined, false, undefined, this)
               ]
             }, undefined, true, undefined, this)
           }, undefined, false, undefined, this),
@@ -35442,4 +35489,4 @@ import_client.default.createRoot(document.getElementById("root")).render(/* @__P
   }, undefined, false, undefined, this)
 }, undefined, false, undefined, this));
 
-//# debugId=3EC14A810AA8343764756E2164756E21
+//# debugId=A8057D4E8E69327864756E2164756E21

@@ -89,6 +89,8 @@
   "config.test.statusCode": "状态：{{code}}",
   "config.test.duration": "耗时：{{ms}} ms",
   "config.test.testedAt": "更新时间 {{time}}",
+  "config.test.viewMessage": "查看消息",
+  "config.test.dialogTitle": "最近请求消息 - {{name}}",
   "config.mode.label": "服务模式",
   "config.mode.manual": "手动选择",
   "config.mode.loadBalance": "负载均衡",

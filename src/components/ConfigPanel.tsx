@@ -282,6 +282,7 @@ export function ConfigPanel() {
       return createEmptyResults();
     }
   });
+  const [resultDialog, setResultDialog] = useState<{ title: string; content: string } | null>(null);
 
   const loadConfigs = useCallback(async () => {
     try {
@@ -559,15 +560,15 @@ export function ConfigPanel() {
     const now = Date.now();
 
     return (
-      <Table>
+      <Table className="table-fixed">
         <TableHeader>
           <TableRow>
             <TableHead>{t('config.name')}</TableHead>
-            <TableHead>{t('config.baseUrl')}</TableHead>
+            <TableHead className="w-[10rem]">{t('config.baseUrl')}</TableHead>
             <TableHead>{t('config.weight')}</TableHead>
             <TableHead>{t('config.status')}</TableHead>
-            <TableHead>{t('config.test.result')}</TableHead>
-            <TableHead className="text-right">{t('config.actions')}</TableHead>
+            <TableHead className="w-[18rem]">{t('config.test.result')}</TableHead>
+            <TableHead className="w-[9rem] text-right">{t('config.actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -595,12 +596,16 @@ export function ConfigPanel() {
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="font-mono text-sm">{config.base_url}</TableCell>
+                <TableCell className="w-[10rem]">
+                  <div className="font-mono text-sm truncate" title={config.base_url}>
+                    {config.base_url}
+                  </div>
+                </TableCell>
                 <TableCell>{config.weight}</TableCell>
                 <TableCell>
                   <span className={`text-xs font-medium ${statusMeta.className}`}>{statusLabel}</span>
                 </TableCell>
-                <TableCell className="align-top">
+                <TableCell className="align-top w-[18rem]">
                   {(() => {
                     if (!result) {
                       return <span className="text-xs text-muted-foreground">{t('config.test.notRun')}</span>;
@@ -625,19 +630,36 @@ export function ConfigPanel() {
                         <span className="text-muted-foreground">
                           {t('config.test.testedAt', { time: testedTime })}
                         </span>
-                        {result.response_preview && (
-                          <span className="text-muted-foreground break-words">
-                            {result.response_preview}
-                          </span>
-                        )}
-                        {result.message && (
-                          <span className="text-muted-foreground break-words">{result.message}</span>
-                        )}
+                        {(() => {
+                          const detailMessage = [result.response_preview, result.message]
+                            .filter((value): value is string => Boolean(value))
+                            .join('\n\n');
+
+                          if (!detailMessage) {
+                            return null;
+                          }
+
+                          return (
+                            <Button
+                              variant="link"
+                              size="sm"
+                              className="inline-flex h-auto px-0 py-0 self-start justify-start text-xs font-normal"
+                              onClick={() =>
+                                setResultDialog({
+                                  title: t('config.test.dialogTitle', { name: config.name }),
+                                  content: detailMessage,
+                                })
+                              }
+                            >
+                              {t('config.test.viewMessage')}
+                            </Button>
+                          );
+                        })()}
                       </div>
                     );
                   })()}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right w-[9rem]">
                   <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"
@@ -883,6 +905,29 @@ export function ConfigPanel() {
                 {t('common.cancel')}
               </Button>
               <Button onClick={handleSave}>{t('common.save')}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={Boolean(resultDialog)}
+          onOpenChange={(open) => {
+            if (!open) {
+              setResultDialog(null);
+            }
+          }}
+        >
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>{resultDialog?.title ?? ''}</DialogTitle>
+            </DialogHeader>
+            <div className="mt-2 max-h-64 overflow-y-auto whitespace-pre-wrap break-words font-mono text-sm">
+              {resultDialog?.content}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setResultDialog(null)}>
+                {t('common.close')}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

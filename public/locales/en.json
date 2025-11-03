@@ -89,6 +89,8 @@
   "config.test.statusCode": "Status: {{code}}",
   "config.test.duration": "Latency: {{ms}} ms",
   "config.test.testedAt": "Updated at {{time}}",
+  "config.test.viewMessage": "View message",
+  "config.test.dialogTitle": "Last request message - {{name}}",
   "config.mode.label": "Service Mode",
   "config.mode.manual": "Manual",
   "config.mode.loadBalance": "Load Balance",
