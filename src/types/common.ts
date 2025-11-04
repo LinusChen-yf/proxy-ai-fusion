@@ -82,3 +82,11 @@ export interface StatusResponse {
   status: string;
   timestamp: string;
 }
+
+export interface ClaudeSetupResponse {
+  success: boolean;
+  settingsPath?: string;
+  backupCreated?: boolean;
+  backupPath?: string | null;
+  error?: string;
+}

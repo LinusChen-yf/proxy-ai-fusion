@@ -6,6 +6,7 @@ import type {
   CodexConfig,
   SeparatedConfigResponse,
   TestConnectionResponse,
+  ClaudeSetupResponse,
 } from '@/types/common';
 import type { LoadBalancerConfig } from '@/types/loadbalancer';
 import type { RequestLog } from '@/types/logs';
@@ -32,6 +33,13 @@ export const api = {
   // Status
   async getStatus(): Promise<StatusResponse> {
     return fetchJSON<StatusResponse>(`${API_BASE}/status`);
+  },
+
+  // Docs
+  async setupLocalClaudeCode(): Promise<ClaudeSetupResponse> {
+    return fetchJSON<ClaudeSetupResponse>(`${API_BASE}/docs/claude/setup`, {
+      method: 'POST',
+    });
   },
 
   // Configs (legacy unified endpoint kept for backward compatibility)

@@ -7,8 +7,8 @@ import { RequestLogger, type LastRequestSnapshot } from './logging/logger';
 import { ProxyService } from './proxy/service';
 import type { ProxyConfig, ServiceConfig } from './config/types';
 import { join, dirname } from 'path';
-import { tmpdir } from 'os';
-import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'fs';
+import { homedir, tmpdir } from 'os';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, renameSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 
 const moduleDir = dirname(fileURLToPath(import.meta.url));
@@ -341,6 +341,60 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
         status: 'ok',
         uptime: process.uptime(),
       }, { headers: corsHeaders });
+    }
+
+    if (path === '/api/docs/claude/setup' && req.method === 'POST') {
+      const claudeDir = join(homedir(), '.claude');
+      const settingsPath = join(claudeDir, 'settings.json');
+      const backupPath = `${settingsPath}.backup`;
+      const settingsContent = {
+        env: {
+          ANTHROPIC_AUTH_TOKEN: '-',
+          ANTHROPIC_BASE_URL: 'http://localhost:8801',
+          CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1',
+          CLAUDE_CODE_MAX_OUTPUT_TOKENS: '32000',
+          MAX_THINKING_TOKENS: '30000',
+          DISABLE_AUTOUPDATER: '1',
+        },
+        permissions: {
+          allow: [],
+          deny: [],
+        },
+        alwaysThinkingEnabled: true,
+      };
+
+      let backupCreated = false;
+
+      try {
+        mkdirSync(claudeDir, { recursive: true });
+
+        if (existsSync(settingsPath)) {
+          if (existsSync(backupPath)) {
+            const timestampedBackup = `${backupPath}.${Date.now()}`;
+            renameSync(backupPath, timestampedBackup);
+          }
+          renameSync(settingsPath, backupPath);
+          backupCreated = true;
+        }
+
+        writeFileSync(settingsPath, `${JSON.stringify(settingsContent, null, 2)}\n`, 'utf8');
+
+        return Response.json(
+          {
+            success: true,
+            settingsPath,
+            backupCreated,
+            backupPath: backupCreated ? backupPath : null,
+          },
+          { headers: corsHeaders },
+        );
+      } catch (error) {
+        console.error('Failed to setup Claude Code settings:', error);
+        return Response.json(
+          { success: false, error: error instanceof Error ? error.message : String(error) },
+          { status: 500, headers: corsHeaders },
+        );
+      }
     }
 
     // Get all configs separated by service

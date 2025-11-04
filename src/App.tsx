@@ -5,6 +5,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ConfigPanel } from '@/components/ConfigPanel';
 import { LoadBalancerPanel } from '@/components/LoadBalancerPanel';
 import { LogsPanel } from '@/components/LogsPanel';
+import { DocsPanel } from '@/components/DocsPanel';
 import { DashboardPanel } from '@/components/DashboardPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -101,6 +102,7 @@ function App() {
             <TabsTrigger value="configs">{t('nav.configs')}</TabsTrigger>
             <TabsTrigger value="loadbalancer">{t('nav.loadbalancer')}</TabsTrigger>
             <TabsTrigger value="logs">{t('nav.logs')}</TabsTrigger>
+            <TabsTrigger value="docs">{t('nav.docs')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-4">
@@ -124,6 +126,12 @@ function App() {
           <TabsContent value="logs" className="space-y-4">
             <ErrorBoundary>
               <LogsPanel />
+            </ErrorBoundary>
+          </TabsContent>
+
+          <TabsContent value="docs" className="space-y-4">
+            <ErrorBoundary>
+              <DocsPanel />
             </ErrorBoundary>
           </TabsContent>
         </Tabs>
