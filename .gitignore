@@ -21,6 +21,8 @@ dist/
 .DS_Store
 Thumbs.db
 
+.claude/
+
 # Old project files (kept for reference)
 target/
 frontend/
