@@ -1,5 +1,3 @@
-#!/usr/bin/env bun
-
 import { existsSync, mkdirSync } from 'fs';
 import { spawn, type Subprocess } from 'bun';
 
@@ -53,7 +51,7 @@ const commands: ManagedCommand[] = [
 const shutdown = async (code: number) => {
   if (shuttingDown) return;
   shuttingDown = true;
-  console.log('\nShutting down dev environment…');
+  console.log('\nShutting down dev environment...');
 
   const killers = [...managedProcesses.values()].map(async proc => {
     if (proc.killed) return;
@@ -70,7 +68,7 @@ const shutdown = async (code: number) => {
 };
 
 const startCommand = (command: ManagedCommand) => {
-  console.log(`Starting ${command.name}…`);
+  console.log(`Starting ${command.name}...`);
   const processHandle = spawn({
     cmd: command.cmd,
     stdin: 'inherit',

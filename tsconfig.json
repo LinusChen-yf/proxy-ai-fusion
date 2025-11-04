@@ -35,6 +35,6 @@
       "@server/*": ["./server/*"]
     }
   },
-  "include": ["src", "server"],
+  "include": ["src", "server", "scripts"],
   "exclude": ["node_modules", "dist", "cli_proxy", "frontend", "target"]
 }

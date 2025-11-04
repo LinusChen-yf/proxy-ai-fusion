@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "description": "High-performance AI proxy service with load balancing and real-time monitoring",
+  "bin": {
+    "proxy-ai-fusion": "scripts/cli.ts"
+  },
   "scripts": {
     "dev": "bun run scripts/dev.ts",
     "build": "bun run build:frontend && bun run build:server",
