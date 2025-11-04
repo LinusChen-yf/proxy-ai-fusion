@@ -120,6 +120,7 @@
   "logs.error.load": "Failed to load logs",
   "logs.error.details": "Failed to load log details",
   "logs.error.clear": "Failed to clear logs",
+  "logs.empty": "No request logs for this service yet.",
   "logs.table.timestamp": "Timestamp",
   "logs.detailsTitle": "Request Log Details",
   "logs.tabs.basic": "Basic Info",

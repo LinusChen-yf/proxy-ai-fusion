@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { api } from '@/services/api';
 import type { RequestLog } from '@/types/logs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,6 +27,8 @@ import { RefreshCw, Eye, Trash2 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useFeedback } from '@/components/FeedbackProvider';
 
+type ServiceTab = 'claude' | 'codex';
+
 export function LogsPanel() {
   const { t } = useTranslation();
   const feedback = useFeedback();
@@ -36,6 +38,7 @@ export function LogsPanel() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
   const [clearing, setClearing] = useState(false);
+  const [activeService, setActiveService] = useState<ServiceTab>('claude');
 
   const loadLogs = async () => {
     setLoading(true);
@@ -89,6 +92,69 @@ export function LogsPanel() {
     }
   };
 
+  const serviceTabs: ServiceTab[] = ['claude', 'codex'];
+
+  const logsByService = useMemo(() => {
+    const groups: Record<ServiceTab, RequestLog[]> = {
+      claude: [],
+      codex: [],
+    };
+
+    logs.forEach((log) => {
+      const service = (log.service || 'claude') as ServiceTab;
+      if (service === 'codex') {
+        groups.codex.push(log);
+        return;
+      }
+      groups.claude.push(log);
+    });
+
+    return groups;
+  }, [logs]);
+
+  const renderLogsTable = (entries: RequestLog[]) => (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>{t('logs.table.timestamp')}</TableHead>
+          <TableHead>{t('common.service')}</TableHead>
+          <TableHead>{t('common.method')}</TableHead>
+          <TableHead>{t('common.targetUrl')}</TableHead>
+          <TableHead>{t('common.status')}</TableHead>
+          <TableHead>{t('common.duration')}</TableHead>
+          <TableHead className="text-right">{t('common.actions')}</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {entries.length === 0 ? (
+          <TableRow>
+            <TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
+              {t('logs.empty')}
+            </TableCell>
+          </TableRow>
+        ) : (
+          entries.map((log) => (
+            <TableRow key={log.id}>
+              <TableCell>{new Date(log.timestamp).toLocaleString()}</TableCell>
+              <TableCell>{log.channel || log.service}</TableCell>
+              <TableCell className="font-mono text-sm">{log.method}</TableCell>
+              <TableCell className="font-mono text-sm">
+                {log.target_url ?? log.path}
+              </TableCell>
+              <TableCell>{getStatusBadge(log.status_code)}</TableCell>
+              <TableCell>{log.duration_ms}ms</TableCell>
+              <TableCell className="text-right">
+                <Button variant="ghost" size="sm" onClick={() => handleViewDetails(log.id)}>
+                  <Eye className="h-4 w-4" />
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))
+        )}
+      </TableBody>
+    </Table>
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -110,38 +176,28 @@ export function LogsPanel() {
         </div>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('logs.table.timestamp')}</TableHead>
-              <TableHead>{t('common.service')}</TableHead>
-              <TableHead>{t('common.method')}</TableHead>
-              <TableHead>{t('common.targetUrl')}</TableHead>
-              <TableHead>{t('common.status')}</TableHead>
-              <TableHead>{t('common.duration')}</TableHead>
-              <TableHead className="text-right">{t('common.actions')}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {logs.map((log) => (
-              <TableRow key={log.id}>
-                <TableCell>{new Date(log.timestamp).toLocaleString()}</TableCell>
-                <TableCell>{log.service}</TableCell>
-                <TableCell className="font-mono text-sm">{log.method}</TableCell>
-                <TableCell className="font-mono text-sm">
-                  {log.target_url ?? log.path}
-                </TableCell>
-                <TableCell>{getStatusBadge(log.status_code)}</TableCell>
-                <TableCell>{log.duration_ms}ms</TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm" onClick={() => handleViewDetails(log.id)}>
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
+        <Tabs
+          value={activeService}
+          onValueChange={(value) => {
+            if (serviceTabs.includes(value as ServiceTab)) {
+              setActiveService(value as ServiceTab);
+            }
+          }}
+          className="w-full"
+        >
+          <TabsList className="mb-4">
+            {serviceTabs.map((service) => (
+              <TabsTrigger key={service} value={service}>
+                {service === 'claude' ? t('service.claude.name') : t('service.codex.name')}
+              </TabsTrigger>
             ))}
-          </TableBody>
-        </Table>
+          </TabsList>
+          {serviceTabs.map((service) => (
+            <TabsContent key={service} value={service} className="mt-0">
+              {renderLogsTable(logsByService[service])}
+            </TabsContent>
+          ))}
+        </Tabs>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -174,7 +230,7 @@ export function LogsPanel() {
                     </div>
                     <div>
                       <p className="text-sm font-medium">{t('common.service')}</p>
-                      <p className="text-sm text-muted-foreground">{selectedLog.service}</p>
+                      <p className="text-sm text-muted-foreground">{selectedLog.channel || selectedLog.service}</p>
                     </div>
                     {selectedLog.channel && (
                       <div>

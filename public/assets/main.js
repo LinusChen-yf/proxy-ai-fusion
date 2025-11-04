@@ -30396,7 +30396,14 @@ function ConfigPanel() {
                         children: t("config.test.notRun")
                       }, undefined, false, undefined, this);
                     }
-                    const testedTime = new Date(result.completedAt).toLocaleTimeString();
+                    const testedDate = new Date(result.completedAt);
+                    const testedTime = testedDate.toLocaleString(undefined, {
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit"
+                    });
                     return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV("div", {
                       className: "flex flex-col gap-1 text-xs",
                       children: [
@@ -34397,6 +34404,7 @@ function LogsPanel() {
   const [dialogOpen, setDialogOpen] = import_react11.useState(false);
   const [clearDialogOpen, setClearDialogOpen] = import_react11.useState(false);
   const [clearing, setClearing] = import_react11.useState(false);
+  const [activeService, setActiveService] = import_react11.useState("claude");
   const loadLogs = async () => {
     setLoading(true);
     try {
@@ -34453,6 +34461,100 @@ function LogsPanel() {
       }, undefined, false, undefined, this);
     }
   };
+  const serviceTabs = ["claude", "codex"];
+  const logsByService = import_react11.useMemo(() => {
+    const groups = {
+      claude: [],
+      codex: []
+    };
+    logs.forEach((log) => {
+      const service = log.service || "claude";
+      if (service === "codex") {
+        groups.codex.push(log);
+        return;
+      }
+      groups.claude.push(log);
+    });
+    return groups;
+  }, [logs]);
+  const renderLogsTable = (entries) => /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Table, {
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHeader, {
+        children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableRow, {
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
+              children: t("logs.table.timestamp")
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
+              children: t("common.service")
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
+              children: t("common.method")
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
+              children: t("common.targetUrl")
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
+              children: t("common.status")
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
+              children: t("common.duration")
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
+              className: "text-right",
+              children: t("common.actions")
+            }, undefined, false, undefined, this)
+          ]
+        }, undefined, true, undefined, this)
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableBody, {
+        children: entries.length === 0 ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableRow, {
+          children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
+            colSpan: 7,
+            className: "py-10 text-center text-sm text-muted-foreground",
+            children: t("logs.empty")
+          }, undefined, false, undefined, this)
+        }, undefined, false, undefined, this) : entries.map((log) => /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableRow, {
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
+              children: new Date(log.timestamp).toLocaleString()
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
+              children: log.channel || log.service
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
+              className: "font-mono text-sm",
+              children: log.method
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
+              className: "font-mono text-sm",
+              children: log.target_url ?? log.path
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
+              children: getStatusBadge(log.status_code)
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
+              children: [
+                log.duration_ms,
+                "ms"
+              ]
+            }, undefined, true, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
+              className: "text-right",
+              children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Button, {
+                variant: "ghost",
+                size: "sm",
+                onClick: () => handleViewDetails(log.id),
+                children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Eye, {
+                  className: "h-4 w-4"
+                }, undefined, false, undefined, this)
+              }, undefined, false, undefined, this)
+            }, undefined, false, undefined, this)
+          ]
+        }, log.id, true, undefined, this))
+      }, undefined, false, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
   return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Card, {
     children: [
       /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardHeader, {
@@ -34501,76 +34603,27 @@ function LogsPanel() {
       }, undefined, false, undefined, this),
       /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardContent, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Table, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Tabs2, {
+            value: activeService,
+            onValueChange: (value) => {
+              if (serviceTabs.includes(value)) {
+                setActiveService(value);
+              }
+            },
+            className: "w-full",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHeader, {
-                children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableRow, {
-                  children: [
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
-                      children: t("logs.table.timestamp")
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
-                      children: t("common.service")
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
-                      children: t("common.method")
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
-                      children: t("common.targetUrl")
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
-                      children: t("common.status")
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
-                      children: t("common.duration")
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
-                      className: "text-right",
-                      children: t("common.actions")
-                    }, undefined, false, undefined, this)
-                  ]
-                }, undefined, true, undefined, this)
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsList2, {
+                className: "mb-4",
+                children: serviceTabs.map((service) => /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
+                  value: service,
+                  children: service === "claude" ? t("service.claude.name") : t("service.codex.name")
+                }, service, false, undefined, this))
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableBody, {
-                children: logs.map((log) => /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableRow, {
-                  children: [
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
-                      children: new Date(log.timestamp).toLocaleString()
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
-                      children: log.service
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
-                      className: "font-mono text-sm",
-                      children: log.method
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
-                      className: "font-mono text-sm",
-                      children: log.target_url ?? log.path
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
-                      children: getStatusBadge(log.status_code)
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
-                      children: [
-                        log.duration_ms,
-                        "ms"
-                      ]
-                    }, undefined, true, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
-                      className: "text-right",
-                      children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Button, {
-                        variant: "ghost",
-                        size: "sm",
-                        onClick: () => handleViewDetails(log.id),
-                        children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Eye, {
-                          className: "h-4 w-4"
-                        }, undefined, false, undefined, this)
-                      }, undefined, false, undefined, this)
-                    }, undefined, false, undefined, this)
-                  ]
-                }, log.id, true, undefined, this))
-              }, undefined, false, undefined, this)
+              serviceTabs.map((service) => /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
+                value: service,
+                className: "mt-0",
+                children: renderLogsTable(logsByService[service])
+              }, service, false, undefined, this))
             ]
           }, undefined, true, undefined, this),
           /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Dialog2, {
@@ -34653,7 +34706,7 @@ function LogsPanel() {
                                 }, undefined, false, undefined, this),
                                 /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
                                   className: "text-sm text-muted-foreground",
-                                  children: selectedLog.service
+                                  children: selectedLog.channel || selectedLog.service
                                 }, undefined, false, undefined, this)
                               ]
                             }, undefined, true, undefined, this),
@@ -35489,4 +35542,4 @@ import_client.default.createRoot(document.getElementById("root")).render(/* @__P
   }, undefined, false, undefined, this)
 }, undefined, false, undefined, this));
 
-//# debugId=A8057D4E8E69327864756E2164756E21
+//# debugId=521DBFE2AC0EF1EB64756E2164756E21

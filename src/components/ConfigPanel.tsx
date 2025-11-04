@@ -611,7 +611,14 @@ export function ConfigPanel() {
                       return <span className="text-xs text-muted-foreground">{t('config.test.notRun')}</span>;
                     }
 
-                    const testedTime = new Date(result.completedAt).toLocaleTimeString();
+                    const testedDate = new Date(result.completedAt);
+                    const testedTime = testedDate.toLocaleString(undefined, {
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                    });
                     return (
                       <div className="flex flex-col gap-1 text-xs">
                         <span className={result.success ? 'text-emerald-600' : 'text-destructive'}>
