@@ -6,6 +6,12 @@
   "bin": {
     "proxy-ai-fusion": "scripts/cli.ts"
   },
+  "files": [
+    "dist/",
+    "public/",
+    "server/",
+    "scripts/cli.ts"
+  ],
   "scripts": {
     "dev": "bun run scripts/dev.ts",
     "build": "bun run build:frontend && bun run build:server",

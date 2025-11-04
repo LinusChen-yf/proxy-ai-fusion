@@ -25,7 +25,7 @@ const startServer = async (): Promise<void> => {
     return;
   }
 
-  console.warn('dist/index.js not found. Falling back to server/index.ts');
+  console.info('dist/index.js not found. Falling back to server/index.ts');
   await import(sourceEntry.href);
 };
 
