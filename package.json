@@ -4,9 +4,7 @@
   "type": "module",
   "description": "High-performance AI proxy service with load balancing and real-time monitoring",
   "scripts": {
-    "dev": "bash dev.sh",
-    "dev:simple": "bun run dev:build && bun run --hot server/index.ts",
-    "dev:build": "bunx tailwindcss -i src/styles/globals.css -o public/assets/styles.css --minify && bun build src/main.tsx --outdir public/assets --target browser --sourcemap=external",
+    "dev": "bun run scripts/dev.ts",
     "build": "bun run build:frontend && bun run build:server",
     "build:frontend": "bunx tailwindcss -i src/styles/globals.css -o public/assets/styles.css --minify && bun build src/main.tsx --outdir public/assets --target browser --minify",
     "build:css": "bunx tailwindcss -i src/styles/globals.css -o public/assets/styles.css --minify",

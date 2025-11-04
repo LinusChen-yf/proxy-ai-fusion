@@ -1,35 +1,19 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `src/` runs the Axum-based service; `proxy`, `routing`, `realtime`, and `config` modules power the request pipeline and persist profiles under `~/.paf/`.
-- `frontend/` hosts the Vite/React dashboard; shadcn UI lives in `src/components/`, i18n files in `public/locales/`. The frontend is automatically built and embedded during Cargo builds via `build.rs`.
-- `cli_proxy/` archives the previous Python CLI (`pyproject.toml`, entry `src/main.py`, static assets under `src/ui/static`) and serves as a reference for the current project.
-- CLI commands: `paf start` runs the service as a daemon, `paf dev` runs in foreground mode, `paf ui` opens the web dashboard.
+`server/` contains the Bun backend with modular folders for `config/`, `routing/`, `proxy/`, and `logging/`; it reads and writes service profiles under `~/.paf/`. The React dashboard lives in `src/` (components, hooks, services, styles) and is bundled straight into `public/assets/`. Built server artifacts land in `dist/`, while `public/` serves static files and generated CSS/JS bundles. Use `test/` for Bun-powered integration and unit tests as they are added. The legacy Python CLI is archived in `cli_proxy/` for reference only—do not modify it unless porting behavior.
 
 ## Build, Test, and Development Commands
-- Initial setup: `cargo build` automatically installs Node dependencies and builds the frontend via `build.rs`.
-- Development: `paf dev` runs the backend in foreground mode; for frontend development, also run `cd frontend && npm run dev` in a separate terminal.
-- Production: `cargo build --release` builds and embeds the optimized frontend bundle.
-- Backend guardrails: `cargo check`, `cargo +nightly fmt`, `cargo clippy`, `cargo test`.
-- Frontend workflow: `cd frontend && npm run dev`, `npm run build`, `npm run type-check`, `npm run lint`.
-- CLI work: `pip install -e cli_proxy` then `python -m src.main --help` for smoke tests.
+Install dependencies with `bun install`. `bun run dev` now invokes `scripts/dev.ts`, which supervises Tailwind, the browser bundle, and `bun run --hot server/index.ts` so changes land instantly without manual restarts. Ship builds via `bun run build` (frontend + server); `bun run build:frontend` or `bun run build:server` target individual steps. `bun run start` executes the compiled server from `dist/index.js`. Clean generated artifacts with `bun run clean`. Type safety lives under `bun run type-check`.
 
 ## Coding Style & Naming Conventions
-- `rustfmt.toml` enforces two-space indentation and crate-level import grouping; keep files `snake_case.rs`, types `PascalCase`, and rely on `cargo +nightly fmt` plus `cargo clippy`.
-- Write inline comments and docstrings in English to keep reviews consistent across teams.
-- React files follow `PascalCase.tsx` for components and `camelCase.ts` for hooks/utilities; reuse Tailwind tokens defined in `tailwind.config.ts`.
-- Python modules respect PEP 8 naming and should avoid import-time side effects.
+TypeScript files lean on Bun’s ESM tooling—keep imports sorted logically and favor concise modules. React components use `PascalCase.tsx`, hooks/utilities use `camelCase.ts`, and shared types live in `src/types/`. Tailwind tokens and animations are declared once in `tailwind.config.ts`, and global styles start at `src/styles/globals.css`. Follow Prettier-style two-space indentation and keep log messages actionable; backend helpers should include short JSDoc when behavior is non-obvious.
 
 ## Testing Guidelines
-- Co-locate Rust unit tests via `#[cfg(test)]`; promote broader scenarios to `tests/` as they emerge.
-- After touching routing or config, run `cargo test` and perform a smoke pass with `paf dev` and check the dashboard at http://localhost:8800.
-- Frontend safety: `cd frontend && npm run type-check`, `npm run lint`; add Vitest or Playwright for WebSocket-heavy UI.
+Place Bun `test()` suites under `test/` or co-locate lightweight specs beside the module when that improves readability. Run `bun test` before submitting changes and pair it with `bun run type-check` to catch structural regressions. For proxy or routing changes, exercise `bun run dev` and manually confirm the dashboard at `http://localhost:8800` can proxy requests for both services. Capture tricky integration scenarios with fixture TOML files under a temporary directory rather than touching `~/.paf/`.
 
 ## Commit & Pull Request Guidelines
-- With no history yet, write short, imperative summaries (e.g., `Add realtime request monitor`) and keep each commit scoped to a single concern.
-- Reference the affected area (backend, frontend, cli) in the body, link issues, and call out schema or config migrations.
-- Pull requests need a focused description, screenshots for UI tweaks, and clear test evidence (`cargo test`, `npm run build`, etc.); update docs when workflows change.
+Write short, imperative commit messages (`Add load balancer health checks`) and scope each commit to one concern (frontend, server, config, docs). Reference relevant areas in the body (e.g. `server/routing`, `src/components`) and note when you touched persisted config formats. Pull requests should include a summary, linked issues, screenshots or terminal recordings for UI/CLI updates, and a checklist of executed commands such as `bun test`, `bun run build`, or targeted smoke tests.
 
 ## Security & Configuration Tips
-- Never commit secrets from `~/.paf/*.toml`, `.env`, or build artifacts such as `frontend/node_modules`; extend `.gitignore` as needed.
-- When altering config schemas, supply migrations and update `ARCHITECTURE.md`; ensure logs do not expose credentials.
+Never commit personal TOML files from `~/.paf/`, `.env` secrets, or generated bundles under `public/assets/` and `dist/`. When evolving configuration schemas, provide upgrade notes, keep defaults backward compatible, and ensure logs redact API keys or tokens before writing to disk.
