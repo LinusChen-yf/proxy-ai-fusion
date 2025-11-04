@@ -131,10 +131,14 @@ setInterval(() => {
   void autoRetestFrozenConfigs('codex');
 }, AUTO_RETEST_INTERVAL_MS);
 
-console.log('Starting Proxy AI Fusion server...');
+const pkg = await Bun.file(join(rootDir, 'package.json')).json();
+const version = typeof pkg?.version === 'string' ? pkg.version : 'unknown';
+
+console.log(`Starting Proxy AI Fusion server (v${version})...`);
 console.log(`Web UI: http://localhost:${systemConfig.webPort}`);
 console.log(`Claude proxy: http://localhost:${systemConfig.proxyPorts.claude}`);
 console.log(`Codex proxy: http://localhost:${systemConfig.proxyPorts.codex}`);
+console.log('Proxy AI Fusion server ready.');
 
 // Start Bun fullstack server for dashboard + API
 serve({
@@ -1253,8 +1257,6 @@ function cleanupClaudeSandbox(dir: string | null): void {
     console.warn(`[proxy:claude] Failed to clean Claude CLI sandbox ${dir}:`, error);
   }
 }
-
-console.log(`✓ Server running on http://localhost:${systemConfig.webPort}`);
 
 /**
  * Handle direct proxy traffic on dedicated service ports (e.g. 8801/8802)
