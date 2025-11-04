@@ -1,6 +1,6 @@
 {
   "name": "proxy-ai-fusion",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "High-performance AI proxy service with load balancing and real-time monitoring",
   "bin": {
