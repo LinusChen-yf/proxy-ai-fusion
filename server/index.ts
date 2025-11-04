@@ -6,9 +6,14 @@ import { LoadBalancer } from './routing/loadbalancer';
 import { RequestLogger, type LastRequestSnapshot } from './logging/logger';
 import { ProxyService } from './proxy/service';
 import type { ProxyConfig, ServiceConfig } from './config/types';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { tmpdir } from 'os';
 import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'fs';
+import { fileURLToPath } from 'url';
+
+const moduleDir = dirname(fileURLToPath(import.meta.url));
+const rootDir = join(moduleDir, '..');
+const publicDir = join(rootDir, 'public');
 
 // Initialize services
 const configManager = new ConfigManager();
@@ -170,13 +175,18 @@ serve({
 
     // Serve frontend
     if (path === '/') {
-      return new Response(Bun.file('public/index.html'), {
+      return new Response(Bun.file(join(publicDir, 'index.html')), {
         headers: { 'Content-Type': 'text/html' },
       });
     }
 
     // Serve static files from public directory
-    const publicPath = `public${path}`;
+    const sanitizedPath = path.replace(/^\/+/, '');
+
+    if (sanitizedPath.includes('..')) {
+      return new Response('Not found', { status: 404 });
+    }
+    const publicPath = join(publicDir, sanitizedPath);
     const file = Bun.file(publicPath);
 
     if (await file.exists()) {
@@ -184,7 +194,7 @@ serve({
     }
 
     // Try serving from root (for src/ during development)
-    const rootPath = path.substring(1);
+    const rootPath = join(rootDir, sanitizedPath);
     const rootFile = Bun.file(rootPath);
 
     if (await rootFile.exists()) {
@@ -192,7 +202,7 @@ serve({
     }
 
     // Fallback to index.html for SPA routing
-    return new Response(Bun.file('public/index.html'), {
+    return new Response(Bun.file(join(publicDir, 'index.html')), {
       headers: { 'Content-Type': 'text/html' },
     });
   },
