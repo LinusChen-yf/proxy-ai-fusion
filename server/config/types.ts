@@ -5,6 +5,7 @@ export interface ProxyConfig {
   baseUrl: string;
   authToken?: string;
   apiKey?: string;
+  headers?: Record<string, string | undefined>;
   weight: number;
   enabled: boolean;
   freezeUntil?: number; // Unix timestamp in milliseconds

@@ -13,6 +13,8 @@ export class LoadBalancer {
   private healthStatus: Map<string, ServerHealth> = new Map();
   private roundRobinIndex = 0;
   private config: LoadBalancerConfig;
+  private currentServerName: string | null = null;
+  private weightRotation: Map<string, number> = new Map();
 
   constructor(config: LoadBalancerConfig) {
     this.config = config;
@@ -26,37 +28,44 @@ export class LoadBalancer {
       return null;
     }
 
-    const healthyServers = servers.filter(s => this.isServerHealthy(s.name));
-    const pool = healthyServers.length > 0 ? healthyServers : servers;
     const now = Date.now();
+    const enabledServers = servers.filter(server => server.enabled !== false);
+    const basePool = enabledServers.length > 0 ? enabledServers : servers;
 
-    // Filter out frozen servers
-    const availableServers = pool.filter(s => {
-      if (!s.freezeUntil) return true;
-      return now >= s.freezeUntil;
-    });
+    const availableServers = basePool.filter(server => !this.isServerFrozen(server, now));
+    const selectableServers = availableServers.length > 0 ? availableServers : basePool;
 
-    if (availableServers.length === 0) {
-      // Fallback: allow previously unhealthy servers to be retried rather than returning 503
-      // This is especially important in manual mode where the user wants to force a specific config.
-      switch (this.config.strategy) {
-        case 'weighted':
-          return this.selectWeighted(pool);
-        case 'round-robin':
-          return this.selectRoundRobin(pool);
-        default:
-          return pool[0];
+    if (this.config.strategy !== 'weighted') {
+      const server = this.selectRoundRobin(selectableServers);
+      this.currentServerName = server?.name ?? null;
+      return server;
+    }
+
+    if (this.currentServerName && !servers.some(s => s.name === this.currentServerName)) {
+      this.currentServerName = null;
+    }
+
+    if (this.currentServerName) {
+      const current = selectableServers.find(s => s.name === this.currentServerName);
+      if (current && !this.hasExceededFailureThreshold(current.name)) {
+        return current;
       }
+      this.currentServerName = null;
     }
 
-    switch (this.config.strategy) {
-      case 'weighted':
-        return this.selectWeighted(availableServers);
-      case 'round-robin':
-        return this.selectRoundRobin(availableServers);
-      default:
-        return availableServers[0];
+    const next = this.selectByDescendingWeight(selectableServers);
+    if (next) {
+      this.currentServerName = next.name;
+      return next;
     }
+
+    const fallback = this.selectFallback(selectableServers);
+    if (fallback && !this.hasExceededFailureThreshold(fallback.name)) {
+      this.currentServerName = fallback.name;
+    } else {
+      this.currentServerName = null;
+    }
+    return fallback;
   }
 
   /**
@@ -64,6 +73,9 @@ export class LoadBalancer {
    */
   private selectWeighted(servers: ProxyConfig[]): ProxyConfig {
     const totalWeight = servers.reduce((sum, s) => sum + s.weight, 0);
+    if (totalWeight <= 0) {
+      return servers[0];
+    }
     let random = Math.random() * totalWeight;
 
     for (const server of servers) {
@@ -110,6 +122,9 @@ export class LoadBalancer {
 
     if (health.consecutiveFailures >= this.config.healthCheck.failureThreshold) {
       health.isHealthy = false;
+      if (this.currentServerName === serverName) {
+        this.currentServerName = null;
+      }
     }
 
     health.lastChecked = Date.now();
@@ -240,6 +255,9 @@ export class LoadBalancer {
    */
   resetServerHealth(serverName: string): void {
     this.healthStatus.delete(serverName);
+    if (this.currentServerName === serverName) {
+      this.currentServerName = null;
+    }
   }
 
   /**
@@ -247,5 +265,87 @@ export class LoadBalancer {
    */
   updateConfig(config: LoadBalancerConfig): void {
     this.config = config;
+    this.weightRotation.clear();
+    if (this.currentServerName && this.hasExceededFailureThreshold(this.currentServerName)) {
+      this.currentServerName = null;
+    }
+  }
+
+  private isServerFrozen(server: ProxyConfig, now: number): boolean {
+    return typeof server.freezeUntil === 'number' && server.freezeUntil > now;
+  }
+
+  private selectFallback(servers: ProxyConfig[]): ProxyConfig | null {
+    if (servers.length === 0) {
+      return null;
+    }
+
+    switch (this.config.strategy) {
+      case 'round-robin':
+        return this.selectRoundRobin(servers);
+      case 'weighted':
+      default:
+        return this.selectWeighted(servers);
+    }
+  }
+
+  private selectByDescendingWeight(servers: ProxyConfig[]): ProxyConfig | null {
+    if (servers.length === 0) {
+      return null;
+    }
+
+    const groups = this.groupServersByWeight(servers);
+    for (const group of groups) {
+      const candidate = this.selectFromWeightGroup(group.weight, group.servers);
+      if (candidate) {
+        return candidate;
+      }
+    }
+
+    return null;
+  }
+
+  private groupServersByWeight(servers: ProxyConfig[]): Array<{ weight: number; servers: ProxyConfig[] }> {
+    const grouped = new Map<number, ProxyConfig[]>();
+
+    for (const server of servers) {
+      const list = grouped.get(server.weight);
+      if (list) {
+        list.push(server);
+      } else {
+        grouped.set(server.weight, [server]);
+      }
+    }
+
+    return Array.from(grouped.entries())
+      .sort((a, b) => b[0] - a[0])
+      .map(([weight, list]) => ({
+        weight,
+        servers: list,
+      }));
+  }
+
+  private selectFromWeightGroup(weight: number, servers: ProxyConfig[]): ProxyConfig | null {
+    const eligible = servers
+      .filter(server => !this.hasExceededFailureThreshold(server.name))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    if (eligible.length === 0) {
+      return null;
+    }
+
+    const key = this.weightKey(weight);
+    let pointer = this.weightRotation.get(key) ?? 0;
+    if (pointer >= eligible.length) {
+      pointer = 0;
+    }
+
+    const server = eligible[pointer];
+    this.weightRotation.set(key, (pointer + 1) % eligible.length);
+    return server;
+  }
+
+  private weightKey(weight: number): string {
+    return Number.isInteger(weight) ? weight.toString() : weight.toString();
   }
 }

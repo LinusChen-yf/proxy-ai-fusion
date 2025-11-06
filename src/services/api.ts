@@ -7,8 +7,10 @@ import type {
   SeparatedConfigResponse,
   TestConnectionResponse,
   ClaudeSetupResponse,
+  ServiceId,
 } from '@/types/common';
 import type { LoadBalancerConfig } from '@/types/loadbalancer';
+import { DEFAULT_LOAD_BALANCER_CONFIG } from '@/types/loadbalancer';
 import type { RequestLog } from '@/types/logs';
 
 const API_BASE = '/api';
@@ -163,12 +165,16 @@ export const api = {
   },
 
   // Load Balancer
-  async getLoadBalancerConfig(): Promise<LoadBalancerConfig> {
-    return fetchJSON<LoadBalancerConfig>(`${API_BASE}/loadbalancer`);
+  async getLoadBalancerConfig(service: ServiceId = 'claude'): Promise<LoadBalancerConfig> {
+    const response = await fetchJSON<{ loadBalancer: LoadBalancerConfig | null }>(
+      `${API_BASE}/loadbalancer?service=${service}`
+    );
+
+    return response.loadBalancer ?? DEFAULT_LOAD_BALANCER_CONFIG;
   },
 
-  async updateLoadBalancerConfig(config: LoadBalancerConfig): Promise<void> {
-    await fetchJSON(`${API_BASE}/loadbalancer`, {
+  async updateLoadBalancerConfig(config: LoadBalancerConfig, service: ServiceId = 'claude'): Promise<void> {
+    await fetchJSON(`${API_BASE}/loadbalancer?service=${service}`, {
       method: 'PUT',
       body: JSON.stringify(config),
     });

@@ -1,35 +1,29 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/services/api';
-import type { LoadBalancerConfig } from '@/types/loadbalancer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Save } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useFeedback } from '@/components/FeedbackProvider';
+import { DEFAULT_LOAD_BALANCER_CONFIG, type LoadBalancerConfig } from '@/types/loadbalancer';
 
 export function LoadBalancerPanel() {
   const { t } = useTranslation();
   const feedback = useFeedback();
-  const [config, setConfig] = useState<LoadBalancerConfig>({
-    mode: 'weight_selection',
-    health_check_interval_secs: 30,
-    failure_threshold: 3,
-    success_threshold: 2,
-    freeze_duration_secs: 300,
-  });
+  const [config, setConfig] = useState<LoadBalancerConfig>(DEFAULT_LOAD_BALANCER_CONFIG);
 
   const loadConfig = async () => {
     try {
       const data = await api.getLoadBalancerConfig();
       setConfig({
-        mode: data.mode || 'weight_selection',
-        health_check_interval_secs: data.health_check_interval_secs ?? 30,
-        failure_threshold: data.failure_threshold ?? 3,
-        success_threshold: data.success_threshold ?? 2,
-        freeze_duration_secs: data.freeze_duration_secs ?? 300,
+        strategy: 'weighted',
+        healthCheck: {
+          ...DEFAULT_LOAD_BALANCER_CONFIG.healthCheck,
+          ...data.healthCheck,
+        },
+        freezeDuration: data.freezeDuration ?? DEFAULT_LOAD_BALANCER_CONFIG.freezeDuration,
       });
     } catch (error) {
       console.error('Failed to load load balancer config:', error);
@@ -43,7 +37,10 @@ export function LoadBalancerPanel() {
 
   const handleSave = async () => {
     try {
-      await api.updateLoadBalancerConfig(config);
+      await api.updateLoadBalancerConfig({
+        ...config,
+        strategy: 'weighted',
+      });
     } catch (error) {
       console.error('Failed to save load balancer config:', error);
       feedback.showError(t('loadbalancer.error.save'));
@@ -67,30 +64,21 @@ export function LoadBalancerPanel() {
       <CardContent>
         <div className="space-y-6">
           <div className="grid gap-2">
-            <Label>{t('lb.mode')}</Label>
-            <Select
-              value={config.mode}
-              onValueChange={(value) => setConfig({ ...config, mode: value as 'weight_selection' | 'round_robin' })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="weight_selection">{t('lb.weightSelection')}</SelectItem>
-                <SelectItem value="round_robin">{t('lb.roundRobin')}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid gap-2">
             <Label htmlFor="health_check_interval">{t('lb.healthInterval')}</Label>
             <Input
               id="health_check_interval"
               type="number"
-              value={config.health_check_interval_secs ?? ''}
-              onChange={(e) =>
-                setConfig({ ...config, health_check_interval_secs: parseInt(e.target.value) || 0 })
-              }
+              value={Math.round(config.healthCheck.interval / 1000)}
+              onChange={(e) => {
+                const seconds = parseInt(e.target.value, 10) || 0;
+                setConfig(prev => ({
+                  ...prev,
+                  healthCheck: {
+                    ...prev.healthCheck,
+                    interval: seconds * 1000,
+                  },
+                }));
+              }}
               min="1"
             />
           </div>
@@ -100,8 +88,17 @@ export function LoadBalancerPanel() {
             <Input
               id="failure_threshold"
               type="number"
-              value={config.failure_threshold ?? ''}
-              onChange={(e) => setConfig({ ...config, failure_threshold: parseInt(e.target.value) || 0 })}
+              value={config.healthCheck.failureThreshold}
+              onChange={(e) => {
+                const threshold = parseInt(e.target.value, 10) || 0;
+                setConfig(prev => ({
+                  ...prev,
+                  healthCheck: {
+                    ...prev.healthCheck,
+                    failureThreshold: threshold,
+                  },
+                }));
+              }}
               min="1"
             />
             <p className="text-xs text-muted-foreground">
@@ -114,8 +111,17 @@ export function LoadBalancerPanel() {
             <Input
               id="success_threshold"
               type="number"
-              value={config.success_threshold ?? ''}
-              onChange={(e) => setConfig({ ...config, success_threshold: parseInt(e.target.value) || 0 })}
+              value={config.healthCheck.successThreshold}
+              onChange={(e) => {
+                const threshold = parseInt(e.target.value, 10) || 0;
+                setConfig(prev => ({
+                  ...prev,
+                  healthCheck: {
+                    ...prev.healthCheck,
+                    successThreshold: threshold,
+                  },
+                }));
+              }}
               min="1"
             />
             <p className="text-xs text-muted-foreground">
@@ -128,10 +134,14 @@ export function LoadBalancerPanel() {
             <Input
               id="freeze_duration"
               type="number"
-              value={config.freeze_duration_secs ?? ''}
-              onChange={(e) =>
-                setConfig({ ...config, freeze_duration_secs: parseInt(e.target.value) || 0 })
-              }
+              value={Math.round(config.freezeDuration / 1000)}
+              onChange={(e) => {
+                const seconds = parseInt(e.target.value, 10) || 0;
+                setConfig(prev => ({
+                  ...prev,
+                  freezeDuration: seconds * 1000,
+                }));
+              }}
               min="60"
             />
             <p className="text-xs text-muted-foreground">

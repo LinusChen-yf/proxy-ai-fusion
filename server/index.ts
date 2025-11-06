@@ -4,7 +4,9 @@ import { serve } from 'bun';
 import { ConfigManager } from './config/manager';
 import { LoadBalancer } from './routing/loadbalancer';
 import { RequestLogger, type LastRequestSnapshot } from './logging/logger';
-import { ProxyService } from './proxy/service';
+import { ClaudeProxyService } from './proxy/claudeProxyService';
+import { CodexProxyService } from './proxy/codexProxyService';
+import type { ProxyService } from './proxy/baseProxyService';
 import type { ProxyConfig, ServiceConfig } from './config/types';
 import { join, dirname } from 'path';
 import { homedir, tmpdir } from 'os';
@@ -104,17 +106,15 @@ const codexLoadBalancer = new LoadBalancer(
 );
 
 // Initialize proxy services
-const claudeProxy = new ProxyService({
+const claudeProxy = new ClaudeProxyService({
   loadBalancer: claudeLoadBalancer,
   logger,
-  serviceName: 'claude',
   configManager,
 });
 
-const codexProxy = new ProxyService({
+const codexProxy = new CodexProxyService({
   loadBalancer: codexLoadBalancer,
   logger,
-  serviceName: 'codex',
   configManager,
 });
 

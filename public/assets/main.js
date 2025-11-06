@@ -26572,6 +26572,19 @@ class ErrorBoundary extends import_react3.Component {
 // src/components/ConfigPanel.tsx
 var import_react8 = __toESM(require_react(), 1);
 
+// src/types/loadbalancer.ts
+var DEFAULT_LOAD_BALANCER_CONFIG = {
+  strategy: "weighted",
+  healthCheck: {
+    enabled: true,
+    interval: 30000,
+    timeout: 5000,
+    failureThreshold: 3,
+    successThreshold: 2
+  },
+  freezeDuration: 300000
+};
+
 // src/services/api.ts
 var API_BASE = "/api";
 async function fetchJSON(url, options) {
@@ -26686,11 +26699,12 @@ var api = {
       body: JSON.stringify({ mode })
     });
   },
-  async getLoadBalancerConfig() {
-    return fetchJSON(`${API_BASE}/loadbalancer`);
+  async getLoadBalancerConfig(service = "claude") {
+    const response = await fetchJSON(`${API_BASE}/loadbalancer?service=${service}`);
+    return response.loadBalancer ?? DEFAULT_LOAD_BALANCER_CONFIG;
   },
-  async updateLoadBalancerConfig(config) {
-    await fetchJSON(`${API_BASE}/loadbalancer`, {
+  async updateLoadBalancerConfig(config, service = "claude") {
+    await fetchJSON(`${API_BASE}/loadbalancer?service=${service}`, {
       method: "PUT",
       body: JSON.stringify(config)
     });
@@ -30918,7 +30932,1001 @@ function ConfigPanel() {
 }
 
 // src/components/LoadBalancerPanel.tsx
+var import_react9 = __toESM(require_react(), 1);
+var jsx_dev_runtime12 = __toESM(require_jsx_dev_runtime(), 1);
+function LoadBalancerPanel() {
+  const { t } = useTranslation();
+  const feedback = useFeedback();
+  const [config, setConfig] = import_react9.useState(DEFAULT_LOAD_BALANCER_CONFIG);
+  const loadConfig = async () => {
+    try {
+      const data = await api.getLoadBalancerConfig();
+      setConfig({
+        strategy: "weighted",
+        healthCheck: {
+          ...DEFAULT_LOAD_BALANCER_CONFIG.healthCheck,
+          ...data.healthCheck
+        },
+        freezeDuration: data.freezeDuration ?? DEFAULT_LOAD_BALANCER_CONFIG.freezeDuration
+      });
+    } catch (error) {
+      console.error("Failed to load load balancer config:", error);
+      feedback.showError(t("loadbalancer.error.load"));
+    }
+  };
+  import_react9.useEffect(() => {
+    loadConfig();
+  }, []);
+  const handleSave = async () => {
+    try {
+      await api.updateLoadBalancerConfig({
+        ...config,
+        strategy: "weighted"
+      });
+    } catch (error) {
+      console.error("Failed to save load balancer config:", error);
+      feedback.showError(t("loadbalancer.error.save"));
+    }
+  };
+  return /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Card, {
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(CardHeader, {
+        children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+          className: "flex items-center justify-between",
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(CardTitle, {
+                  children: t("lb.title")
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(CardDescription, {
+                  children: t("lb.description")
+                }, undefined, false, undefined, this)
+              ]
+            }, undefined, true, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Button, {
+              onClick: handleSave,
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Save, {
+                  className: "mr-2 h-4 w-4"
+                }, undefined, false, undefined, this),
+                t("common.save")
+              ]
+            }, undefined, true, undefined, this)
+          ]
+        }, undefined, true, undefined, this)
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(CardContent, {
+        children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+          className: "space-y-6",
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+              className: "grid gap-2",
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Label2, {
+                  htmlFor: "health_check_interval",
+                  children: t("lb.healthInterval")
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Input, {
+                  id: "health_check_interval",
+                  type: "number",
+                  value: Math.round(config.healthCheck.interval / 1000),
+                  onChange: (e) => {
+                    const seconds = parseInt(e.target.value, 10) || 0;
+                    setConfig((prev) => ({
+                      ...prev,
+                      healthCheck: {
+                        ...prev.healthCheck,
+                        interval: seconds * 1000
+                      }
+                    }));
+                  },
+                  min: "1"
+                }, undefined, false, undefined, this)
+              ]
+            }, undefined, true, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+              className: "grid gap-2",
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Label2, {
+                  htmlFor: "failure_threshold",
+                  children: t("lb.failureThreshold")
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Input, {
+                  id: "failure_threshold",
+                  type: "number",
+                  value: config.healthCheck.failureThreshold,
+                  onChange: (e) => {
+                    const threshold = parseInt(e.target.value, 10) || 0;
+                    setConfig((prev) => ({
+                      ...prev,
+                      healthCheck: {
+                        ...prev.healthCheck,
+                        failureThreshold: threshold
+                      }
+                    }));
+                  },
+                  min: "1"
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("p", {
+                  className: "text-xs text-muted-foreground",
+                  children: t("lb.failureHint")
+                }, undefined, false, undefined, this)
+              ]
+            }, undefined, true, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+              className: "grid gap-2",
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Label2, {
+                  htmlFor: "success_threshold",
+                  children: t("lb.successThreshold")
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Input, {
+                  id: "success_threshold",
+                  type: "number",
+                  value: config.healthCheck.successThreshold,
+                  onChange: (e) => {
+                    const threshold = parseInt(e.target.value, 10) || 0;
+                    setConfig((prev) => ({
+                      ...prev,
+                      healthCheck: {
+                        ...prev.healthCheck,
+                        successThreshold: threshold
+                      }
+                    }));
+                  },
+                  min: "1"
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("p", {
+                  className: "text-xs text-muted-foreground",
+                  children: t("lb.successHint")
+                }, undefined, false, undefined, this)
+              ]
+            }, undefined, true, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("div", {
+              className: "grid gap-2",
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Label2, {
+                  htmlFor: "freeze_duration",
+                  children: t("lb.freezeDuration")
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Input, {
+                  id: "freeze_duration",
+                  type: "number",
+                  value: Math.round(config.freezeDuration / 1000),
+                  onChange: (e) => {
+                    const seconds = parseInt(e.target.value, 10) || 0;
+                    setConfig((prev) => ({
+                      ...prev,
+                      freezeDuration: seconds * 1000
+                    }));
+                  },
+                  min: "60"
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("p", {
+                  className: "text-xs text-muted-foreground",
+                  children: t("lb.freezeHint")
+                }, undefined, false, undefined, this)
+              ]
+            }, undefined, true, undefined, this)
+          ]
+        }, undefined, true, undefined, this)
+      }, undefined, false, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
+
+// src/components/LogsPanel.tsx
 var import_react10 = __toESM(require_react(), 1);
+
+// src/components/ui/badge.tsx
+var jsx_dev_runtime13 = __toESM(require_jsx_dev_runtime(), 1);
+var badgeVariants = cva("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", {
+  variants: {
+    variant: {
+      default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+      secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+      destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+      outline: "text-foreground"
+    }
+  },
+  defaultVariants: {
+    variant: "default"
+  }
+});
+function Badge({ className, variant, ...props }) {
+  return /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
+    className: cn(badgeVariants({ variant }), className),
+    ...props
+  }, undefined, false, undefined, this);
+}
+
+// src/components/LogsPanel.tsx
+var jsx_dev_runtime14 = __toESM(require_jsx_dev_runtime(), 1);
+function LogsPanel() {
+  const { t } = useTranslation();
+  const feedback = useFeedback();
+  const [logs, setLogs] = import_react10.useState([]);
+  const [loading, setLoading] = import_react10.useState(false);
+  const [selectedLog, setSelectedLog] = import_react10.useState(null);
+  const [dialogOpen, setDialogOpen] = import_react10.useState(false);
+  const [clearDialogOpen, setClearDialogOpen] = import_react10.useState(false);
+  const [clearing, setClearing] = import_react10.useState(false);
+  const [activeService, setActiveService] = import_react10.useState("claude");
+  const loadLogs = async () => {
+    setLoading(true);
+    try {
+      const data = await api.getLogs(50, 0);
+      setLogs(data);
+    } catch (error) {
+      console.error("Failed to load logs:", error);
+      feedback.showError(t("logs.error.load"));
+    } finally {
+      setLoading(false);
+    }
+  };
+  import_react10.useEffect(() => {
+    loadLogs();
+  }, []);
+  const handleViewDetails = async (id) => {
+    try {
+      const log = await api.getLogById(id);
+      setSelectedLog(log);
+      setDialogOpen(true);
+    } catch (error) {
+      console.error("Failed to load log details:", error);
+      feedback.showError(t("logs.error.details"));
+    }
+  };
+  const handleClearLogs = async () => {
+    setClearing(true);
+    try {
+      await api.clearLogs();
+      setLogs([]);
+      setClearDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to clear logs:", error);
+      feedback.showError(t("logs.error.clear"));
+    } finally {
+      setClearing(false);
+    }
+  };
+  const getStatusBadge = (statusCode) => {
+    if (statusCode >= 200 && statusCode < 300) {
+      return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Badge, {
+        variant: "default",
+        children: statusCode
+      }, undefined, false, undefined, this);
+    } else if (statusCode >= 400) {
+      return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Badge, {
+        variant: "secondary",
+        children: statusCode
+      }, undefined, false, undefined, this);
+    } else {
+      return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Badge, {
+        variant: "secondary",
+        children: statusCode
+      }, undefined, false, undefined, this);
+    }
+  };
+  const serviceTabs = ["claude", "codex"];
+  const logsByService = import_react10.useMemo(() => {
+    const groups = {
+      claude: [],
+      codex: []
+    };
+    logs.forEach((log) => {
+      const service = log.service || "claude";
+      if (service === "codex") {
+        groups.codex.push(log);
+        return;
+      }
+      groups.claude.push(log);
+    });
+    return groups;
+  }, [logs]);
+  const renderLogsTable = (entries) => /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Table, {
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHeader, {
+        children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableRow, {
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+              children: t("logs.table.timestamp")
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+              children: t("common.service")
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+              children: t("common.method")
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+              children: t("common.targetUrl")
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+              children: t("common.status")
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+              children: t("common.duration")
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableHead, {
+              className: "text-right",
+              children: t("common.actions")
+            }, undefined, false, undefined, this)
+          ]
+        }, undefined, true, undefined, this)
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableBody, {
+        children: entries.length === 0 ? /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableRow, {
+          children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+            colSpan: 7,
+            className: "py-10 text-center text-sm text-muted-foreground",
+            children: t("logs.empty")
+          }, undefined, false, undefined, this)
+        }, undefined, false, undefined, this) : entries.map((log) => /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableRow, {
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+              children: new Date(log.timestamp).toLocaleString()
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+              children: log.channel || log.service
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+              className: "font-mono text-sm",
+              children: log.method
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+              className: "font-mono text-sm",
+              children: log.target_url ?? log.path
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+              children: getStatusBadge(log.status_code)
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+              children: [
+                log.duration_ms,
+                "ms"
+              ]
+            }, undefined, true, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TableCell, {
+              className: "text-right",
+              children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Button, {
+                variant: "ghost",
+                size: "sm",
+                onClick: () => handleViewDetails(log.id),
+                children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Eye, {
+                  className: "h-4 w-4"
+                }, undefined, false, undefined, this)
+              }, undefined, false, undefined, this)
+            }, undefined, false, undefined, this)
+          ]
+        }, log.id, true, undefined, this))
+      }, undefined, false, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+  return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Card, {
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(CardHeader, {
+        children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+          className: "flex items-center justify-between",
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(CardTitle, {
+                  children: t("logs.title")
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(CardDescription, {
+                  children: t("logs.description")
+                }, undefined, false, undefined, this)
+              ]
+            }, undefined, true, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+              className: "flex gap-2",
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Button, {
+                  variant: "outline",
+                  onClick: loadLogs,
+                  disabled: loading,
+                  children: [
+                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(RefreshCw, {
+                      className: `mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`
+                    }, undefined, false, undefined, this),
+                    t("logs.refresh")
+                  ]
+                }, undefined, true, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Button, {
+                  variant: "outline",
+                  onClick: () => setClearDialogOpen(true),
+                  disabled: logs.length === 0,
+                  children: [
+                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Trash2, {
+                      className: "mr-2 h-4 w-4"
+                    }, undefined, false, undefined, this),
+                    t("logs.clear")
+                  ]
+                }, undefined, true, undefined, this)
+              ]
+            }, undefined, true, undefined, this)
+          ]
+        }, undefined, true, undefined, this)
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(CardContent, {
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Tabs2, {
+            value: activeService,
+            onValueChange: (value) => {
+              if (serviceTabs.includes(value)) {
+                setActiveService(value);
+              }
+            },
+            className: "w-full",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsList2, {
+                className: "mb-4",
+                children: serviceTabs.map((service) => /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsTrigger2, {
+                  value: service,
+                  children: service === "claude" ? t("service.claude.name") : t("service.codex.name")
+                }, service, false, undefined, this))
+              }, undefined, false, undefined, this),
+              serviceTabs.map((service) => /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsContent2, {
+                value: service,
+                className: "mt-0",
+                children: renderLogsTable(logsByService[service])
+              }, service, false, undefined, this))
+            ]
+          }, undefined, true, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Dialog2, {
+            open: dialogOpen,
+            onOpenChange: setDialogOpen,
+            children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(DialogContent2, {
+              className: "max-w-4xl max-h-[80vh] overflow-y-auto",
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(DialogHeader, {
+                  children: [
+                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(DialogTitle2, {
+                      children: t("logs.detailsTitle")
+                    }, undefined, false, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(DialogDescription2, {
+                      className: "font-mono break-all",
+                      children: selectedLog && (selectedLog.target_url ?? `${selectedLog.method} ${selectedLog.path}`)
+                    }, undefined, false, undefined, this)
+                  ]
+                }, undefined, true, undefined, this),
+                selectedLog && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Tabs2, {
+                  defaultValue: "basic",
+                  className: "w-full",
+                  children: [
+                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsList2, {
+                      children: [
+                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsTrigger2, {
+                          value: "basic",
+                          children: t("logs.tabs.basic")
+                        }, undefined, false, undefined, this),
+                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsTrigger2, {
+                          value: "request",
+                          children: t("logs.tabs.request")
+                        }, undefined, false, undefined, this),
+                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsTrigger2, {
+                          value: "response",
+                          children: t("logs.tabs.response")
+                        }, undefined, false, undefined, this),
+                        selectedLog.usage && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsTrigger2, {
+                          value: "usage",
+                          children: t("logs.tabs.usage")
+                        }, undefined, false, undefined, this)
+                      ]
+                    }, undefined, true, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsContent2, {
+                      value: "basic",
+                      className: "space-y-4",
+                      children: [
+                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                          className: "grid grid-cols-2 gap-4",
+                          children: [
+                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                              children: [
+                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                  className: "text-sm font-medium",
+                                  children: t("common.id")
+                                }, undefined, false, undefined, this),
+                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                  className: "text-sm text-muted-foreground font-mono",
+                                  children: selectedLog.id
+                                }, undefined, false, undefined, this)
+                              ]
+                            }, undefined, true, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                              children: [
+                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                  className: "text-sm font-medium",
+                                  children: t("logs.table.timestamp")
+                                }, undefined, false, undefined, this),
+                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                  className: "text-sm text-muted-foreground",
+                                  children: new Date(selectedLog.timestamp).toLocaleString()
+                                }, undefined, false, undefined, this)
+                              ]
+                            }, undefined, true, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                              children: [
+                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                  className: "text-sm font-medium",
+                                  children: t("common.service")
+                                }, undefined, false, undefined, this),
+                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                  className: "text-sm text-muted-foreground",
+                                  children: selectedLog.channel || selectedLog.service
+                                }, undefined, false, undefined, this)
+                              ]
+                            }, undefined, true, undefined, this),
+                            selectedLog.channel && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                              children: [
+                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                  className: "text-sm font-medium",
+                                  children: t("common.channel")
+                                }, undefined, false, undefined, this),
+                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                  className: "text-sm text-muted-foreground",
+                                  children: selectedLog.channel
+                                }, undefined, false, undefined, this)
+                              ]
+                            }, undefined, true, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                              children: [
+                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                  className: "text-sm font-medium",
+                                  children: t("common.statusCode")
+                                }, undefined, false, undefined, this),
+                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                  className: "text-sm text-muted-foreground",
+                                  children: selectedLog.status_code
+                                }, undefined, false, undefined, this)
+                              ]
+                            }, undefined, true, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                              children: [
+                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                  className: "text-sm font-medium",
+                                  children: t("common.duration")
+                                }, undefined, false, undefined, this),
+                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                  className: "text-sm text-muted-foreground",
+                                  children: [
+                                    selectedLog.duration_ms,
+                                    "ms"
+                                  ]
+                                }, undefined, true, undefined, this)
+                              ]
+                            }, undefined, true, undefined, this),
+                            selectedLog.target_url && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                              className: "col-span-2",
+                              children: [
+                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                  className: "text-sm font-medium",
+                                  children: t("common.targetUrl")
+                                }, undefined, false, undefined, this),
+                                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                  className: "text-sm text-muted-foreground break-all",
+                                  children: selectedLog.target_url
+                                }, undefined, false, undefined, this)
+                              ]
+                            }, undefined, true, undefined, this)
+                          ]
+                        }, undefined, true, undefined, this),
+                        selectedLog.error_message && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                          children: [
+                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              className: "text-sm font-medium text-destructive",
+                              children: t("common.error")
+                            }, undefined, false, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("pre", {
+                              className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
+                              children: selectedLog.error_message
+                            }, undefined, false, undefined, this)
+                          ]
+                        }, undefined, true, undefined, this)
+                      ]
+                    }, undefined, true, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsContent2, {
+                      value: "request",
+                      className: "space-y-4",
+                      children: [
+                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                          children: [
+                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              className: "text-sm font-medium",
+                              children: t("common.headers")
+                            }, undefined, false, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("pre", {
+                              className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
+                              children: JSON.stringify(selectedLog.request_headers ?? {}, null, 2)
+                            }, undefined, false, undefined, this)
+                          ]
+                        }, undefined, true, undefined, this),
+                        selectedLog.request_body && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                          children: [
+                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              className: "text-sm font-medium",
+                              children: t("common.body")
+                            }, undefined, false, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("pre", {
+                              className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
+                              children: selectedLog.request_body
+                            }, undefined, false, undefined, this)
+                          ]
+                        }, undefined, true, undefined, this)
+                      ]
+                    }, undefined, true, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsContent2, {
+                      value: "response",
+                      className: "space-y-4",
+                      children: [
+                        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                          children: [
+                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              className: "text-sm font-medium",
+                              children: t("common.headers")
+                            }, undefined, false, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("pre", {
+                              className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
+                              children: JSON.stringify(selectedLog.response_headers ?? {}, null, 2)
+                            }, undefined, false, undefined, this)
+                          ]
+                        }, undefined, true, undefined, this),
+                        selectedLog.response_body && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                          children: [
+                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                              className: "text-sm font-medium",
+                              children: t("common.body")
+                            }, undefined, false, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("pre", {
+                              className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
+                              children: selectedLog.response_body
+                            }, undefined, false, undefined, this)
+                          ]
+                        }, undefined, true, undefined, this)
+                      ]
+                    }, undefined, true, undefined, this),
+                    selectedLog.usage && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(TabsContent2, {
+                      value: "usage",
+                      className: "space-y-4",
+                      children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                        className: "grid grid-cols-2 gap-4",
+                        children: [
+                          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            children: [
+                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                className: "text-sm font-medium",
+                                children: t("common.model")
+                              }, undefined, false, undefined, this),
+                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                className: "text-sm text-muted-foreground",
+                                children: selectedLog.usage.model
+                              }, undefined, false, undefined, this)
+                            ]
+                          }, undefined, true, undefined, this),
+                          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            children: [
+                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                className: "text-sm font-medium",
+                                children: t("common.totalTokens")
+                              }, undefined, false, undefined, this),
+                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                className: "text-sm text-muted-foreground",
+                                children: selectedLog.usage.total_tokens
+                              }, undefined, false, undefined, this)
+                            ]
+                          }, undefined, true, undefined, this),
+                          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            children: [
+                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                className: "text-sm font-medium",
+                                children: t("common.promptTokens")
+                              }, undefined, false, undefined, this),
+                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                className: "text-sm text-muted-foreground",
+                                children: selectedLog.usage.prompt_tokens
+                              }, undefined, false, undefined, this)
+                            ]
+                          }, undefined, true, undefined, this),
+                          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
+                            children: [
+                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                className: "text-sm font-medium",
+                                children: t("common.completionTokens")
+                              }, undefined, false, undefined, this),
+                              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("p", {
+                                className: "text-sm text-muted-foreground",
+                                children: selectedLog.usage.completion_tokens
+                              }, undefined, false, undefined, this)
+                            ]
+                          }, undefined, true, undefined, this)
+                        ]
+                      }, undefined, true, undefined, this)
+                    }, undefined, false, undefined, this)
+                  ]
+                }, undefined, true, undefined, this)
+              ]
+            }, undefined, true, undefined, this)
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialog2, {
+            open: clearDialogOpen,
+            onOpenChange: setClearDialogOpen,
+            children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogContent2, {
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogHeader, {
+                  children: [
+                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogTitle2, {
+                      children: t("logs.confirmClear")
+                    }, undefined, false, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogDescription2, {
+                      children: t("logs.confirmClearDescription")
+                    }, undefined, false, undefined, this)
+                  ]
+                }, undefined, true, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogFooter, {
+                  children: [
+                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogCancel2, {
+                      disabled: clearing,
+                      children: t("common.cancel")
+                    }, undefined, false, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(AlertDialogAction2, {
+                      onClick: handleClearLogs,
+                      disabled: clearing,
+                      className: "bg-primary text-primary-foreground hover:bg-primary/90",
+                      children: clearing ? t("common.loading") : t("common.delete")
+                    }, undefined, false, undefined, this)
+                  ]
+                }, undefined, true, undefined, this)
+              ]
+            }, undefined, true, undefined, this)
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
+
+// src/components/DocsPanel.tsx
+var import_react11 = __toESM(require_react(), 1);
+var jsx_dev_runtime15 = __toESM(require_jsx_dev_runtime(), 1);
+var CLAUDE_CODE_SETTINGS_TEMPLATE = {
+  env: {
+    ANTHROPIC_AUTH_TOKEN: "-",
+    ANTHROPIC_BASE_URL: "http://localhost:8801",
+    CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
+    CLAUDE_CODE_MAX_OUTPUT_TOKENS: "32000",
+    MAX_THINKING_TOKENS: "30000",
+    DISABLE_AUTOUPDATER: "1"
+  },
+  permissions: {
+    allow: [],
+    deny: []
+  },
+  alwaysThinkingEnabled: true
+};
+function DocsPanel() {
+  const { t } = useTranslation();
+  const feedback = useFeedback();
+  const [activeService, setActiveService] = import_react11.useState("claude");
+  const [claudeSetupLoading, setClaudeSetupLoading] = import_react11.useState(false);
+  const [claudeSetupMessage, setClaudeSetupMessage] = import_react11.useState(null);
+  const [claudeCopyState, setClaudeCopyState] = import_react11.useState("idle");
+  const copyTimeoutRef = import_react11.useRef();
+  const claudeSettingsText = import_react11.useMemo(() => JSON.stringify(CLAUDE_CODE_SETTINGS_TEMPLATE, null, 2), []);
+  import_react11.useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
+  const handleSetupLocalClaude = async () => {
+    if (claudeSetupLoading) {
+      return;
+    }
+    setClaudeSetupLoading(true);
+    setClaudeSetupMessage(null);
+    try {
+      const response = await api.setupLocalClaudeCode();
+      const messageKey = response.backupCreated ? "docs.claude.local.successWithBackup" : "docs.claude.local.success";
+      const message = t(messageKey, {
+        path: response.settingsPath ?? "~/.claude/settings.json",
+        backup: response.backupPath ?? "~/.claude/settings.json.backup"
+      });
+      setClaudeSetupMessage(message);
+      feedback.showSuccess(message);
+    } catch (error) {
+      const description = error instanceof Error ? error.message : t("docs.common.unknownError");
+      const message = t("docs.claude.local.error", { message: description });
+      setClaudeSetupMessage(message);
+      feedback.showError(message);
+    } finally {
+      setClaudeSetupLoading(false);
+    }
+  };
+  const handleCopyTemplate = async () => {
+    if (typeof navigator === "undefined" || !navigator?.clipboard) {
+      feedback.showInfo(t("docs.common.copyUnavailable"));
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(claudeSettingsText);
+      setClaudeCopyState("copied");
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+      copyTimeoutRef.current = setTimeout(() => {
+        setClaudeCopyState("idle");
+        copyTimeoutRef.current = undefined;
+      }, 2000);
+    } catch {
+      feedback.showError(t("docs.common.copyFailed"));
+    }
+  };
+  return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Card, {
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardHeader, {
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardTitle, {
+            children: t("docs.title")
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardDescription, {
+            children: t("docs.description")
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardContent, {
+        className: "space-y-6",
+        children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Tabs2, {
+          value: activeService,
+          onValueChange: (value) => setActiveService(value),
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsList2, {
+              className: "grid grid-cols-2 gap-2",
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
+                  value: "claude",
+                  className: "capitalize",
+                  children: t("service.claude.name")
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
+                  value: "codex",
+                  className: "capitalize",
+                  children: t("service.codex.name")
+                }, undefined, false, undefined, this)
+              ]
+            }, undefined, true, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
+              value: "claude",
+              className: "space-y-6 pt-6",
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("section", {
+                  className: "space-y-3 rounded-lg border border-dashed p-4",
+                  children: [
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("h3", {
+                      className: "text-lg font-semibold",
+                      children: t("docs.claude.local.title")
+                    }, undefined, false, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                      className: "text-sm text-muted-foreground",
+                      children: t("docs.claude.local.description")
+                    }, undefined, false, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Button, {
+                      onClick: handleSetupLocalClaude,
+                      disabled: claudeSetupLoading,
+                      children: [
+                        claudeSetupLoading ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Loader2, {
+                          className: "mr-2 h-4 w-4 animate-spin"
+                        }, undefined, false, undefined, this) : null,
+                        t("docs.claude.local.button")
+                      ]
+                    }, undefined, true, undefined, this),
+                    claudeSetupMessage ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                      className: "text-sm text-muted-foreground",
+                      children: claudeSetupMessage
+                    }, undefined, false, undefined, this) : null
+                  ]
+                }, undefined, true, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("section", {
+                  className: "space-y-4 rounded-lg border p-4",
+                  children: [
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                      className: "flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between",
+                      children: [
+                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
+                          children: [
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("h3", {
+                              className: "text-lg font-semibold",
+                              children: t("docs.claude.remote.title")
+                            }, undefined, false, undefined, this),
+                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                              className: "text-sm text-muted-foreground",
+                              children: t("docs.claude.remote.description")
+                            }, undefined, false, undefined, this)
+                          ]
+                        }, undefined, true, undefined, this),
+                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Button, {
+                          variant: "outline",
+                          size: "sm",
+                          onClick: handleCopyTemplate,
+                          children: [
+                            claudeCopyState === "copied" ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(ClipboardCheck, {
+                              className: "mr-2 h-4 w-4"
+                            }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Clipboard, {
+                              className: "mr-2 h-4 w-4"
+                            }, undefined, false, undefined, this),
+                            claudeCopyState === "copied" ? t("docs.common.copied") : t("docs.common.copy")
+                          ]
+                        }, undefined, true, undefined, this)
+                      ]
+                    }, undefined, true, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("pre", {
+                      className: "max-h-80 overflow-auto rounded-md border bg-muted/40 p-4 text-xs leading-relaxed",
+                      children: claudeSettingsText
+                    }, undefined, false, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                      className: "text-xs text-muted-foreground",
+                      children: t("docs.claude.remote.note")
+                    }, undefined, false, undefined, this)
+                  ]
+                }, undefined, true, undefined, this)
+              ]
+            }, undefined, true, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
+              value: "codex",
+              className: "space-y-6 pt-6",
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("section", {
+                  className: "space-y-3 rounded-lg border border-dashed p-4",
+                  children: [
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("h3", {
+                      className: "text-lg font-semibold",
+                      children: t("docs.codex.title")
+                    }, undefined, false, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                      className: "text-sm text-muted-foreground",
+                      children: t("docs.codex.description")
+                    }, undefined, false, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("ul", {
+                      className: "list-disc space-y-2 pl-6 text-sm text-muted-foreground",
+                      children: [
+                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("li", {
+                          children: t("docs.codex.stepProxy")
+                        }, undefined, false, undefined, this),
+                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("li", {
+                          children: t("docs.codex.stepKey")
+                        }, undefined, false, undefined, this),
+                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("li", {
+                          children: t("docs.codex.stepTest")
+                        }, undefined, false, undefined, this)
+                      ]
+                    }, undefined, true, undefined, this)
+                  ]
+                }, undefined, true, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("section", {
+                  className: "space-y-3 rounded-lg border p-4",
+                  children: [
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("h3", {
+                      className: "text-lg font-semibold",
+                      children: t("docs.codex.notesTitle")
+                    }, undefined, false, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
+                      className: "text-sm text-muted-foreground",
+                      children: t("docs.codex.notesDescription")
+                    }, undefined, false, undefined, this)
+                  ]
+                }, undefined, true, undefined, this)
+              ]
+            }, undefined, true, undefined, this)
+          ]
+        }, undefined, true, undefined, this)
+      }, undefined, false, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
+
+// src/components/DashboardPanel.tsx
+var import_react13 = __toESM(require_react(), 1);
 
 // src/components/ui/select.tsx
 var React49 = __toESM(require_react(), 1);
@@ -32533,11 +33541,11 @@ var computePosition2 = (reference, floating, options2) => {
 
 // node_modules/@floating-ui/react-dom/dist/floating-ui.react-dom.mjs
 var React42 = __toESM(require_react(), 1);
-var import_react9 = __toESM(require_react(), 1);
+var import_react12 = __toESM(require_react(), 1);
 var ReactDOM3 = __toESM(require_react_dom(), 1);
 var isClient = typeof document !== "undefined";
 var noop = function noop2() {};
-var index = isClient ? import_react9.useLayoutEffect : noop;
+var index = isClient ? import_react12.useLayoutEffect : noop;
 function deepEqual(a, b) {
   if (a === b) {
     return true;
@@ -34136,1084 +35144,92 @@ var ScrollDownButton = SelectScrollDownButton;
 var Separator = SelectSeparator;
 
 // src/components/ui/select.tsx
-var jsx_dev_runtime12 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime16 = __toESM(require_jsx_dev_runtime(), 1);
 var Select2 = Root25;
 var SelectValue2 = Value;
-var SelectTrigger2 = React49.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Trigger3, {
+var SelectTrigger2 = React49.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Trigger3, {
   ref,
   className: cn("flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1", className),
   ...props,
   children: [
     children,
-    /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Icon, {
+    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Icon, {
       asChild: true,
-      children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ChevronDown, {
+      children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ChevronDown, {
         className: "h-4 w-4 opacity-50"
       }, undefined, false, undefined, this)
     }, undefined, false, undefined, this)
   ]
 }, undefined, true, undefined, this));
 SelectTrigger2.displayName = Trigger3.displayName;
-var SelectScrollUpButton2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ScrollUpButton, {
+var SelectScrollUpButton2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ScrollUpButton, {
   ref,
   className: cn("flex cursor-default items-center justify-center py-1", className),
   ...props,
-  children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ChevronUp, {
+  children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ChevronUp, {
     className: "h-4 w-4"
   }, undefined, false, undefined, this)
 }, undefined, false, undefined, this));
 SelectScrollUpButton2.displayName = ScrollUpButton.displayName;
-var SelectScrollDownButton2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ScrollDownButton, {
+var SelectScrollDownButton2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ScrollDownButton, {
   ref,
   className: cn("flex cursor-default items-center justify-center py-1", className),
   ...props,
-  children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ChevronDown, {
+  children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ChevronDown, {
     className: "h-4 w-4"
   }, undefined, false, undefined, this)
 }, undefined, false, undefined, this));
 SelectScrollDownButton2.displayName = ScrollDownButton.displayName;
-var SelectContent2 = React49.forwardRef(({ className, children, position = "popper", ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Portal3, {
-  children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Content23, {
+var SelectContent2 = React49.forwardRef(({ className, children, position = "popper", ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Portal3, {
+  children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Content23, {
     ref,
     className: cn("relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2", position === "popper" && "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1", className),
     position,
     ...props,
     children: [
-      /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(SelectScrollUpButton2, {}, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Viewport, {
+      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectScrollUpButton2, {}, undefined, false, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Viewport, {
         className: cn("p-1", position === "popper" && "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"),
         children
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(SelectScrollDownButton2, {}, undefined, false, undefined, this)
+      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(SelectScrollDownButton2, {}, undefined, false, undefined, this)
     ]
   }, undefined, true, undefined, this)
 }, undefined, false, undefined, this));
 SelectContent2.displayName = Content23.displayName;
-var SelectLabel2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Label3, {
+var SelectLabel2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Label3, {
   ref,
   className: cn("py-1.5 pl-8 pr-2 text-sm font-semibold", className),
   ...props
 }, undefined, false, undefined, this));
 SelectLabel2.displayName = Label3.displayName;
-var SelectItem2 = React49.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Item2, {
+var SelectItem2 = React49.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Item2, {
   ref,
   className: cn("relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50", className),
   ...props,
   children: [
-    /* @__PURE__ */ jsx_dev_runtime12.jsxDEV("span", {
+    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("span", {
       className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center",
-      children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ItemIndicator, {
-        children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Check, {
+      children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ItemIndicator, {
+        children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Check, {
           className: "h-4 w-4"
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this)
     }, undefined, false, undefined, this),
-    /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ItemText, {
+    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ItemText, {
       children
     }, undefined, false, undefined, this)
   ]
 }, undefined, true, undefined, this));
 SelectItem2.displayName = Item2.displayName;
-var SelectSeparator2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Separator, {
+var SelectSeparator2 = React49.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Separator, {
   ref,
   className: cn("-mx-1 my-1 h-px bg-muted", className),
   ...props
 }, undefined, false, undefined, this));
 SelectSeparator2.displayName = Separator.displayName;
 
-// src/components/LoadBalancerPanel.tsx
-var jsx_dev_runtime13 = __toESM(require_jsx_dev_runtime(), 1);
-function LoadBalancerPanel() {
-  const { t } = useTranslation();
-  const feedback = useFeedback();
-  const [config, setConfig] = import_react10.useState({
-    mode: "weight_selection",
-    health_check_interval_secs: 30,
-    failure_threshold: 3,
-    success_threshold: 2,
-    freeze_duration_secs: 300
-  });
-  const loadConfig = async () => {
-    try {
-      const data = await api.getLoadBalancerConfig();
-      setConfig({
-        mode: data.mode || "weight_selection",
-        health_check_interval_secs: data.health_check_interval_secs ?? 30,
-        failure_threshold: data.failure_threshold ?? 3,
-        success_threshold: data.success_threshold ?? 2,
-        freeze_duration_secs: data.freeze_duration_secs ?? 300
-      });
-    } catch (error) {
-      console.error("Failed to load load balancer config:", error);
-      feedback.showError(t("loadbalancer.error.load"));
-    }
-  };
-  import_react10.useEffect(() => {
-    loadConfig();
-  }, []);
-  const handleSave = async () => {
-    try {
-      await api.updateLoadBalancerConfig(config);
-    } catch (error) {
-      console.error("Failed to save load balancer config:", error);
-      feedback.showError(t("loadbalancer.error.save"));
-    }
-  };
-  return /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Card, {
-    children: [
-      /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(CardHeader, {
-        children: /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
-          className: "flex items-center justify-between",
-          children: [
-            /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(CardTitle, {
-                  children: t("lb.title")
-                }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(CardDescription, {
-                  children: t("lb.description")
-                }, undefined, false, undefined, this)
-              ]
-            }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Button, {
-              onClick: handleSave,
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Save, {
-                  className: "mr-2 h-4 w-4"
-                }, undefined, false, undefined, this),
-                t("common.save")
-              ]
-            }, undefined, true, undefined, this)
-          ]
-        }, undefined, true, undefined, this)
-      }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(CardContent, {
-        children: /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
-          className: "space-y-6",
-          children: [
-            /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
-              className: "grid gap-2",
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Label2, {
-                  children: t("lb.mode")
-                }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Select2, {
-                  value: config.mode,
-                  onValueChange: (value) => setConfig({ ...config, mode: value }),
-                  children: [
-                    /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(SelectTrigger2, {
-                      children: /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(SelectValue2, {}, undefined, false, undefined, this)
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(SelectContent2, {
-                      children: [
-                        /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(SelectItem2, {
-                          value: "weight_selection",
-                          children: t("lb.weightSelection")
-                        }, undefined, false, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(SelectItem2, {
-                          value: "round_robin",
-                          children: t("lb.roundRobin")
-                        }, undefined, false, undefined, this)
-                      ]
-                    }, undefined, true, undefined, this)
-                  ]
-                }, undefined, true, undefined, this)
-              ]
-            }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
-              className: "grid gap-2",
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Label2, {
-                  htmlFor: "health_check_interval",
-                  children: t("lb.healthInterval")
-                }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Input, {
-                  id: "health_check_interval",
-                  type: "number",
-                  value: config.health_check_interval_secs ?? "",
-                  onChange: (e) => setConfig({ ...config, health_check_interval_secs: parseInt(e.target.value) || 0 }),
-                  min: "1"
-                }, undefined, false, undefined, this)
-              ]
-            }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
-              className: "grid gap-2",
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Label2, {
-                  htmlFor: "failure_threshold",
-                  children: t("lb.failureThreshold")
-                }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Input, {
-                  id: "failure_threshold",
-                  type: "number",
-                  value: config.failure_threshold ?? "",
-                  onChange: (e) => setConfig({ ...config, failure_threshold: parseInt(e.target.value) || 0 }),
-                  min: "1"
-                }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("p", {
-                  className: "text-xs text-muted-foreground",
-                  children: t("lb.failureHint")
-                }, undefined, false, undefined, this)
-              ]
-            }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
-              className: "grid gap-2",
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Label2, {
-                  htmlFor: "success_threshold",
-                  children: t("lb.successThreshold")
-                }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Input, {
-                  id: "success_threshold",
-                  type: "number",
-                  value: config.success_threshold ?? "",
-                  onChange: (e) => setConfig({ ...config, success_threshold: parseInt(e.target.value) || 0 }),
-                  min: "1"
-                }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("p", {
-                  className: "text-xs text-muted-foreground",
-                  children: t("lb.successHint")
-                }, undefined, false, undefined, this)
-              ]
-            }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("div", {
-              className: "grid gap-2",
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Label2, {
-                  htmlFor: "freeze_duration",
-                  children: t("lb.freezeDuration")
-                }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Input, {
-                  id: "freeze_duration",
-                  type: "number",
-                  value: config.freeze_duration_secs ?? "",
-                  onChange: (e) => setConfig({ ...config, freeze_duration_secs: parseInt(e.target.value) || 0 }),
-                  min: "60"
-                }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime13.jsxDEV("p", {
-                  className: "text-xs text-muted-foreground",
-                  children: t("lb.freezeHint")
-                }, undefined, false, undefined, this)
-              ]
-            }, undefined, true, undefined, this)
-          ]
-        }, undefined, true, undefined, this)
-      }, undefined, false, undefined, this)
-    ]
-  }, undefined, true, undefined, this);
-}
-
-// src/components/LogsPanel.tsx
-var import_react11 = __toESM(require_react(), 1);
-
-// src/components/ui/badge.tsx
-var jsx_dev_runtime14 = __toESM(require_jsx_dev_runtime(), 1);
-var badgeVariants = cva("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", {
-  variants: {
-    variant: {
-      default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-      secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-      destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-      outline: "text-foreground"
-    }
-  },
-  defaultVariants: {
-    variant: "default"
-  }
-});
-function Badge({ className, variant, ...props }) {
-  return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV("div", {
-    className: cn(badgeVariants({ variant }), className),
-    ...props
-  }, undefined, false, undefined, this);
-}
-
-// src/components/LogsPanel.tsx
-var jsx_dev_runtime15 = __toESM(require_jsx_dev_runtime(), 1);
-function LogsPanel() {
-  const { t } = useTranslation();
-  const feedback = useFeedback();
-  const [logs, setLogs] = import_react11.useState([]);
-  const [loading, setLoading] = import_react11.useState(false);
-  const [selectedLog, setSelectedLog] = import_react11.useState(null);
-  const [dialogOpen, setDialogOpen] = import_react11.useState(false);
-  const [clearDialogOpen, setClearDialogOpen] = import_react11.useState(false);
-  const [clearing, setClearing] = import_react11.useState(false);
-  const [activeService, setActiveService] = import_react11.useState("claude");
-  const loadLogs = async () => {
-    setLoading(true);
-    try {
-      const data = await api.getLogs(50, 0);
-      setLogs(data);
-    } catch (error) {
-      console.error("Failed to load logs:", error);
-      feedback.showError(t("logs.error.load"));
-    } finally {
-      setLoading(false);
-    }
-  };
-  import_react11.useEffect(() => {
-    loadLogs();
-  }, []);
-  const handleViewDetails = async (id) => {
-    try {
-      const log = await api.getLogById(id);
-      setSelectedLog(log);
-      setDialogOpen(true);
-    } catch (error) {
-      console.error("Failed to load log details:", error);
-      feedback.showError(t("logs.error.details"));
-    }
-  };
-  const handleClearLogs = async () => {
-    setClearing(true);
-    try {
-      await api.clearLogs();
-      setLogs([]);
-      setClearDialogOpen(false);
-    } catch (error) {
-      console.error("Failed to clear logs:", error);
-      feedback.showError(t("logs.error.clear"));
-    } finally {
-      setClearing(false);
-    }
-  };
-  const getStatusBadge = (statusCode) => {
-    if (statusCode >= 200 && statusCode < 300) {
-      return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Badge, {
-        variant: "default",
-        children: statusCode
-      }, undefined, false, undefined, this);
-    } else if (statusCode >= 400) {
-      return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Badge, {
-        variant: "secondary",
-        children: statusCode
-      }, undefined, false, undefined, this);
-    } else {
-      return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Badge, {
-        variant: "secondary",
-        children: statusCode
-      }, undefined, false, undefined, this);
-    }
-  };
-  const serviceTabs = ["claude", "codex"];
-  const logsByService = import_react11.useMemo(() => {
-    const groups = {
-      claude: [],
-      codex: []
-    };
-    logs.forEach((log) => {
-      const service = log.service || "claude";
-      if (service === "codex") {
-        groups.codex.push(log);
-        return;
-      }
-      groups.claude.push(log);
-    });
-    return groups;
-  }, [logs]);
-  const renderLogsTable = (entries) => /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Table, {
-    children: [
-      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHeader, {
-        children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableRow, {
-          children: [
-            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
-              children: t("logs.table.timestamp")
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
-              children: t("common.service")
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
-              children: t("common.method")
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
-              children: t("common.targetUrl")
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
-              children: t("common.status")
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
-              children: t("common.duration")
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableHead, {
-              className: "text-right",
-              children: t("common.actions")
-            }, undefined, false, undefined, this)
-          ]
-        }, undefined, true, undefined, this)
-      }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableBody, {
-        children: entries.length === 0 ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableRow, {
-          children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
-            colSpan: 7,
-            className: "py-10 text-center text-sm text-muted-foreground",
-            children: t("logs.empty")
-          }, undefined, false, undefined, this)
-        }, undefined, false, undefined, this) : entries.map((log) => /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableRow, {
-          children: [
-            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
-              children: new Date(log.timestamp).toLocaleString()
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
-              children: log.channel || log.service
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
-              className: "font-mono text-sm",
-              children: log.method
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
-              className: "font-mono text-sm",
-              children: log.target_url ?? log.path
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
-              children: getStatusBadge(log.status_code)
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
-              children: [
-                log.duration_ms,
-                "ms"
-              ]
-            }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TableCell, {
-              className: "text-right",
-              children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Button, {
-                variant: "ghost",
-                size: "sm",
-                onClick: () => handleViewDetails(log.id),
-                children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Eye, {
-                  className: "h-4 w-4"
-                }, undefined, false, undefined, this)
-              }, undefined, false, undefined, this)
-            }, undefined, false, undefined, this)
-          ]
-        }, log.id, true, undefined, this))
-      }, undefined, false, undefined, this)
-    ]
-  }, undefined, true, undefined, this);
-  return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Card, {
-    children: [
-      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardHeader, {
-        children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-          className: "flex items-center justify-between",
-          children: [
-            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardTitle, {
-                  children: t("logs.title")
-                }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardDescription, {
-                  children: t("logs.description")
-                }, undefined, false, undefined, this)
-              ]
-            }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-              className: "flex gap-2",
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Button, {
-                  variant: "outline",
-                  onClick: loadLogs,
-                  disabled: loading,
-                  children: [
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(RefreshCw, {
-                      className: `mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`
-                    }, undefined, false, undefined, this),
-                    t("logs.refresh")
-                  ]
-                }, undefined, true, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Button, {
-                  variant: "outline",
-                  onClick: () => setClearDialogOpen(true),
-                  disabled: logs.length === 0,
-                  children: [
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Trash2, {
-                      className: "mr-2 h-4 w-4"
-                    }, undefined, false, undefined, this),
-                    t("logs.clear")
-                  ]
-                }, undefined, true, undefined, this)
-              ]
-            }, undefined, true, undefined, this)
-          ]
-        }, undefined, true, undefined, this)
-      }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(CardContent, {
-        children: [
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Tabs2, {
-            value: activeService,
-            onValueChange: (value) => {
-              if (serviceTabs.includes(value)) {
-                setActiveService(value);
-              }
-            },
-            className: "w-full",
-            children: [
-              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsList2, {
-                className: "mb-4",
-                children: serviceTabs.map((service) => /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
-                  value: service,
-                  children: service === "claude" ? t("service.claude.name") : t("service.codex.name")
-                }, service, false, undefined, this))
-              }, undefined, false, undefined, this),
-              serviceTabs.map((service) => /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
-                value: service,
-                className: "mt-0",
-                children: renderLogsTable(logsByService[service])
-              }, service, false, undefined, this))
-            ]
-          }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Dialog2, {
-            open: dialogOpen,
-            onOpenChange: setDialogOpen,
-            children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(DialogContent2, {
-              className: "max-w-4xl max-h-[80vh] overflow-y-auto",
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(DialogHeader, {
-                  children: [
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(DialogTitle2, {
-                      children: t("logs.detailsTitle")
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(DialogDescription2, {
-                      className: "font-mono break-all",
-                      children: selectedLog && (selectedLog.target_url ?? `${selectedLog.method} ${selectedLog.path}`)
-                    }, undefined, false, undefined, this)
-                  ]
-                }, undefined, true, undefined, this),
-                selectedLog && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Tabs2, {
-                  defaultValue: "basic",
-                  className: "w-full",
-                  children: [
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsList2, {
-                      children: [
-                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
-                          value: "basic",
-                          children: t("logs.tabs.basic")
-                        }, undefined, false, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
-                          value: "request",
-                          children: t("logs.tabs.request")
-                        }, undefined, false, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
-                          value: "response",
-                          children: t("logs.tabs.response")
-                        }, undefined, false, undefined, this),
-                        selectedLog.usage && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsTrigger2, {
-                          value: "usage",
-                          children: t("logs.tabs.usage")
-                        }, undefined, false, undefined, this)
-                      ]
-                    }, undefined, true, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
-                      value: "basic",
-                      className: "space-y-4",
-                      children: [
-                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                          className: "grid grid-cols-2 gap-4",
-                          children: [
-                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                              children: [
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                  className: "text-sm font-medium",
-                                  children: t("common.id")
-                                }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                  className: "text-sm text-muted-foreground font-mono",
-                                  children: selectedLog.id
-                                }, undefined, false, undefined, this)
-                              ]
-                            }, undefined, true, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                              children: [
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                  className: "text-sm font-medium",
-                                  children: t("logs.table.timestamp")
-                                }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                  className: "text-sm text-muted-foreground",
-                                  children: new Date(selectedLog.timestamp).toLocaleString()
-                                }, undefined, false, undefined, this)
-                              ]
-                            }, undefined, true, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                              children: [
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                  className: "text-sm font-medium",
-                                  children: t("common.service")
-                                }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                  className: "text-sm text-muted-foreground",
-                                  children: selectedLog.channel || selectedLog.service
-                                }, undefined, false, undefined, this)
-                              ]
-                            }, undefined, true, undefined, this),
-                            selectedLog.channel && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                              children: [
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                  className: "text-sm font-medium",
-                                  children: t("common.channel")
-                                }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                  className: "text-sm text-muted-foreground",
-                                  children: selectedLog.channel
-                                }, undefined, false, undefined, this)
-                              ]
-                            }, undefined, true, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                              children: [
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                  className: "text-sm font-medium",
-                                  children: t("common.statusCode")
-                                }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                  className: "text-sm text-muted-foreground",
-                                  children: selectedLog.status_code
-                                }, undefined, false, undefined, this)
-                              ]
-                            }, undefined, true, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                              children: [
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                  className: "text-sm font-medium",
-                                  children: t("common.duration")
-                                }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                  className: "text-sm text-muted-foreground",
-                                  children: [
-                                    selectedLog.duration_ms,
-                                    "ms"
-                                  ]
-                                }, undefined, true, undefined, this)
-                              ]
-                            }, undefined, true, undefined, this),
-                            selectedLog.target_url && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                              className: "col-span-2",
-                              children: [
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                  className: "text-sm font-medium",
-                                  children: t("common.targetUrl")
-                                }, undefined, false, undefined, this),
-                                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                  className: "text-sm text-muted-foreground break-all",
-                                  children: selectedLog.target_url
-                                }, undefined, false, undefined, this)
-                              ]
-                            }, undefined, true, undefined, this)
-                          ]
-                        }, undefined, true, undefined, this),
-                        selectedLog.error_message && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                          children: [
-                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                              className: "text-sm font-medium text-destructive",
-                              children: t("common.error")
-                            }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("pre", {
-                              className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
-                              children: selectedLog.error_message
-                            }, undefined, false, undefined, this)
-                          ]
-                        }, undefined, true, undefined, this)
-                      ]
-                    }, undefined, true, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
-                      value: "request",
-                      className: "space-y-4",
-                      children: [
-                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                          children: [
-                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                              className: "text-sm font-medium",
-                              children: t("common.headers")
-                            }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("pre", {
-                              className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
-                              children: JSON.stringify(selectedLog.request_headers ?? {}, null, 2)
-                            }, undefined, false, undefined, this)
-                          ]
-                        }, undefined, true, undefined, this),
-                        selectedLog.request_body && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                          children: [
-                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                              className: "text-sm font-medium",
-                              children: t("common.body")
-                            }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("pre", {
-                              className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
-                              children: selectedLog.request_body
-                            }, undefined, false, undefined, this)
-                          ]
-                        }, undefined, true, undefined, this)
-                      ]
-                    }, undefined, true, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
-                      value: "response",
-                      className: "space-y-4",
-                      children: [
-                        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                          children: [
-                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                              className: "text-sm font-medium",
-                              children: t("common.headers")
-                            }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("pre", {
-                              className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
-                              children: JSON.stringify(selectedLog.response_headers ?? {}, null, 2)
-                            }, undefined, false, undefined, this)
-                          ]
-                        }, undefined, true, undefined, this),
-                        selectedLog.response_body && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                          children: [
-                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                              className: "text-sm font-medium",
-                              children: t("common.body")
-                            }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("pre", {
-                              className: "mt-2 p-2 bg-muted rounded text-xs whitespace-pre-wrap break-words",
-                              children: selectedLog.response_body
-                            }, undefined, false, undefined, this)
-                          ]
-                        }, undefined, true, undefined, this)
-                      ]
-                    }, undefined, true, undefined, this),
-                    selectedLog.usage && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(TabsContent2, {
-                      value: "usage",
-                      className: "space-y-4",
-                      children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                        className: "grid grid-cols-2 gap-4",
-                        children: [
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                            children: [
-                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                className: "text-sm font-medium",
-                                children: t("common.model")
-                              }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                className: "text-sm text-muted-foreground",
-                                children: selectedLog.usage.model
-                              }, undefined, false, undefined, this)
-                            ]
-                          }, undefined, true, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                            children: [
-                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                className: "text-sm font-medium",
-                                children: t("common.totalTokens")
-                              }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                className: "text-sm text-muted-foreground",
-                                children: selectedLog.usage.total_tokens
-                              }, undefined, false, undefined, this)
-                            ]
-                          }, undefined, true, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                            children: [
-                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                className: "text-sm font-medium",
-                                children: t("common.promptTokens")
-                              }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                className: "text-sm text-muted-foreground",
-                                children: selectedLog.usage.prompt_tokens
-                              }, undefined, false, undefined, this)
-                            ]
-                          }, undefined, true, undefined, this),
-                          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("div", {
-                            children: [
-                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                className: "text-sm font-medium",
-                                children: t("common.completionTokens")
-                              }, undefined, false, undefined, this),
-                              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV("p", {
-                                className: "text-sm text-muted-foreground",
-                                children: selectedLog.usage.completion_tokens
-                              }, undefined, false, undefined, this)
-                            ]
-                          }, undefined, true, undefined, this)
-                        ]
-                      }, undefined, true, undefined, this)
-                    }, undefined, false, undefined, this)
-                  ]
-                }, undefined, true, undefined, this)
-              ]
-            }, undefined, true, undefined, this)
-          }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialog2, {
-            open: clearDialogOpen,
-            onOpenChange: setClearDialogOpen,
-            children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogContent2, {
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogHeader, {
-                  children: [
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogTitle2, {
-                      children: t("logs.confirmClear")
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogDescription2, {
-                      children: t("logs.confirmClearDescription")
-                    }, undefined, false, undefined, this)
-                  ]
-                }, undefined, true, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogFooter, {
-                  children: [
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogCancel2, {
-                      disabled: clearing,
-                      children: t("common.cancel")
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(AlertDialogAction2, {
-                      onClick: handleClearLogs,
-                      disabled: clearing,
-                      className: "bg-primary text-primary-foreground hover:bg-primary/90",
-                      children: clearing ? t("common.loading") : t("common.delete")
-                    }, undefined, false, undefined, this)
-                  ]
-                }, undefined, true, undefined, this)
-              ]
-            }, undefined, true, undefined, this)
-          }, undefined, false, undefined, this)
-        ]
-      }, undefined, true, undefined, this)
-    ]
-  }, undefined, true, undefined, this);
-}
-
-// src/components/DocsPanel.tsx
-var import_react12 = __toESM(require_react(), 1);
-var jsx_dev_runtime16 = __toESM(require_jsx_dev_runtime(), 1);
-var CLAUDE_CODE_SETTINGS_TEMPLATE = {
-  env: {
-    ANTHROPIC_AUTH_TOKEN: "-",
-    ANTHROPIC_BASE_URL: "http://localhost:8801",
-    CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
-    CLAUDE_CODE_MAX_OUTPUT_TOKENS: "32000",
-    MAX_THINKING_TOKENS: "30000",
-    DISABLE_AUTOUPDATER: "1"
-  },
-  permissions: {
-    allow: [],
-    deny: []
-  },
-  alwaysThinkingEnabled: true
-};
-function DocsPanel() {
-  const { t } = useTranslation();
-  const feedback = useFeedback();
-  const [activeService, setActiveService] = import_react12.useState("claude");
-  const [claudeSetupLoading, setClaudeSetupLoading] = import_react12.useState(false);
-  const [claudeSetupMessage, setClaudeSetupMessage] = import_react12.useState(null);
-  const [claudeCopyState, setClaudeCopyState] = import_react12.useState("idle");
-  const copyTimeoutRef = import_react12.useRef();
-  const claudeSettingsText = import_react12.useMemo(() => JSON.stringify(CLAUDE_CODE_SETTINGS_TEMPLATE, null, 2), []);
-  import_react12.useEffect(() => {
-    return () => {
-      if (copyTimeoutRef.current) {
-        clearTimeout(copyTimeoutRef.current);
-      }
-    };
-  }, []);
-  const handleSetupLocalClaude = async () => {
-    if (claudeSetupLoading) {
-      return;
-    }
-    setClaudeSetupLoading(true);
-    setClaudeSetupMessage(null);
-    try {
-      const response = await api.setupLocalClaudeCode();
-      const messageKey = response.backupCreated ? "docs.claude.local.successWithBackup" : "docs.claude.local.success";
-      const message = t(messageKey, {
-        path: response.settingsPath ?? "~/.claude/settings.json",
-        backup: response.backupPath ?? "~/.claude/settings.json.backup"
-      });
-      setClaudeSetupMessage(message);
-      feedback.showSuccess(message);
-    } catch (error) {
-      const description = error instanceof Error ? error.message : t("docs.common.unknownError");
-      const message = t("docs.claude.local.error", { message: description });
-      setClaudeSetupMessage(message);
-      feedback.showError(message);
-    } finally {
-      setClaudeSetupLoading(false);
-    }
-  };
-  const handleCopyTemplate = async () => {
-    if (typeof navigator === "undefined" || !navigator?.clipboard) {
-      feedback.showInfo(t("docs.common.copyUnavailable"));
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(claudeSettingsText);
-      setClaudeCopyState("copied");
-      if (copyTimeoutRef.current) {
-        clearTimeout(copyTimeoutRef.current);
-      }
-      copyTimeoutRef.current = setTimeout(() => {
-        setClaudeCopyState("idle");
-        copyTimeoutRef.current = undefined;
-      }, 2000);
-    } catch {
-      feedback.showError(t("docs.common.copyFailed"));
-    }
-  };
-  return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Card, {
-    children: [
-      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(CardHeader, {
-        children: [
-          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(CardTitle, {
-            children: t("docs.title")
-          }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(CardDescription, {
-            children: t("docs.description")
-          }, undefined, false, undefined, this)
-        ]
-      }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(CardContent, {
-        className: "space-y-6",
-        children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Tabs2, {
-          value: activeService,
-          onValueChange: (value) => setActiveService(value),
-          children: [
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsList2, {
-              className: "grid grid-cols-2 gap-2",
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsTrigger2, {
-                  value: "claude",
-                  className: "capitalize",
-                  children: t("service.claude.name")
-                }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsTrigger2, {
-                  value: "codex",
-                  className: "capitalize",
-                  children: t("service.codex.name")
-                }, undefined, false, undefined, this)
-              ]
-            }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsContent2, {
-              value: "claude",
-              className: "space-y-6 pt-6",
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("section", {
-                  className: "space-y-3 rounded-lg border border-dashed p-4",
-                  children: [
-                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("h3", {
-                      className: "text-lg font-semibold",
-                      children: t("docs.claude.local.title")
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
-                      className: "text-sm text-muted-foreground",
-                      children: t("docs.claude.local.description")
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Button, {
-                      onClick: handleSetupLocalClaude,
-                      disabled: claudeSetupLoading,
-                      children: [
-                        claudeSetupLoading ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Loader2, {
-                          className: "mr-2 h-4 w-4 animate-spin"
-                        }, undefined, false, undefined, this) : null,
-                        t("docs.claude.local.button")
-                      ]
-                    }, undefined, true, undefined, this),
-                    claudeSetupMessage ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
-                      className: "text-sm text-muted-foreground",
-                      children: claudeSetupMessage
-                    }, undefined, false, undefined, this) : null
-                  ]
-                }, undefined, true, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("section", {
-                  className: "space-y-4 rounded-lg border p-4",
-                  children: [
-                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
-                      className: "flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between",
-                      children: [
-                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("div", {
-                          children: [
-                            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("h3", {
-                              className: "text-lg font-semibold",
-                              children: t("docs.claude.remote.title")
-                            }, undefined, false, undefined, this),
-                            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
-                              className: "text-sm text-muted-foreground",
-                              children: t("docs.claude.remote.description")
-                            }, undefined, false, undefined, this)
-                          ]
-                        }, undefined, true, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Button, {
-                          variant: "outline",
-                          size: "sm",
-                          onClick: handleCopyTemplate,
-                          children: [
-                            claudeCopyState === "copied" ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ClipboardCheck, {
-                              className: "mr-2 h-4 w-4"
-                            }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Clipboard, {
-                              className: "mr-2 h-4 w-4"
-                            }, undefined, false, undefined, this),
-                            claudeCopyState === "copied" ? t("docs.common.copied") : t("docs.common.copy")
-                          ]
-                        }, undefined, true, undefined, this)
-                      ]
-                    }, undefined, true, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("pre", {
-                      className: "max-h-80 overflow-auto rounded-md border bg-muted/40 p-4 text-xs leading-relaxed",
-                      children: claudeSettingsText
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
-                      className: "text-xs text-muted-foreground",
-                      children: t("docs.claude.remote.note")
-                    }, undefined, false, undefined, this)
-                  ]
-                }, undefined, true, undefined, this)
-              ]
-            }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(TabsContent2, {
-              value: "codex",
-              className: "space-y-6 pt-6",
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("section", {
-                  className: "space-y-3 rounded-lg border border-dashed p-4",
-                  children: [
-                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("h3", {
-                      className: "text-lg font-semibold",
-                      children: t("docs.codex.title")
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
-                      className: "text-sm text-muted-foreground",
-                      children: t("docs.codex.description")
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("ul", {
-                      className: "list-disc space-y-2 pl-6 text-sm text-muted-foreground",
-                      children: [
-                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("li", {
-                          children: t("docs.codex.stepProxy")
-                        }, undefined, false, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("li", {
-                          children: t("docs.codex.stepKey")
-                        }, undefined, false, undefined, this),
-                        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("li", {
-                          children: t("docs.codex.stepTest")
-                        }, undefined, false, undefined, this)
-                      ]
-                    }, undefined, true, undefined, this)
-                  ]
-                }, undefined, true, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("section", {
-                  className: "space-y-3 rounded-lg border p-4",
-                  children: [
-                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("h3", {
-                      className: "text-lg font-semibold",
-                      children: t("docs.codex.notesTitle")
-                    }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime16.jsxDEV("p", {
-                      className: "text-sm text-muted-foreground",
-                      children: t("docs.codex.notesDescription")
-                    }, undefined, false, undefined, this)
-                  ]
-                }, undefined, true, undefined, this)
-              ]
-            }, undefined, true, undefined, this)
-          ]
-        }, undefined, true, undefined, this)
-      }, undefined, false, undefined, this)
-    ]
-  }, undefined, true, undefined, this);
-}
-
 // src/components/DashboardPanel.tsx
-var import_react13 = __toESM(require_react(), 1);
 var jsx_dev_runtime17 = __toESM(require_jsx_dev_runtime(), 1);
 var SERVICES = [
   {
@@ -35827,4 +35843,4 @@ import_client.default.createRoot(document.getElementById("root")).render(/* @__P
   }, undefined, false, undefined, this)
 }, undefined, false, undefined, this));
 
-//# debugId=7D106D84B80AAC7364756E2164756E21
+//# debugId=488281E5368B09EF64756E2164756E21

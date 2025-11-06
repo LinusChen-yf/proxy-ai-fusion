@@ -1,24 +1,31 @@
-// Proxy service - handles forwarding requests to upstream APIs
+// Shared proxy service base class - handles forwarding to upstream APIs
 
 import type { ProxyConfig, ServiceConfig } from '../config/types';
 import type { LoadBalancer } from '../routing/loadbalancer';
 import type { RequestLogger } from '../logging/logger';
 import { ConfigManager } from '../config/manager';
 
-export interface ProxyOptions {
+export interface BaseProxyOptions {
   loadBalancer: LoadBalancer;
   logger: RequestLogger;
   serviceName: string;
   configManager: ConfigManager;
 }
 
-export class ProxyService {
-  private loadBalancer: LoadBalancer;
-  private logger: RequestLogger;
-  private serviceName: string;
-  private configManager: ConfigManager;
+export interface RequestPreparationResult {
+  updatedBody: any;
+  bodyForUpstream: BodyInit | null;
+  sanitized: boolean;
+  thinkingBlocksRemoved: number;
+}
 
-  constructor(options: ProxyOptions) {
+export abstract class BaseProxyService {
+  protected loadBalancer: LoadBalancer;
+  protected logger: RequestLogger;
+  protected serviceName: string;
+  protected configManager: ConfigManager;
+
+  constructor(options: BaseProxyOptions) {
     this.loadBalancer = options.loadBalancer;
     this.logger = options.logger;
     this.serviceName = options.serviceName;
@@ -28,10 +35,7 @@ export class ProxyService {
   /**
    * Handle incoming proxy request
    */
-  async handleRequest(
-    request: Request,
-    servers: ProxyConfig[]
-  ): Promise<Response> {
+  async handleRequest(request: Request, servers: ProxyConfig[]): Promise<Response> {
     const requestId = crypto.randomUUID();
     const startTime = Date.now();
     let upstreamUrl: string | null = null;
@@ -45,8 +49,6 @@ export class ProxyService {
       return new Response('No upstream server available', { status: 503 });
     }
 
-
-
     // Clone and read request body for logging
     let requestBodyJson: any = null;
     let requestBodyForUpstream: BodyInit | null = null;
@@ -55,19 +57,20 @@ export class ProxyService {
       try {
         const requestClone = request.clone();
         const requestText = await requestClone.text();
+
         if (requestText) {
-          requestBodyJson = JSON.parse(requestText);
-          if (this.serviceName === 'claude') {
-            const sanitized = this.sanitizeClaudeRequestBody(requestBodyJson);
-            sanitizedThinking = sanitized.removedThinkingBlocks > 0;
-            thinkingBlocksRemoved = sanitized.removedThinkingBlocks;
-            requestBodyJson = sanitized.body;
-            requestBodyForUpstream = sanitizedThinking
-              ? JSON.stringify(requestBodyJson)
+          const parsedBody = JSON.parse(requestText);
+          const prepared = this.prepareRequestBody(parsedBody, requestText);
+
+          requestBodyJson = prepared.updatedBody ?? parsedBody;
+          requestBodyForUpstream =
+            prepared.bodyForUpstream !== undefined && prepared.bodyForUpstream !== null
+              ? prepared.bodyForUpstream
               : requestText;
-          } else {
-            requestBodyForUpstream = requestText;
-          }
+          sanitizedThinking = prepared.sanitized;
+          thinkingBlocksRemoved = prepared.thinkingBlocksRemoved;
+        } else {
+          requestBodyForUpstream = requestText;
         }
       } catch (error) {
         console.error('Failed to read request body:', error);
@@ -83,9 +86,11 @@ export class ProxyService {
       upstreamUrl = `${base}${path}${url.search}`;
 
       // Build headers
-      const headers = this.buildHeaders(request, server);
+      const headers = this.buildForwardHeaders(request, server);
       if (sanitizedThinking) {
-        console.log(`[proxy:${this.serviceName}] removed ${thinkingBlocksRemoved} thinking block(s) before forwarding to ${server.name}`);
+        console.log(
+          `[proxy:${this.serviceName}] removed ${thinkingBlocksRemoved} thinking block(s) before forwarding to ${server.name}`
+        );
       }
 
       // Use the request body
@@ -117,7 +122,9 @@ export class ProxyService {
       // Handle response
       if (isStreaming && upstreamResponse.body) {
         if (!upstreamResponse.ok) {
-          console.warn(`[proxy:${this.serviceName}] streaming upstream ${upstreamResponse.status} for ${server.name} -> ${upstreamUrl}`);
+          console.warn(
+            `[proxy:${this.serviceName}] streaming upstream ${upstreamResponse.status} for ${server.name} -> ${upstreamUrl}`
+          );
         }
         return this.handleStreamingResponse(
           upstreamResponse,
@@ -130,7 +137,9 @@ export class ProxyService {
         );
       } else {
         if (!upstreamResponse.ok) {
-          console.warn(`[proxy:${this.serviceName}] upstream ${upstreamResponse.status} for ${server.name} -> ${upstreamUrl}`);
+          console.warn(
+            `[proxy:${this.serviceName}] upstream ${upstreamResponse.status} for ${server.name} -> ${upstreamUrl}`
+          );
         }
         return this.handleRegularResponse(
           upstreamResponse,
@@ -178,14 +187,36 @@ export class ProxyService {
         requestHeaders,
       });
 
-      return new Response(
-        JSON.stringify({ error: errorMessage }),
-        {
-          status: 502,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      return new Response(JSON.stringify({ error: errorMessage }), {
+        status: 502,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
+  }
+
+  /**
+   * Allow subclasses to manipulate the parsed request body and outbound payload.
+   */
+  protected prepareRequestBody(parsedBody: any, originalText: string): RequestPreparationResult {
+    return {
+      updatedBody: parsedBody,
+      bodyForUpstream: originalText,
+      sanitized: false,
+      thinkingBlocksRemoved: 0,
+    };
+  }
+
+  /**
+   * Allow subclasses to adjust headers before forwarding upstream.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected adjustForwardHeaders(
+    // request is included for future overrides that might need it
+    _headers: Record<string, string>,
+    _request: Request,
+    _server: ProxyConfig
+  ): void {
+    // Default: no-op
   }
 
   /**
@@ -305,7 +336,7 @@ export class ProxyService {
     // Stream response chunks
     (async () => {
       try {
-        let chunks: string[] = [];
+        const chunks: string[] = [];
 
         while (true) {
           const { done, value } = await reader.read();
@@ -354,13 +385,9 @@ export class ProxyService {
           requestHeaders,
           responseHeaders: headersForLogging,
         });
-
-
       } catch (error) {
         console.error('Streaming error:', error);
         await writer.abort(error);
-
-
       }
     })();
 
@@ -389,14 +416,18 @@ export class ProxyService {
     await this.freezeConfig(server, 'failure threshold reached', serviceConfig);
   }
 
-  private async freezeConfig(server: ProxyConfig, reason: string, existingConfig?: ServiceConfig): Promise<void> {
+  private async freezeConfig(
+    server: ProxyConfig,
+    reason: string,
+    existingConfig?: ServiceConfig
+  ): Promise<void> {
     try {
       const serviceConfig = existingConfig ?? this.configManager.getServiceConfig(this.serviceName);
       if (!serviceConfig) {
         return;
       }
 
-      const index = serviceConfig.configs.findIndex(c => c.name === server.name);
+      const index = serviceConfig.configs.findIndex((c) => c.name === server.name);
       if (index === -1) {
         return;
       }
@@ -430,7 +461,7 @@ export class ProxyService {
   /**
    * Build headers for upstream request
    */
-  private buildHeaders(request: Request, server: ProxyConfig): Record<string, string> {
+  private buildForwardHeaders(request: Request, server: ProxyConfig): Record<string, string> {
     const headers: Record<string, string> = {};
 
     // Forward almost all original headers to mimic legacy proxy behaviour.
@@ -445,108 +476,50 @@ export class ProxyService {
       headers['host'] = new URL(server.baseUrl).host;
     } catch {
       // Fallback: let fetch compute the host header if baseUrl is invalid.
-      delete headers['host'];
-    }
-    headers['connection'] = headers['connection'] || 'keep-alive';
-
-    if (server.apiKey) {
-      headers['x-api-key'] = server.apiKey;
     }
 
-    if (server.authToken) {
-      headers['authorization'] = `Bearer ${server.authToken}`;
-
-      // Legacy CLI treated Claude auth tokens as API keys when no explicit key was set.
-      if (this.serviceName === 'claude' && !headers['x-api-key']) {
-        headers['x-api-key'] = server.authToken;
+    // Use per-config auth if provided, otherwise forward from client headers.
+    if (server.headers) {
+      for (const [key, value] of Object.entries(server.headers)) {
+        if (typeof value === 'string' && value.length > 0) {
+          headers[key.toLowerCase()] = value;
+        }
       }
     }
 
-    if (this.serviceName === 'claude' && !headers['anthropic-version']) {
-      headers['anthropic-version'] = '2023-06-01';
+    if (server.apiKey) {
+      headers['authorization'] = `Bearer ${server.apiKey}`;
+      if (!headers['x-api-key']) {
+        headers['x-api-key'] = server.apiKey;
+      }
+    } else if (server.authToken) {
+      headers['authorization'] = `Bearer ${server.authToken}`;
+    } else {
+      const clientAuth = request.headers.get('authorization');
+      if (clientAuth) {
+        headers['authorization'] = clientAuth;
+      }
     }
+
+    const clientApiKey = request.headers.get('x-api-key');
+    if (clientApiKey) {
+      headers['x-api-key'] = clientApiKey;
+    }
+
+    const clientOrg = request.headers.get('openai-organization');
+    if (clientOrg) {
+      headers['openai-organization'] = clientOrg;
+    }
+
+    this.adjustForwardHeaders(headers, request, server);
 
     return headers;
   }
 
   /**
-   * Remove thinking blocks from Claude requests so upstreams without
-   * signed reasoning support do not reject them.
-   */
-  private sanitizeClaudeRequestBody(body: any): {
-    body: any;
-    removedThinkingBlocks: number;
-  } {
-    if (this.serviceName !== 'claude') {
-      return { body, removedThinkingBlocks: 0 };
-    }
-
-    if (!body || typeof body !== 'object') {
-      return { body, removedThinkingBlocks: 0 };
-    }
-
-    const totalRemoved =
-      this.stripThinkingFromMessages(body.messages) +
-      this.stripThinkingFromMessages(body.previous_messages);
-
-    return {
-      body,
-      removedThinkingBlocks: totalRemoved,
-    };
-  }
-
-  private stripThinkingFromMessages(messages: unknown): number {
-    if (!Array.isArray(messages)) {
-      return 0;
-    }
-
-    let removed = 0;
-
-    for (const message of messages) {
-      if (!message || typeof message !== 'object') {
-        continue;
-      }
-
-      const content = Array.isArray((message as any).content)
-        ? (message as any).content
-        : [];
-
-      if (content.length === 0) {
-        continue;
-      }
-
-      const filtered: any[] = [];
-      for (const block of content) {
-        if (block && typeof block === 'object') {
-          const blockType = typeof (block as any).type === 'string'
-            ? ((block as any).type as string).toLowerCase()
-            : '';
-
-          if (
-            blockType === 'thinking' ||
-            blockType === 'assistant_thinking' ||
-            blockType === 'reasoning'
-          ) {
-            removed += 1;
-            continue;
-          }
-        }
-
-        filtered.push(block);
-      }
-
-      if (filtered.length !== content.length) {
-        (message as any).content = filtered;
-      }
-    }
-
-    return removed;
-  }
-
-  /**
    * Parse usage from streaming response
    */
-  private parseStreamingUsage(fullResponse: string): {
+  protected parseStreamingUsage(fullResponse: string): {
     inputTokens?: number;
     outputTokens?: number;
     model?: string;
@@ -590,3 +563,5 @@ export class ProxyService {
     return {};
   }
 }
+
+export type ProxyService = BaseProxyService;
