@@ -403,31 +403,42 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
       const codexConfig = configManager.getServiceConfig('codex');
 
       // For load_balance mode, simulate selecting a config to display as "current"
-      const getCurrentConfig = (config: any) => {
-        if (!config || config.mode !== 'load_balance') {
-          return config?.active || null;
+      const getCurrentConfig = (serviceName: 'claude' | 'codex', config: ServiceConfig | undefined) => {
+        const loadBalancerInstance = serviceName === 'claude' ? claudeLoadBalancer : codexLoadBalancer;
+        const currentFromBalancer = loadBalancerInstance.getCurrentServerName();
+        const configs = config?.configs ?? [];
+
+        if (currentFromBalancer && configs.some(c => c.name === currentFromBalancer)) {
+          return currentFromBalancer;
         }
-        const enabled = (config.configs || []).filter((c: any) => c.enabled !== false);
-        if (enabled.length === 0) return null;
+
+        if (!config) {
+          return null;
+        }
+
+        if (config.mode !== 'load_balance') {
+          return config.active || null;
+        }
 
         const now = Date.now();
-        const eligible = enabled.filter((c: any) => {
-          const freezeUntil = c.freezeUntil ?? c.freeze_until ?? null;
-          return !freezeUntil || now >= freezeUntil;
-        });
-        if (eligible.length === 0) {
-          return enabled[0]?.name || null;
+        const enabled = configs.filter(c => c.enabled !== false);
+        if (enabled.length === 0) {
+          return config.active || null;
         }
-        // Random selection based on weights
-        const totalWeight = eligible.reduce((sum: number, c: any) => sum + (c.weight || 1), 0);
-        let random = Math.random() * totalWeight;
-        for (const c of eligible) {
-          random -= c.weight || 1;
-          if (random <= 0) {
-            return c.name;
-          }
-        }
-        return eligible[0].name;
+
+        const eligible = enabled.filter(c => !c.freezeUntil || now >= c.freezeUntil);
+        const pool = eligible.length > 0 ? eligible : enabled;
+
+        const sorted = pool
+          .slice()
+          .sort((a, b) => {
+            if ((b.weight ?? 0) !== (a.weight ?? 0)) {
+              return (b.weight ?? 0) - (a.weight ?? 0);
+            }
+            return a.name.localeCompare(b.name);
+          });
+
+        return sorted[0]?.name ?? null;
       };
 
       return Response.json({
@@ -435,14 +446,14 @@ async function handleApiRequest(req: Request, path: string): Promise<Response> {
           configs: claudeConfig?.configs || [],
           active: claudeConfig?.active,
           mode: claudeConfig?.mode || 'manual',
-          current: getCurrentConfig(claudeConfig),
+          current: getCurrentConfig('claude', claudeConfig),
           last_results: buildLastResults('claude'),
         },
         codex: {
           configs: codexConfig?.configs || [],
           active: codexConfig?.active,
           mode: codexConfig?.mode || 'manual',
-          current: getCurrentConfig(codexConfig),
+          current: getCurrentConfig('codex', codexConfig),
           last_results: buildLastResults('codex'),
         },
       }, { headers: corsHeaders });

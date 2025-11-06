@@ -98,6 +98,13 @@ export class LoadBalancer {
   }
 
   /**
+   * Expose the most recently selected server for observability
+   */
+  getCurrentServerName(): string | null {
+    return this.currentServerName;
+  }
+
+  /**
    * Mark a server as healthy after successful request
    */
   markSuccess(serverName: string): void {
@@ -110,6 +117,7 @@ export class LoadBalancer {
     }
 
     health.lastChecked = Date.now();
+    this.currentServerName = serverName;
   }
 
   /**
